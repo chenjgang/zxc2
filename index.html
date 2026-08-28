@@ -1,0 +1,1285 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>乐分析表</title>
+<meta name="theme-color" content="#F3EFE6">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="乐分析表">
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="icons/icon-192.png">
+<link rel="apple-touch-icon" href="icons/icon-192.png">
+<link rel="stylesheet" href="https://miaoda.feishu.cn/fonts/css2?family=Noto+Serif+SC:wght@600;700;900&family=Noto+Sans+SC:wght@300;400;500;700&display=swap">
+<style>
+  :root{
+    --paper:#F3EFE6;
+    --panel:#FBF8F1;
+    --panel-deep:#EDE7D9;
+    --ink:#23272E;
+    --muted:#7A7469;
+    --line:#E0D8C6;
+    --line2:#CEC5AE;
+    --red:#C52E24;
+    --red-deep:#9E1F18;
+    --blue:#1C6FCE;
+    --blue-deep:#13569F;
+    --green:#2E9E58;
+    --red-soft:rgba(197,46,36,.16);
+    --blue-soft:rgba(28,111,206,.16);
+    --green-soft:rgba(46,158,88,.16);
+    --serif:"Noto Serif SC",serif;
+    --sans:"Noto Sans SC",system-ui,-apple-system,"Segoe UI",sans-serif;
+    --cell:40px;
+    --cell-sm:24px;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{background:var(--paper);color:var(--ink);font-family:var(--sans);-webkit-font-smoothing:antialiased}
+  body{padding:34px clamp(16px,4vw,56px) 60px}
+  .wrap{max-width:1480px;margin:0 auto}
+
+  /* ===== 顶栏 ===== */
+  header.topbar{display:flex;justify-content:space-between;align-items:flex-end;gap:24px;flex-wrap:wrap;
+    border-bottom:3px double var(--line2);padding-bottom:18px;margin-bottom:20px}
+  .brand h1{font-family:var(--serif);font-weight:900;font-size:clamp(24px,3vw,34px);letter-spacing:.06em}
+  .brand .sub{margin-top:6px;color:var(--muted);font-weight:300;font-size:13px;letter-spacing:.12em}
+  .topbar-right{display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+  .topbar .bulk{display:flex;gap:8px;flex:none;align-items:center}
+  .topbar .bulk input{width:200px;background:var(--panel);border:1px solid var(--line);border-radius:9px;padding:9px 13px;
+    font-size:13px;color:var(--ink);font-family:var(--sans);outline:none}
+  .topbar .bulk input:focus{border-color:var(--line2)}
+  .session-stats{display:flex;gap:10px;flex-wrap:wrap}
+  .s-chip{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:6px 12px;font-size:12.5px;display:flex;align-items:baseline;gap:7px}
+  .s-chip b{font-size:16px;font-weight:700;font-variant-numeric:tabular-nums}
+  .s-chip .d{color:var(--muted)}
+  .s-chip.b b{color:var(--red)}
+  .s-chip.p b{color:var(--blue)}
+  .s-chip.t b{color:var(--green)}
+
+  /* ===== 工具栏 ===== */
+  section.toolbar{display:flex;align-items:center;gap:14px;flex-wrap:wrap;background:var(--panel);
+    border:1px solid var(--line);border-radius:14px;padding:12px 16px;margin-bottom:26px}
+  .btn-group{display:flex;gap:8px;align-items:center}
+  .btn-round{width:46px;height:46px;border-radius:50%;border:1px solid transparent;font-family:var(--sans);
+    font-size:15px;font-weight:700;color:#fff;cursor:pointer;transition:transform .12s ease, box-shadow .12s ease;box-shadow:0 2px 6px rgba(35,39,46,.12)}
+  .btn-round:hover{transform:translateY(-1px)}
+  .btn-round:active{transform:translateY(0) scale(.97)}
+  .btn-round.b{background:var(--red)}
+  .btn-round.p{background:var(--blue)}
+  .btn-round.t{background:var(--green)}
+  .btn-ghost{background:transparent;border:1px solid var(--line2);color:var(--ink);border-radius:9px;padding:9px 15px;
+    font-size:13px;cursor:pointer;font-family:var(--sans);transition:background .12s, border-color .12s}
+  .btn-ghost:hover{background:var(--panel-deep);border-color:var(--line2)}
+  .bulk{display:flex;gap:8px;flex:1;min-width:220px}
+  .bulk input{flex:1;background:var(--paper);border:1px solid var(--line);border-radius:9px;padding:9px 13px;
+    font-size:13px;color:var(--ink);font-family:var(--sans);outline:none}
+  .bulk input:focus{border-color:var(--line2)}
+  .toolbar .spacer{flex:1}
+  .reco-group{display:flex;align-items:center;gap:8px;margin-left:auto}
+  .reco-badge{display:flex;align-items:center;gap:8px;font-size:13px;font-weight:700;letter-spacing:.03em;
+    border-radius:24px;padding:8px 16px;border:1px solid var(--line);background:var(--panel);white-space:nowrap}
+  button.reco-badge{font-family:var(--sans);cursor:pointer;user-select:none;transition:box-shadow .12s, transform .12s}
+  button.reco-badge:hover{transform:translateY(-1px)}
+  .reco-badge.sel{box-shadow:0 0 0 2px var(--ink)}
+  .reco-badge.sel .lbl{color:var(--ink)}
+  .reco-badge .lbl{color:var(--muted);font-weight:500}
+  .reco-badge .dot{width:11px;height:11px;border-radius:50%;flex:none;background:var(--line2)}
+  .reco-badge.red{background:var(--red-soft);color:var(--red-deep);border-color:rgba(178,59,52,.25)}
+  .reco-badge.red .dot{background:var(--red)}
+  .reco-badge.blue{background:var(--blue-soft);color:var(--blue-deep);border-color:rgba(47,94,136,.25)}
+  .reco-badge.blue .dot{background:var(--blue)}
+  /* 方框/圆圈一致统计（位于大路上方） */
+  .reco-stat{display:flex;align-items:center;gap:16px;font-size:12.5px;white-space:nowrap;border-radius:10px;
+    border:1px solid var(--line);background:var(--panel);padding:7px 14px;color:var(--ink);margin-bottom:10px}
+  .reco-stat .lbl{color:var(--muted);font-weight:500;letter-spacing:.03em;margin-right:2px}
+  .reco-stat b{font-variant-numeric:tabular-nums;font-weight:800}
+  .reco-stat .m{color:var(--red-deep)}
+  .reco-stat .n{color:var(--blue-deep)}
+  .reco-stat .p{color:var(--muted)}
+  .reco-stat .p b{color:var(--ink)}
+  .reco-stat .t{color:var(--muted)}
+  .reco-stat .t b{color:var(--ink);font-weight:800}
+  .reco-stat .d{color:var(--muted)}
+  .reco-stat .d b{font-weight:800}
+  .reco-stat.none{display:none}
+  .reco-badge.none{background:var(--panel-deep);color:var(--muted);font-weight:500}
+
+  /* ===== 面板 ===== */
+  .panel{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:16px 16px 14px}
+  .panel-head{display:flex;align-items:baseline;gap:10px;margin-bottom:12px;flex-wrap:wrap}
+  .panel-head h3{font-family:var(--serif);font-weight:700;font-size:17px;letter-spacing:.04em}
+  .panel-head .en{color:var(--muted);font-size:11.5px;letter-spacing:.08em;text-transform:uppercase}
+  .panel-head .legend{margin-left:auto;color:var(--muted);font-size:11.5px}
+  .roads-main{display:grid;grid-template-columns:1fr;gap:16px;margin-bottom:16px}
+
+  /* ===== 三小路（大眼仔/小路/曱甴）上下排列 ===== */
+  .three-roads{grid-template-columns:1fr}
+  .three-roads .panel{min-width:0}
+  .smroad.road-grid{grid-template-rows:repeat(6,22px);grid-auto-columns:22px;gap:1px}
+  .smroad .cell{width:22px;height:22px}
+  .smroad .mk.solid{width:15px;height:15px}
+  .smroad .mk.ring{width:15px;height:15px;border:3px solid var(--c)}
+  /* 曱甴路斜杠 */
+  .mk-slash{position:relative;display:block;width:15px;height:15px}
+  .mk-slash::before{content:"";position:absolute;left:50%;top:50%;width:3px;height:17px;background:var(--c);
+    transform:translate(-50%,-50%) rotate(45deg);border-radius:2px}
+  .mk-slash.red{--c:var(--red)}
+  .mk-slash.blue{--c:var(--blue)}
+
+  /* ===== 庄问路 / 闲问路 + 三小路推荐 ===== */
+  .ask-panel{max-width:660px}
+  .ask-grid{display:grid;gap:6px;min-width:220px}
+  .ask-head,.ask-row{display:grid;grid-template-columns:70px 1fr 1fr 1.35fr 1.35fr;gap:8px;align-items:center}
+  .ask-col{font-size:12px;font-weight:800;text-align:center;padding:5px 0;border-bottom:1px solid var(--line);letter-spacing:.05em}
+  .ask-col.b{color:var(--red-deep)}
+  .ask-col.p{color:var(--blue-deep)}
+  .ask-road{font-size:12.5px;font-weight:600;color:var(--ink)}
+  .ask-cell{display:flex;align-items:center;justify-content:center;background:var(--paper);border:1px solid var(--line);border-radius:8px;height:32px}
+  .ask-na{color:var(--line2);font-size:12px}
+  .ask-cell .mk.ring{width:16px;height:16px;border:3px solid var(--c)}
+  .ask-cell .mk.solid{width:16px;height:16px}
+  .ask-cell .mk-slash{width:16px;height:16px}
+  .ask-cell .mk-slash::before{height:18px;width:3px}
+  .ask-rb{color:var(--red-deep);font-weight:800;font-size:13px;white-space:nowrap}
+  .ask-rp{color:var(--blue-deep);font-weight:800;font-size:13px;white-space:nowrap}
+  .ask-sep{color:var(--line2);margin:0 3px}
+  .ask-total{border-top:2px solid var(--line2);padding-top:4px}
+  .ask-total .ask-road{font-weight:800;color:var(--ink)}
+
+  /* ===== 路网格 ===== */
+  .road-scroll{overflow-x:auto;overflow-y:hidden;padding-bottom:6px}
+  .road-grid{display:grid;grid-template-rows:repeat(6,var(--cell));grid-auto-flow:column;grid-auto-columns:var(--cell);gap:0;width:max-content}
+  /* 大路行竖向间距收紧 + 列宽收紧 */
+  #bigroad.road-grid{grid-template-rows:repeat(6,30px);grid-auto-columns:30px}
+  /* 珠盘路3：3行 */
+  #bead3.road-grid{grid-template-rows:repeat(3,30px);grid-auto-columns:30px}
+  /* 珠盘路4：4行 */
+  #bead4.road-grid{grid-template-rows:repeat(4,30px);grid-auto-columns:30px}
+  /* 珠盘路5：5行 */
+  #bead5.road-grid{grid-template-rows:repeat(5,30px);grid-auto-columns:30px}
+  /* 珠盘路6：6行 */
+  #bead6.road-grid{grid-template-rows:repeat(6,30px);grid-auto-columns:30px}
+  .bead3-reco{display:flex;align-items:center;gap:14px;font-size:12.5px;white-space:nowrap;border-radius:10px;
+    border:1px solid var(--line);background:var(--panel);padding:7px 14px;color:var(--ink);margin-bottom:10px}
+  .bead3-reco b{font-variant-numeric:tabular-nums;font-weight:800}
+  .cell{width:var(--cell);height:var(--cell);display:flex;align-items:center;justify-content:center;position:relative;border-radius:6px}
+  .cell.empty{background:transparent}
+  .cell.filled{background:rgba(35,39,46,.025)}
+  .mk{display:block;position:relative}
+  .mk.red{--c:var(--red)}
+  .mk.blue{--c:var(--blue)}
+  .mk.green{--c:var(--green)}
+  /* 实心圆 */
+  .mk.solid{width:24px;height:24px;border-radius:50%;background:var(--c);box-shadow:0 1px 3px rgba(35,39,46,.18)}
+  /* 空心圆环：有颜色描边 4px */
+  .mk.ring{width:24px;height:24px;border-radius:50%;border:4px solid var(--c);background:transparent}
+  /* 和局标记（叠在大路圆环上） */
+  .mk-tie{position:absolute;right:-6px;bottom:-6px;min-width:16px;height:16px;border-radius:8px;background:var(--green);
+    color:#fff;font-size:9.5px;line-height:16px;text-align:center;padding:0 3px;font-weight:700;border:1px solid var(--panel)}
+  /* 珠盘推荐方框：外框 25px */
+  .mk-reco{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:25px;height:25px;
+    border:3px solid var(--c);background:transparent;border-radius:3px}
+  .mk-reco.red{--c:var(--red)}
+  .mk-reco.blue{--c:var(--blue)}
+  .lead-tie{background:var(--green-soft);border-radius:6px}
+
+  /* ===== 统计 ===== */
+  .section-title{margin-bottom:16px}
+  .section-title h2{font-family:var(--serif);font-weight:900;font-size:22px;letter-spacing:.05em}
+  .section-title .note{margin-top:6px;color:var(--muted);font-size:12.5px;line-height:1.7;max-width:900px}
+  .stat-cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(340px,1fr));gap:16px;max-width:1120px}
+  .stat-card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:16px;display:flex;flex-direction:column;gap:12px}
+  .stat-head{display:flex;align-items:center;gap:8px}
+  .stat-head h4{font-family:var(--serif);font-weight:700;font-size:16px;letter-spacing:.03em}
+  .stat-head .tag{margin-left:auto;font-size:10.5px;color:var(--muted);border:1px solid var(--line);border-radius:20px;padding:2px 9px;letter-spacing:.04em}
+  .stat-pattern{display:flex;align-items:center;gap:8px;background:var(--paper);border:1px solid var(--line);border-radius:10px;padding:9px 12px}
+  .stat-pattern .lbl{color:var(--muted);font-size:11.5px}
+  .pat-chip{width:16px;height:16px;border-radius:50%}
+  .pat-chip.red{background:var(--red)}
+  .pat-chip.blue{background:var(--blue)}
+  .pat-text{font-size:13px;font-weight:600}
+  .stat-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+  .stat-num{background:var(--paper);border:1px solid var(--line);border-radius:10px;padding:9px 6px;text-align:center}
+  .stat-num b{display:block;font-size:24px;font-weight:800;font-variant-numeric:tabular-nums;line-height:1.1}
+  .stat-num span{font-size:10.5px;color:var(--muted);letter-spacing:.05em}
+  .stat-num.blue b{color:var(--blue)}
+  .stat-num.red b{color:var(--red)}
+  .stat-num.hl b{color:var(--ink)}
+  .stat-bar{height:7px;border-radius:4px;background:var(--panel-deep);overflow:hidden;display:flex}
+  .stat-bar .seg.b{background:var(--blue)}
+  .stat-bar .seg.r{background:var(--red)}
+  .stat-meta{font-size:11px;color:var(--muted);display:flex;justify-content:space-between}
+  .stat-reco{display:flex;align-items:center;gap:9px;border-radius:10px;padding:11px 14px;font-size:14px;font-weight:700;letter-spacing:.04em}
+  .stat-reco.red{background:var(--red-soft);color:var(--red-deep)}
+  .stat-reco.blue{background:var(--blue-soft);color:var(--blue-deep)}
+  .stat-reco.none{background:var(--panel-deep);color:var(--muted);font-weight:500}
+  .stat-reco .reco-dot{width:12px;height:12px;border-radius:50%;flex:none}
+  .stat-reco.red .reco-dot{background:var(--red)}
+  .stat-reco.blue .reco-dot{background:var(--blue)}
+  .stat-reco.none .reco-dot{background:var(--line2)}
+  .stat-list{display:flex;flex-wrap:wrap;gap:5px;border-top:1px dashed var(--line);padding-top:10px}
+  .stat-list .empty{color:var(--muted);font-size:12px}
+  .th-chip{font-size:10.5px;border-radius:20px;padding:2px 8px;font-variant-numeric:tabular-nums;line-height:1.4}
+  .th-chip.b{background:var(--blue-soft);color:var(--blue-deep)}
+  .th-chip.r{background:var(--red-soft);color:var(--red-deep)}
+  /* 四行合计汇总卡 */
+  .stat-card.total{grid-column:1/-1;background:linear-gradient(150deg,var(--panel) 55%,#fff8f1);border-color:rgba(178,59,52,.16)}
+  .stat-card.total .stat-head h4{font-size:17px}
+  .total-rows{display:grid;gap:6px}
+  .t-row{display:flex;align-items:center;gap:12px;font-size:12px}
+  .t-row .t-name{width:88px;flex:none;color:var(--ink);font-weight:600;letter-spacing:.02em}
+  .t-row .t-bar{flex:1;height:8px;border-radius:4px;background:var(--panel-deep);overflow:hidden;display:flex}
+  .t-row .t-bar i{display:block;height:100%}
+  .t-row .t-bar i.b{background:var(--blue)}
+  .t-row .t-bar i.r{background:var(--red)}
+  .t-row .t-num{flex:none;font-variant-numeric:tabular-nums;white-space:nowrap;color:var(--muted)}
+  .t-row .t-num .b{color:var(--blue-deep);font-weight:600}
+  .t-row .t-num .r{color:var(--red-deep);font-weight:600}
+
+  /* 统计卡内的迷你珠盘预览 */
+  .mini-scroll{overflow-x:auto}
+  .mini-grid{display:grid;grid-auto-flow:column;grid-auto-columns:16px;grid-auto-rows:16px;gap:2px;width:max-content}
+  .mini-cell{width:18px;height:18px;display:flex;align-items:center;justify-content:center}
+  .mini-dot{width:12px;height:12px;border-radius:50%}
+  .mini-dot.red{background:var(--red)}
+  .mini-dot.blue{background:var(--blue)}
+  .mini-dot.green{background:var(--green)}
+  .mini-cell.empty{background:transparent}
+
+  footer.foot{margin-top:36px;color:var(--muted);font-size:11.5px;letter-spacing:.06em;border-top:1px solid var(--line);padding-top:14px}
+
+  @media (max-width:1100px){
+    .roads-main{grid-template-columns:1fr}
+  }
+  @media (max-width:600px){
+    body{padding:20px 14px 40px}
+    .toolbar{flex-direction:column;align-items:stretch}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="topbar">
+    <div class="brand">
+      <h1>乐分析表</h1>
+      <p class="sub">大路 · 珠盘路 · 珠盘分红统计</p>
+    </div>
+    <div class="topbar-right">
+      <div class="bulk">
+        <input id="bulkInput" placeholder="粘贴结果序列，如 BBBPBBPTB…" />
+        <button class="btn-ghost" id="loadBtn">载入</button>
+      </div>
+      <div class="session-stats" id="sessionStats"></div>
+      <button class="btn-ghost" id="sampleBtn">示例</button>
+    </div>
+  </header>
+
+  <section class="toolbar">
+    <div class="btn-group">
+      <button class="btn-round p" data-add="P" title="闲 Player">闲</button>
+      <button class="btn-round b" data-add="B" title="庄 Banker">庄</button>
+      <button class="btn-round t" data-add="T" title="和 Tie">和</button>
+      <button class="btn-ghost" id="undoBtn">撤销</button>
+      <button class="btn-ghost" id="randomBtn">随机</button>
+      <button class="btn-ghost" id="clearBtn">清空</button>
+    </div>
+    <div class="reco-group">
+      <button class="reco-badge none sel" id="totalReco" data-source="zhu" title="按下后按珠盘推荐写入大路"><span class="lbl">珠盘推荐</span><span class="dot"></span><span class="val">—</span></button>
+      <button class="reco-badge none" id="totalRecoSm" data-source="small" title="按下后按三小路推荐写入大路"><span class="lbl">三小路推荐</span><span class="dot"></span><span class="val">—</span></button>
+      <button class="reco-badge none" id="totalRecoCommon" data-source="common" title="按下后按共同推荐写入大路"><span class="lbl">共同推荐</span><span class="dot"></span><span class="val">—</span></button>
+      <button class="reco-badge none" id="totalRecoSeq" data-source="seq" title="按下后按三顺推荐写入大路"><span class="lbl">三顺推荐</span><span class="dot"></span><span class="val">—</span></button>
+      <button class="reco-badge none" id="totalRecoSeqCommon" data-source="seqcommon" title="按下后按珠盘三顺推荐写入大路"><span class="lbl">珠盘三顺推荐</span><span class="dot"></span><span class="val">—</span></button>
+      <button class="reco-badge none" id="totalRecoBead4" data-source="bead4" title="按下后按珠盘4路推荐写入大路"><span class="lbl">珠盘4路推荐</span><span class="dot"></span><span class="val">—</span></button>
+    </div>
+  </section>
+
+  <section class="roads-main">
+    <div class="panel">
+      <div class="panel-head"><h3>大路</h3><span class="en">Big Road · 6行</span><span class="legend">超6个从第6行向右衍生 · 下行被占则从当前行衍生 · 换色从第1行开始</span></div>
+      <div class="reco-stat none" id="boxStat">
+        <span class="lbl">方框·圆圈</span>
+        <span class="m">一致 <b>0</b></span>
+        <span class="n">不一致 <b>0</b></span>
+        <span class="p">一致率 <b>—</b></span>
+        <span class="t">合计 <b>—</b></span>
+        <span class="d">差额 <b>—</b></span>
+      </div>
+      <div class="road-scroll"><div class="road-grid" id="bigroad"></div></div>
+    </div>
+  </section>
+
+  <section class="roads-main three-roads">
+    <div class="panel">
+      <div class="panel-head"><h3>大眼仔路</h3><span class="en">Big Eye Boy</span><span class="legend">红＝有规律　蓝＝无规律</span></div>
+      <div class="road-scroll"><div class="road-grid smroad" id="smEye"></div></div>
+    </div>
+    <div class="panel">
+      <div class="panel-head"><h3>小路</h3><span class="en">Small Road</span><span class="legend">红＝有规律　蓝＝无规律</span></div>
+      <div class="road-scroll"><div class="road-grid smroad" id="smSmall"></div></div>
+    </div>
+    <div class="panel">
+      <div class="panel-head"><h3>曱甴路</h3><span class="en">Cockroach Pig</span><span class="legend">红＝有规律　蓝＝无规律</span></div>
+      <div class="road-scroll"><div class="road-grid smroad" id="smRoach"></div></div>
+    </div>
+  </section>
+
+  <section class="roads-main">
+    <div class="panel ask-panel">
+      <div class="panel-head"><h3>庄问路 · 闲问路　/　三小路推荐</h3><span class="en">Ask & Recommend</span><span class="legend">问路＝假设下一局为庄/闲时三小路的下一标记；最新颜色与庄问路相反显示“推荐庄”、与闲问路相反显示“推荐闲”</span></div>
+      <div class="ask-grid" id="askRoads"></div>
+    </div>
+  </section>
+
+  <section class="stats">
+    <div class="section-title">
+      <h2>珠盘分红统计</h2>
+      <p class="note">珠盘路 3/4/5/6 行：分别取最近 2/3/4/5 局为模式，在大路中从前到后检索相同模式，统计其后第 3/4/5/6 局的红蓝，红多推荐红、蓝多推荐蓝，和局不参与检索；顶部四行合计为四卡红蓝相加。</p>
+    </div>
+    <div class="stat-cards" id="statCards"></div>
+  </section>
+
+  <section class="roads-main">
+    <div class="panel">
+      <div class="panel-head"><h3>珠盘路3</h3><span class="en">Bead Plate · 3行</span><span class="legend">新出在第2行时按列检索：本列第1、2行与历史某列第1、2行同色即匹配，统计匹配列第3行红蓝数量，红多推荐红、蓝多推荐蓝</span></div>
+      <div class="bead3-reco" id="bead3Reco"></div>
+      <div class="road-scroll"><div class="road-grid" id="bead3"></div></div>
+    </div>
+  </section>
+
+  <section class="roads-main">
+    <div class="panel">
+      <div class="panel-head"><h3>珠盘路4</h3><span class="en">Bead Plate · 4行</span><span class="legend">新出在第3行时按列检索：本列第1、2、3行与历史某列同色即匹配，统计匹配列第4行红蓝数量，红多推荐红、蓝多推荐蓝</span></div>
+      <div class="bead3-reco" id="bead4Reco"></div>
+      <div class="road-scroll"><div class="road-grid" id="bead4"></div></div>
+    </div>
+  </section>
+
+  <section class="roads-main">
+    <div class="panel">
+      <div class="panel-head"><h3>珠盘路5</h3><span class="en">Bead Plate · 5行</span><span class="legend">新出在第4行时按列检索：本列第1、2、3、4行与历史某列同色即匹配，统计匹配列第5行红蓝数量，红多推荐红、蓝多推荐蓝</span></div>
+      <div class="bead3-reco" id="bead5Reco"></div>
+      <div class="road-scroll"><div class="road-grid" id="bead5"></div></div>
+    </div>
+  </section>
+
+  <section class="roads-main">
+    <div class="panel">
+      <div class="panel-head"><h3>珠盘路6</h3><span class="en">Bead Plate · 6行</span><span class="legend">红＝庄　蓝＝闲　绿＝和；新出在第5行时按列检索：本列第1~5行与历史某列同色即匹配，统计匹配列第6行红蓝数量，红多推荐红、蓝多推荐蓝</span></div>
+      <div class="bead3-reco" id="bead6Reco"></div>
+      <div class="road-scroll"><div class="road-grid" id="bead6"></div></div>
+    </div>
+  </section>
+
+  <footer class="foot">百家乐分红分析表 · 仅供结果记录与模式观察</footer>
+</div>
+
+<script>
+/* ============ 状态 ============ */
+const state = { results: [], recoSource: 'zhu' };   // 'B' | 'P' | 'T'；recoSource: 'zhu'|'small'|'common'|null
+const SAMPLE = "BBBBPPBPBBPPPPBPPBTBBPPPPBBPBBPBTBP";
+const COLOR_KEY = { B:'red', P:'blue', T:'green' };
+
+/* ============ 数据构建 ============ */
+// 大路（新显示方式）：
+//  - 每列同色自上而下，最多 6 个
+//  - 超过第 6 个：从第 6 行开始向右衍生（水平尾巴在第 6 行）
+//  - 换色新列：从第一行最左侧空格处开始（顶部紧贴、无空档）
+//  - 向下填时若下一行已被占（如前方尾巴）：不重叠，从当前底行开始向右衍生
+//    （例：已填到第 3 行而第 4 行已有内容 → 从第 3 行向右衍生）
+function buildBigRoad(results){
+  const grid = []; // grid[col] = [row0..row5]（null 为空）
+  let leadingTies = 0;
+  let streak = null; // {color, col, height, tailRow, tailCol}
+  let lastCell = null;
+  let hand = 0;
+
+  const ensure = c => { while (grid.length <= c) grid.push([null,null,null,null,null,null]); };
+  const get = (c, r) => { ensure(c); return grid[c][r]; };
+  const set = (c, r, cell) => { ensure(c); grid[c][r] = cell; };
+  const firstFree = (r, from) => { let c = from; while (get(c, r) !== null) c++; return c; };
+
+  for (const r of results){
+    hand++;
+    if (r === 'T'){
+      if (lastCell) lastCell.ties = (lastCell.ties || 0) + 1; else leadingTies++;
+      continue;
+    }
+    const cell = { type: r, ties: 0, hand };
+    if (streak === null || r !== streak.color){
+      // 换色新列：从第一行最左侧空格处开始
+      const c0 = firstFree(0, 0);
+      set(c0, 0, cell);
+      streak = { color: r, col: c0, height: 1, tailRow: null, tailCol: c0 };
+    } else {
+      const col = streak.col;
+      if (streak.tailRow !== null){
+        // 尾巴模式：沿 tailRow 行向右衍生
+        const c2 = firstFree(streak.tailRow, streak.tailCol + 1);
+        set(c2, streak.tailRow, cell);
+        streak.tailCol = c2;
+        streak.height++;
+      } else if (streak.height < 6){
+        const tr = streak.height; // 下一行（0-based）
+        if (get(col, tr) === null){
+          set(col, tr, cell);
+          streak.height++;
+        } else {
+          // 下一行已被占（如前方尾巴）→ 从当前底行向右衍生
+          const dr = streak.height - 1; // 当前底行（0-based）
+          const c2 = firstFree(dr, col + 1);
+          set(c2, dr, cell);
+          streak.height++;
+          streak.tailRow = dr;
+          streak.tailCol = c2;
+        }
+      } else {
+        // 超过 6 个：从第 6 行(0-based 5)向右衍生
+        const c2 = firstFree(5, col + 1);
+        set(c2, 5, cell);
+        streak.height++;
+        streak.tailRow = 5;
+        streak.tailCol = c2;
+      }
+    }
+    lastCell = cell;
+  }
+  return { grid, leadingTies, streak };
+}
+
+// 模拟：按大路规则计算“下一个结果”应落的位置（同色继续下/右尾，换色开新列）
+function nextBeadPos(grid, streak, nextColor){
+  const get = (c, r) => { while (grid.length <= c) grid.push([null,null,null,null,null,null]); return grid[c][r]; };
+  const firstFree = (r, from) => { let c = from; while (get(c, r) !== null) c++; return c; };
+  if (nextColor === streak.color){
+    if (streak.tailRow !== null){
+      return { col: firstFree(streak.tailRow, streak.tailCol + 1), row: streak.tailRow };
+    }
+    if (streak.height < 6){
+      return { col: streak.col, row: streak.height };
+    }
+    return { col: firstFree(5, streak.col + 1), row: 5 };
+  }
+  return { col: firstFree(0, 0), row: 0 };
+}
+
+// 大路逻辑列（用于分红检索）：标准的同色连列结构（按时间先后）
+function buildStreakColumns(results){
+  const cols = [];
+  let leadingTies = 0, prev = null, hand = 0;
+  for (const r of results){
+    hand++;
+    if (r === 'T'){
+      if (cols.length === 0){ leadingTies++; continue; }
+      const lastCell = cols[cols.length-1][cols[cols.length-1].length-1];
+      lastCell.ties = (lastCell.ties || 0) + 1;
+      continue;
+    }
+    const cell = { type: r, ties: 0, hand };
+    if (prev === null){ cols.push([cell]); }
+    else if (r === prev){
+      const last = cols[cols.length-1];
+      if (last.length >= 6) cols.push([cell]); else last.push(cell);
+    } else {
+      cols.push([cell]);
+    }
+    prev = r;
+  }
+  return { cols, leadingTies };
+}
+
+// 珠盘路：按列自上而下填充，每列固定 rows 行
+function buildBeadColumns(results, rows){
+  const cols = [];
+  for (const r of results){
+    let last = cols[cols.length-1];
+    if (!last || last.length >= rows){ last = []; cols.push(last); }
+    last.push(r);
+  }
+  return cols;
+}
+
+/* ============ 分红统计 ============ */
+// 取最近 patternLen 局为当前模式，在大路中从前到后（按列自上而下）检索相同模式，
+// 统计其后第 patternLen+1 局的红（庄）/蓝（闲）数量。返回 {pattern, matches, blue, red}
+function computeStats(results, patternLen){
+  const nonTie = results.filter(x => x === 'B' || x === 'P');
+  if (nonTie.length < patternLen) return null;
+  const big = buildStreakColumns(results);
+  const seq = []; // 大路从前到后的庄/闲序列
+  for (const col of big.cols){
+    for (const cell of col){
+      seq.push({ val: cell.type, hand: cell.hand });
+    }
+  }
+  if (seq.length < patternLen + 1) return null;
+  const pattern = nonTie.slice(-patternLen);
+  const matches = [];
+  for (let i = 0; i + patternLen - 1 < seq.length; i++){
+    let ok = true;
+    for (let k = 0; k < patternLen; k++){
+      if (seq[i + k].val !== pattern[k]){ ok = false; break; }
+    }
+    if (!ok) continue;
+    const next = seq[i + patternLen];
+    if (next) matches.push({ next });
+  }
+  let blue = 0, red = 0;
+  for (const m of matches){ if (m.next.val === 'P') blue++; else if (m.next.val === 'B') red++; }
+  return { pattern, matches, blue, red };
+}
+
+/* ============ 渲染 ============ */
+const $ = id => document.getElementById(id);
+
+function roadGridHTML(matrix, renderer, emptyRenderer, rowCount){
+  // matrix: 列数组，每列为长度6的数组（值为对象或 null）
+  const R = rowCount || 6;
+  let html = '';
+  for (let c = 0; c < matrix.length; c++){
+    for (let r = 0; r < R; r++){
+      const v = matrix[c][r];
+      if (v === null || v === undefined){
+        html += '<div class="cell empty">' + (emptyRenderer ? emptyRenderer(c, r) : '') + '</div>';
+      } else {
+        html += '<div class="cell filled">' + renderer(v, c, r) + '</div>';
+      }
+    }
+  }
+  return html;
+}
+
+// 把“列数组”（每列行元素）转成 6×col 矩阵
+function toMatrix(cols, mapVal){
+  const mat = [];
+  const w = Math.max(cols.length, 1);
+  for (let c = 0; c < w; c++){
+    const colArr = new Array(6).fill(null);
+    if (cols[c]) for (let r = 0; r < cols[c].length; r++) colArr[r] = mapVal ? mapVal(cols[c][r]) : cols[c][r];
+    mat.push(colArr);
+  }
+  return mat;
+}
+
+function renderBigRoad(big){
+  // big.grid：列数组，每列长度6（可为 null）
+  const grid = big.grid.length ? big.grid : [[null,null,null,null,null,null]];
+  if (big.leadingTies > 0){
+    // 开局连续和局：在大路左上角以绿色格标注
+    if (grid[0][0] === null) grid[0][0] = { type:'T', ties:big.leadingTies };
+  }
+  // 推荐方框整体后移一格：
+  //  历史：第 i 颗的推荐（按截至该局的数据）显示在下一颗圆圈的位置
+  //  最新：显示在下一个空格处；若按推荐色会换列，则随新列走
+  const boxColor = {}; // "col,row" -> 'red'|'blue'
+  const chrono = [];
+  for (const col of buildStreakColumns(state.results).cols){
+    for (const cell of col) chrono.push(cell);
+  }
+  if (chrono.length){
+    const handPos = {};
+    for (let c = 0; c < grid.length; c++){
+      for (let r = 0; r < 6; r++){
+        const cell = grid[c][r];
+        if (cell && cell.type !== 'T') handPos[cell.hand] = { col: c, row: r };
+      }
+    }
+    for (let i = 0; i < chrono.length; i++){
+      const cell = chrono[i];
+      const R = recoColorAt(state.recoSource, state.results.slice(0, cell.hand));
+      if (R !== 'red' && R !== 'blue') continue;
+      if (i < chrono.length - 1){
+        const np = handPos[chrono[i + 1].hand];
+        if (np) boxColor[np.col + ',' + np.row] = R;
+      } else if (big.streak){
+        // 最新：模拟下一结果位置（按推荐色决定是否换列，推荐色→大路色码）
+        const np = nextBeadPos(grid, big.streak, R === 'red' ? 'B' : 'P');
+        while (grid.length <= np.col) grid.push([null,null,null,null,null,null]);
+        boxColor[np.col + ',' + np.row] = R;
+      }
+    }
+  }
+  // 统计方框与圆圈一致 / 不一致数量
+  let match = 0, mismatch = 0;
+  for (let c = 0; c < grid.length; c++){
+    for (let r = 0; r < 6; r++){
+      const cell = grid[c][r];
+      if (!cell || cell.type === 'T') continue;
+      const reco = boxColor[c + ',' + r];
+      if (reco !== 'red' && reco !== 'blue') continue;
+      if (reco === COLOR_KEY[cell.type]) match++; else mismatch++;
+    }
+  }
+  state.boxStat = { match: match, mismatch: mismatch, total: match + mismatch };
+  $('bigroad').innerHTML = roadGridHTML(grid, (cell, c, r) => {
+    if (cell.type === 'T'){
+      return '<span class="mk solid green" style="width:22px;height:22px"></span>';
+    }
+    const col = COLOR_KEY[cell.type];
+    const tie = cell.ties > 0 ? '<span class="mk-tie">' + (cell.ties > 1 ? cell.ties : '和') + '</span>' : '';
+    const reco = boxColor[c + ',' + r];
+    const recoHtml = (reco === 'red' || reco === 'blue') ? '<span class="mk-reco ' + reco + '"></span>' : '';
+    // 圆圈与珠盘推荐方框同色时，圆圈显示为实心
+    const circleHtml = (reco === col)
+      ? '<span class="mk solid ' + col + '"></span>'
+      : '<span class="mk ring ' + col + '"></span>';
+    return circleHtml + recoHtml + tie;
+  }, (c, r) => {
+    // 空格处叠加推荐方框（最新一局的预测位置）
+    const reco = boxColor[c + ',' + r];
+    return (reco === 'red' || reco === 'blue') ? '<span class="mk-reco ' + reco + '"></span>' : '';
+  });
+}
+
+// 珠盘路N统计（按列检索）：新出的落在本列第 patternLen 行时，取本列前 patternLen 行作为
+// 比较模式；检索历史列中前 patternLen 行同色的列，统计匹配列第 patternLen+1 行的红（庄）/蓝（闲）数量
+function computeBeadNStats(results, rows, patternLen){
+  const cols = buildBeadColumns(results, rows);
+  if (cols.length === 0) return null;
+  const cur = cols[cols.length - 1];
+  // 仅当新出的在第 patternLen 行（当前列恰有 patternLen 行）时按列检索
+  if (cur.length !== patternLen) return null;
+  const pattern = [];
+  for (let k = 0; k < patternLen; k++) pattern.push(cur[k]);
+  let colCount = 0, blue = 0, red = 0;
+  for (const col of cols){
+    let ok = true;
+    for (let k = 0; k < patternLen; k++){
+      if (col[k] !== pattern[k]){ ok = false; break; }
+    }
+    if (!ok) continue;
+    colCount++;
+    const next = col[patternLen];
+    if (next === 'P') blue++;
+    else if (next === 'B') red++;
+  }
+  return { pattern, blue, red, colCount };
+}
+
+function renderBeadN(rows, patternLen, id, recoId, prefixLabel){
+  // N 行珠盘路显示
+  const cols = buildBeadColumns(state.results, rows);
+  const mat = toMatrix(cols, v => v);
+  $(id).innerHTML = roadGridHTML(mat, v => {
+    return '<span class="mk solid ' + COLOR_KEY[v] + '"></span>';
+  }, null, rows);
+  // 统计与推荐
+  const st = computeBeadNStats(state.results, rows, patternLen);
+  const el = $(recoId);
+  const nonTie = state.results.filter(x => x === 'B' || x === 'P');
+  if (!st){
+    if (nonTie.length < patternLen + 1) el.innerHTML = '<span style="color:var(--muted)">数据不足（至少 ' + (patternLen + 1) + ' 局庄/闲）</span>';
+    else el.innerHTML = '<span style="color:var(--muted)">新出不在第' + patternLen + '行，暂不按列检索</span>';
+    return;
+  }
+  const patText = st.pattern.map(x => x === 'B' ? '红' : x === 'P' ? '蓝' : '和').join(' · ');
+  let reco;
+  if (st.colCount === 0) reco = '<span style="color:var(--muted)">未检索到相同列</span>';
+  else if (st.red > st.blue) reco = '<span style="color:var(--red-deep);font-weight:800">推荐红</span>';
+  else if (st.blue > st.red) reco = '<span style="color:var(--blue-deep);font-weight:800">推荐蓝</span>';
+  else reco = '<span style="color:var(--muted)">红蓝持平</span>';
+  el.innerHTML = '<span>' + prefixLabel + '：<b>' + patText + '</b></span>'
+    + '<span>相同列 <b>' + st.colCount + '</b> 列</span>'
+    + '<span style="color:var(--red-deep)">红 <b>' + st.red + '</b></span>'
+    + '<span style="color:var(--blue-deep)">蓝 <b>' + st.blue + '</b></span>'
+    + reco;
+}
+
+function renderBead3(){
+  renderBeadN(3, 2, 'bead3', 'bead3Reco', '当前两行');
+}
+
+function renderBead4(){
+  renderBeadN(4, 3, 'bead4', 'bead4Reco', '当前三行');
+}
+
+function renderBead5(){
+  renderBeadN(5, 4, 'bead5', 'bead5Reco', '当前四行');
+}
+
+function renderBead6(){
+  renderBeadN(6, 5, 'bead6', 'bead6Reco', '当前五行');
+}
+
+// 珠盘4路推荐：汇总珠盘路 3/4/5/6 四个推荐的相同列红/蓝数量，多数颜色为推荐
+function computeBead4RoadReco(results){
+  const rs = results || state.results;
+  const configs = [[3, 2], [4, 3], [5, 4], [6, 5]];
+  let red = 0, blue = 0, any = false;
+  for (const [rows, len] of configs){
+    const st = computeBeadNStats(rs, rows, len);
+    if (!st) continue;
+    any = true;
+    red += st.red;
+    blue += st.blue;
+  }
+  return { red, blue, any };
+}
+
+// 珠盘4路推荐色：'red' | 'blue' | null
+function bead4RoadColorAt(results){
+  const r = computeBead4RoadReco(results);
+  if (!r.any || (r.red === 0 && r.blue === 0) || r.red === r.blue) return null;
+  return r.red > r.blue ? 'red' : 'blue';
+}
+
+function renderBead4RoadReco(){
+  const el = $('totalRecoBead4');
+  if (!el) return;
+  const r = computeBead4RoadReco();
+  if (!r.any || (r.red === 0 && r.blue === 0)){
+    setBadgeClass(el, 'none');
+    el.querySelector('.val').textContent = '—';
+    return;
+  }
+  if (r.red === r.blue){
+    setBadgeClass(el, '');
+    el.querySelector('.val').textContent = '平';
+    return;
+  }
+  const cls = r.red > r.blue ? 'red' : 'blue';
+  setBadgeClass(el, cls);
+  el.querySelector('.val').textContent = r.red > r.blue ? '推荐庄' : '推荐闲';
+}
+
+/* ============ 三小路（由大路推导） ============ */
+// 红＝有规律（对齐），蓝＝无规律（错位）
+//  大眼仔路 skip=0：自大路第3列起，参考左邻列（c-1）
+//  小路     skip=1：自大路第4列起，参考隔一列（c-2）
+//  曱甴路   skip=2：自大路第5列起，参考隔两列（c-3）
+//  列首（r=0）：比较前两列长度，相等红、不等蓝
+//  列内（r>0）：比较“左格”与“左上格”，同有/同无为红，一有一无为蓝
+function buildDerivedRoad(grid, skip){
+  const marks = []; // 'R' | 'B'
+  const len = c => {
+    const col = grid[c]; if (!col) return 0;
+    let n = 0;
+    for (let r = 0; r < 6; r++){ const v = col[r]; if (v && v.type !== 'T') n++; }
+    return n;
+  };
+  const has = (c, r) => { const col = grid[c]; return !!(col && col[r] && col[r].type !== 'T'); };
+  const start = 2 + skip;
+  for (let c = start; c < grid.length; c++){
+    const col = grid[c];
+    if (!col) continue;
+    for (let r = 0; r < 6; r++){
+      const cell = col[r];
+      if (!cell || cell.type === 'T') continue;
+      let red;
+      if (r === 0){
+        red = (len(c - 1 - skip) === len(c - 2 - skip));
+      } else {
+        const hasLeft = has(c - 1 - skip, r);
+        const hasUpLeft = has(c - 1 - skip, r - 1);
+        red = (hasLeft === hasUpLeft);
+      }
+      marks.push(red ? 'R' : 'B');
+    }
+  }
+  return marks;
+}
+
+function renderSmallRoads(grid){
+  const defs = [['smEye', 0], ['smSmall', 1], ['smRoach', 2]];
+  for (const [id, skip] of defs){
+    const marks = buildDerivedRoad(grid, skip);
+    // 与大路显示方式一致：同色堆叠、换色新列、超第6行向右衍生、下行被占则向右衍生
+    const big = buildBigRoad(marks.map(m => m === 'R' ? 'B' : 'P'));
+    const mat = big.grid.map(col => col.map(cell => cell ? (cell.type === 'B' ? 'R' : 'B') : null));
+    let renderer;
+    if (id === 'smEye') renderer = v => '<span class="mk ring ' + (v === 'R' ? 'red' : 'blue') + '"></span>';
+    else if (id === 'smSmall') renderer = v => '<span class="mk solid ' + (v === 'R' ? 'red' : 'blue') + '"></span>';
+    else renderer = v => '<span class="mk-slash ' + (v === 'R' ? 'red' : 'blue') + '"></span>';
+    $(id).innerHTML = roadGridHTML(mat, renderer);
+  }
+}
+
+/* ============ 庄问路 / 闲问路 ============ */
+// 三小路推荐统计：最新颜色与庄问路/闲问路相反即累计推荐，返回计数与推荐色
+function smallRecoStats(results){
+  const pred = predictAskRoads(results);
+  const grid = buildBigRoad(results).grid;
+  const latest = [0, 1, 2].map(k => {
+    const marks = buildDerivedRoad(grid, k);
+    return marks.length ? marks[marks.length - 1] : null;
+  });
+  let cntR = 0, cntB = 0;
+  for (let i = 0; i < 3; i++){
+    if (latest[i] && pred.B[i] && latest[i] !== pred.B[i]) cntR++;
+    if (latest[i] && pred.P[i] && latest[i] !== pred.P[i]) cntB++;
+  }
+  return {
+    pred, latest, cntR, cntB,
+    color: (cntR === 0 && cntB === 0 || cntR === cntB) ? null : (cntR > cntB ? 'red' : 'blue'),
+    status: cntR > cntB ? 'red' : cntB > cntR ? 'blue' : (cntR === 0 && cntB === 0 ? 'none' : 'tie')
+  };
+}
+
+// 三顺推荐：实际最新颜色与庄问路/闲问路一致的数量，多的显示推荐色（'red'|'blue'|null）
+function seqRecoColorAt(results){
+  const s = smallRecoStats(results);
+  let cntR = 0, cntB = 0;
+  for (let i = 0; i < 3; i++){
+    if (s.latest[i] && s.pred.B[i] && s.latest[i] === s.pred.B[i]) cntR++;
+    if (s.latest[i] && s.pred.P[i] && s.latest[i] === s.pred.P[i]) cntB++;
+  }
+  if (cntR === 0 && cntB === 0 || cntR === cntB) return null;
+  return cntR > cntB ? 'red' : 'blue';
+}
+
+// 指定推荐来源在某局结果前缀下的推荐色：'red' | 'blue' | null
+function recoColorAt(source, results){
+  if (!source) return null;   // 未选择任何来源：不写方框
+  if (source === 'small') return smallRecoStats(results).color;
+  const z = computeTotalStats(results).cls;
+  if (source === 'common'){
+    const st = smallRecoStats(results);
+    // 仅当珠盘与三小路同色时显示该颜色，其余不显示
+    if (z === 'red' || z === 'blue'){
+      if (st.color === z) return z;
+    }
+    return null;
+  }
+  if (source === 'seq') return seqRecoColorAt(results);
+  if (source === 'seqcommon'){
+    const q = seqRecoColorAt(results);
+    // 仅当珠盘与三顺同色时显示该颜色
+    if (z === 'red' || z === 'blue'){
+      if (q === z) return z;
+    }
+    return null;
+  }
+  if (source === 'bead4') return bead4RoadColorAt(results);
+  // zhu（默认）
+  return (z === 'red' || z === 'blue') ? z : null;
+}
+
+// 徽标类名：保留选中态
+function setBadgeClass(el, cls){
+  const sel = state.recoSource === el.dataset.source ? ' sel' : '';
+  el.className = 'reco-badge ' + cls + sel;
+}
+
+// 模拟下一局（庄/闲）在大路上的落点（不修改网格）
+function simulateNextEntry(grid, streak, nextColor){
+  const has = (c, r) => { const col = grid[c]; return !!(col && col[r]); };
+  const firstFree = (r, from) => { let c = from; while (has(c, r)) c++; return c; };
+  if (streak === null || nextColor !== streak.color){
+    return { col: firstFree(0, 0), row: 0, isTop: true };
+  }
+  if (streak.tailRow !== null){
+    return { col: firstFree(streak.tailRow, streak.tailCol + 1), row: streak.tailRow, isTop: false };
+  }
+  if (streak.height < 6){
+    return { col: streak.col, row: streak.height, isTop: false };
+  }
+  return { col: firstFree(5, streak.col + 1), row: 5, isTop: false };
+}
+
+// 预测：假设下一局为庄/闲，三小路（大眼仔/小路/曱甴）的下一标记
+function predictAskRoads(results){
+  const big = buildBigRoad(results);
+  const grid = big.grid;
+  const lenOf = c => {
+    const col = grid[c]; if (!col) return 0;
+    let n = 0;
+    for (let r = 0; r < 6; r++){ const v = col[r]; if (v && v.type !== 'T') n++; }
+    return n;
+  };
+  const hasAt = (c, r) => { const col = grid[c]; return !!(col && col[r] && col[r].type !== 'T'); };
+  const out = { B: [], P: [] };
+  for (const [label, nextType] of [['B', 'B'], ['P', 'P']]){
+    const np = simulateNextEntry(grid, big.streak, nextType);
+    for (let skip = 0; skip < 3; skip++){
+      const start = 2 + skip;
+      if (np.col < start){ out[label].push(null); continue; }
+      let red;
+      if (np.isTop){
+        red = (lenOf(np.col - 1 - skip) === lenOf(np.col - 2 - skip));
+      } else {
+        const hasLeft = hasAt(np.col - 1 - skip, np.row);
+        const hasUpLeft = hasAt(np.col - 1 - skip, np.row - 1);
+        red = (hasLeft === hasUpLeft);
+      }
+      out[label].push(red ? 'R' : 'B');
+    }
+  }
+  return out;
+}
+
+function renderAskRoads(){
+  const el = $('askRoads');
+  if (state.results.length === 0){ el.innerHTML = ''; return; }
+  const s = smallRecoStats(state.results);
+  const pred = s.pred;
+  const latest = s.latest;
+  const names = ['大眼仔', '小路', '曱甴'];
+  const markHtml = (road, v) => {
+    if (!v) return '<span class="ask-na">—</span>';
+    if (road === 0) return '<span class="mk ring ' + (v === 'R' ? 'red' : 'blue') + '"></span>';
+    if (road === 1) return '<span class="mk solid ' + (v === 'R' ? 'red' : 'blue') + '"></span>';
+    return '<span class="mk-slash ' + (v === 'R' ? 'red' : 'blue') + '"></span>';
+  };
+  // 庄问路 / 闲问路 / 三小路推荐 / 三顺推荐 表（5列）
+  let html = '<div class="ask-head"><span class="ask-road"></span><span class="ask-col b">庄问路</span><span class="ask-col p">闲问路</span><span class="ask-col">三小路推荐</span><span class="ask-col">三顺推荐</span></div>';
+  let seqR = 0, seqB = 0;
+  for (let i = 0; i < 3; i++){
+    const parts = [];
+    if (latest[i] && pred.B[i] && latest[i] !== pred.B[i]) parts.push('<span class="ask-rb">推荐庄</span>');
+    if (latest[i] && pred.P[i] && latest[i] !== pred.P[i]) parts.push('<span class="ask-rp">推荐闲</span>');
+    const reco = parts.length ? parts.join('<span class="ask-sep">/</span>') : '<span class="ask-na">—</span>';
+    // 三顺推荐：实际最新颜色与庄问路一致 → 推荐庄；与闲问路一致 → 推荐闲
+    const seqParts = [];
+    if (latest[i] && pred.B[i] && latest[i] === pred.B[i]){ seqParts.push('<span class="ask-rb">推荐庄</span>'); seqR++; }
+    if (latest[i] && pred.P[i] && latest[i] === pred.P[i]){ seqParts.push('<span class="ask-rp">推荐闲</span>'); seqB++; }
+    const seq = seqParts.length ? seqParts.join('<span class="ask-sep">/</span>') : '<span class="ask-na">—</span>';
+    html += '<div class="ask-row"><span class="ask-road">' + names[i] + '</span>'
+      + '<span class="ask-cell">' + markHtml(i, pred.B[i]) + '</span>'
+      + '<span class="ask-cell">' + markHtml(i, pred.P[i]) + '</span>'
+      + '<span class="ask-cell">' + reco + '</span>'
+      + '<span class="ask-cell">' + seq + '</span></div>';
+  }
+  // 三小路推荐：统计三条路中推荐庄/推荐闲的数量，多的显示推荐哪个
+  const { cntR, cntB } = s;
+  let total;
+  if (cntR === 0 && cntB === 0) total = '<span class="ask-na">—</span>';
+  else if (cntR === cntB) total = '<span class="ask-na">平</span>';
+  else if (cntR > cntB) total = '<span class="ask-rb">推荐庄</span>';
+  else total = '<span class="ask-rp">推荐闲</span>';
+  html += '<div class="ask-row ask-total"><span class="ask-road">三小路推荐</span><span class="ask-cell"></span><span class="ask-cell"></span><span class="ask-cell">' + total + '</span><span class="ask-cell"></span></div>';
+  // 三顺路推荐合计：三顺推荐列中推荐庄/推荐闲的数量，多的显示推荐哪个
+  let seqTotal;
+  if (seqR === 0 && seqB === 0) seqTotal = '<span class="ask-na">—</span>';
+  else if (seqR === seqB) seqTotal = '<span class="ask-na">平</span>';
+  else if (seqR > seqB) seqTotal = '<span class="ask-rb">推荐庄</span>';
+  else seqTotal = '<span class="ask-rp">推荐闲</span>';
+  html += '<div class="ask-row ask-total"><span class="ask-road">三顺路推荐</span><span class="ask-cell"></span><span class="ask-cell"></span><span class="ask-cell"></span><span class="ask-cell">' + seqTotal + '</span></div>';
+  el.innerHTML = html;
+  // 记录三小路推荐状态（供共同推荐使用）：red | blue | tie(平) | none
+  state.smallRecoStatus = s.status;
+  // 顶部三小路推荐徽标同步（珠盘推荐右侧）
+  const smEl = $('totalRecoSm');
+  if (smEl){
+    if (cntR === 0 && cntB === 0){ setBadgeClass(smEl, 'none'); smEl.querySelector('.val').textContent = '—'; }
+    else if (cntR === cntB){ setBadgeClass(smEl, ''); smEl.querySelector('.val').textContent = '平'; }
+    else { setBadgeClass(smEl, cntR > cntB ? 'red' : 'blue'); smEl.querySelector('.val').textContent = cntR > cntB ? '推荐庄' : '推荐闲'; }
+  }
+  // 顶部三顺推荐徽标同步（共同推荐右侧）
+  const seqEl = $('totalRecoSeq');
+  if (seqEl){
+    if (seqR === 0 && seqB === 0){ setBadgeClass(seqEl, 'none'); seqEl.querySelector('.val').textContent = '—'; }
+    else if (seqR === seqB){ setBadgeClass(seqEl, ''); seqEl.querySelector('.val').textContent = '平'; }
+    else { setBadgeClass(seqEl, seqR > seqB ? 'red' : 'blue'); seqEl.querySelector('.val').textContent = seqR > seqB ? '推荐庄' : '推荐闲'; }
+  }
+  // 顶部珠盘三顺推荐徽标同步（三顺推荐右侧）：珠盘推荐与三顺推荐同色时显示
+  const seqCommonEl = $('totalRecoSeqCommon');
+  if (seqCommonEl){
+    const zc = computeTotalStats().cls;
+    const seqCls = seqR > seqB ? 'red' : seqB > seqR ? 'blue' : 'none';
+    if ((zc === 'red' || zc === 'blue') && zc === seqCls){
+      setBadgeClass(seqCommonEl, zc);
+      seqCommonEl.querySelector('.val').textContent = zc === 'red' ? '推荐庄' : '推荐闲';
+    } else {
+      setBadgeClass(seqCommonEl, 'none');
+      seqCommonEl.querySelector('.val').textContent = '—';
+    }
+  }
+}
+
+function renderSessionStats(){
+  const r = state.results;
+  const cnt = c => r.filter(x => x === c).length;
+  const b = cnt('B'), p = cnt('P'), t = cnt('T');
+  let maxRunB = 0, maxRunP = 0, run = 0, last = null;
+  for (const x of r){
+    if (x === 'T') continue;
+    if (x === last){ run++; }
+    else { run = 1; last = x; }
+    if (last === 'B' && run > maxRunB) maxRunB = run;
+    if (last === 'P' && run > maxRunP) maxRunP = run;
+  }
+  $('sessionStats').innerHTML =
+    '<span class="s-chip"><b>' + r.length + '</b><span class="d">局数</span></span>' +
+    '<span class="s-chip b"><b>' + b + '</b><span class="d">庄</span></span>' +
+    '<span class="s-chip p"><b>' + p + '</b><span class="d">闲</span></span>' +
+    '<span class="s-chip t"><b>' + t + '</b><span class="d">和</span></span>' +
+    '<span class="s-chip b"><b>' + maxRunB + '</b><span class="d">最长连庄</span></span>' +
+    '<span class="s-chip p"><b>' + maxRunP + '</b><span class="d">最长连闲</span></span>';
+}
+
+function pct(n, total){
+  return total > 0 ? Math.round(n / total * 100) + '%' : '—';
+}
+
+function renderStats(){
+  const card = $('statCards');
+  if (state.results.length === 0){
+    card.innerHTML = '<p class="empty" style="color:var(--muted);font-size:13px">暂无数据，请录入开牌结果。</p>';
+    return;
+  }
+  const configs = [
+    { rows: 3, len: 2, nextLabel: '第三局' },
+    { rows: 4, len: 3, nextLabel: '第四局' },
+    { rows: 5, len: 4, nextLabel: '第五局' },
+    { rows: 6, len: 5, nextLabel: '第六局' }
+  ];
+  card.innerHTML = renderTotalCard() + configs.map(renderStatCard).join('');
+}
+
+// 四行合计统一计算：3/4/5/6 行四卡红蓝相加，给出珠盘推荐（供合计卡与顶部徽标共用）
+function computeTotalStats(results){
+  const rs = results || state.results;
+  const configs = [
+    { rows: 3, len: 2 },
+    { rows: 4, len: 3 },
+    { rows: 5, len: 4 },
+    { rows: 6, len: 5 }
+  ];
+  const stats = configs.map(c => computeStats(rs, c.len));
+  let tBlue = 0, tRed = 0, present = 0;
+  for (const st of stats){
+    if (!st) continue;
+    present++;
+    tBlue += st.blue;
+    tRed += st.red;
+  }
+  const tTotal = tBlue + tRed;
+  let cls = 'none', text = '暂无推荐';
+  if (present > 0 && tTotal > 0){
+    if (tRed > tBlue){ cls = 'red'; text = '红（庄）'; }
+    else if (tBlue > tRed){ cls = 'blue'; text = '蓝（闲）'; }
+    else { cls = 'none'; text = '红蓝持平'; }
+  }
+  return { configs, stats, tBlue, tRed, tTotal, cls, text };
+}
+
+// 顶部珠盘推荐徽标（载入按钮右侧）
+function renderTotalReco(){
+  const el = $('totalReco');
+  if (!el) return;
+  if (state.results.length === 0){
+    setBadgeClass(el, 'none');
+    el.querySelector('.val').textContent = '—';
+    return;
+  }
+  const { cls, text } = computeTotalStats();
+  setBadgeClass(el, cls);
+  el.querySelector('.val').textContent = text;
+}
+
+// 共同推荐：珠盘与三小路同色 → 显示该颜色；其余情况不显示
+function renderCommonReco(){
+  const el = $('totalRecoCommon');
+  if (!el) return;
+  const z = computeTotalStats();
+  const s = state.smallRecoStatus || 'none';
+  let show = null;
+  if (z.cls !== 'none' && s === z.cls) show = z.cls;   // 两色一致
+  if (show){
+    setBadgeClass(el, show);
+    el.querySelector('.val').textContent = show === 'red' ? '红（庄）' : '蓝（闲）';
+  } else {
+    setBadgeClass(el, 'none');
+    el.querySelector('.val').textContent = '—';
+  }
+}
+
+// 四行合计：将 3/4/5/6 行四张卡的红蓝计数相加，计算合计红蓝比例并给出珠盘推荐
+function renderTotalCard(){
+  const { configs, stats, tBlue, tRed, tTotal, cls, text } = computeTotalStats();
+  const rowsHtml = [];
+  for (let i = 0; i < configs.length; i++){
+    const c = configs[i], st = stats[i];
+    if (!st) continue;
+    const total = st.blue + st.red;
+    const bp = total > 0 ? st.blue / total * 100 : 0;
+    rowsHtml.push('<div class="t-row">'
+      + '<span class="t-name">珠盘路' + c.rows + '行</span>'
+      + '<span class="t-bar"><i class="b" style="flex:' + bp.toFixed(2) + '"></i><i class="r" style="flex:' + (100 - bp).toFixed(2) + '"></i></span>'
+      + '<span class="t-num"><span class="b">蓝 ' + st.blue + '</span> · <span class="r">红 ' + st.red + '</span></span>'
+      + '</div>');
+  }
+  if (rowsHtml.length === 0) return '';
+  const rpct = tTotal > 0 ? Math.round(tRed / tTotal * 100) : 0;
+  let reco;
+  if (tTotal === 0){
+    reco = '<div class="stat-reco none"><span class="reco-dot"></span>暂无匹配，无推荐</div>';
+  } else if (cls === 'red'){
+    reco = '<div class="stat-reco red"><span class="reco-dot"></span>珠盘推荐：' + text + '</div>';
+  } else if (cls === 'blue'){
+    reco = '<div class="stat-reco blue"><span class="reco-dot"></span>珠盘推荐：' + text + '</div>';
+  } else {
+    reco = '<div class="stat-reco none"><span class="reco-dot"></span>红蓝持平，暂无明确推荐</div>';
+  }
+  return '<div class="stat-card total">'
+    + '<div class="stat-head"><h4>四行合计</h4><span class="tag">3/4/5/6行红蓝相加</span></div>'
+    + '<div class="total-rows">' + rowsHtml.join('') + '</div>'
+    + '<div class="stat-grid">'
+    +   '<div class="stat-num blue"><b>' + tBlue + '</b><span>合计·蓝</span></div>'
+    +   '<div class="stat-num red"><b>' + tRed + '</b><span>合计·红</span></div>'
+    +   '<div class="stat-num hl"><b>' + rpct + '%</b><span>红占比例</span></div>'
+    + '</div>'
+    + '<div class="stat-bar"><div class="seg b" style="flex:' + (tTotal > 0 ? (tBlue / tTotal * 100).toFixed(2) : 0) + '"></div><div class="seg r" style="flex:' + (tTotal > 0 ? (tRed / tTotal * 100).toFixed(2) : 0) + '"></div></div>'
+    + '<div class="stat-meta"><span>蓝 ' + pct(tBlue, tTotal) + '</span><span>红 ' + pct(tRed, tTotal) + '</span></div>'
+    + reco
+    + '</div>';
+}
+
+// 渲染单张分红统计卡：珠盘路 rows 行，取最近 len 局为模式，统计第 len+1 局红蓝
+function renderStatCard(cfg){
+  const rows = cfg.rows, len = cfg.len, nextLabel = cfg.nextLabel;
+  const st = computeStats(state.results, len);
+  const miniCols = buildBeadColumns(state.results, rows);
+  // 迷你珠盘（rows 行）预览
+  let mini = '';
+  for (let c = 0; c < miniCols.length; c++){
+    for (let r = 0; r < rows; r++){
+      const v = miniCols[c][r];
+      mini += v === undefined
+        ? '<div class="mini-cell empty"></div>'
+        : '<div class="mini-cell"><span class="mini-dot ' + COLOR_KEY[v] + '"></span></div>';
+    }
+  }
+  const head = '<div class="stat-head"><h4>珠盘路 ' + rows + ' 行</h4><span class="tag">检索大路</span></div>'
+    + '<div class="mini-scroll"><div class="mini-grid">' + mini + '</div></div>';
+  if (!st){
+    return '<div class="stat-card">' + head
+      + '<p class="empty" style="color:var(--muted);font-size:12px">数据不足（至少' + (len + 1) + '局庄/闲）</p></div>';
+  }
+  const total = st.blue + st.red;
+  const bpct = total > 0 ? st.blue / total * 100 : 0;
+  const patChips = st.pattern.map(x => '<span class="pat-chip ' + COLOR_KEY[x] + '"></span>').join('');
+  const patText = st.pattern.map(x => x === 'B' ? '红' : '蓝').join(' · ');
+  const list = st.matches.length
+    ? st.matches.map(m => '<span class="th-chip ' + (m.next.val === 'B' ? 'r' : 'b') + '">第' + m.next.hand + '局→' + (m.next.val === 'B' ? '红' : '蓝') + '</span>').join('')
+    : '<span class="empty">未检索到相同模式</span>';
+  // 推荐：红多推荐红，蓝多推荐蓝
+  let reco;
+  if (st.matches.length === 0){
+    reco = '<div class="stat-reco none"><span class="reco-dot"></span>暂无匹配，无推荐</div>';
+  } else if (st.red > st.blue){
+    reco = '<div class="stat-reco red"><span class="reco-dot"></span>推荐：红（庄）</div>';
+  } else if (st.blue > st.red){
+    reco = '<div class="stat-reco blue"><span class="reco-dot"></span>推荐：蓝（闲）</div>';
+  } else {
+    reco = '<div class="stat-reco none"><span class="reco-dot"></span>红蓝持平，暂无明确推荐</div>';
+  }
+  return '<div class="stat-card">' + head
+    + '<div class="stat-pattern"><span class="lbl">最近 ' + len + ' 局</span>' + patChips + '<span class="pat-text">' + patText + '</span></div>'
+    + '<div class="stat-grid">'
+    +   '<div class="stat-num hl"><b>' + st.matches.length + '</b><span>匹配次数</span></div>'
+    +   '<div class="stat-num blue"><b>' + st.blue + '</b><span>' + nextLabel + '·蓝</span></div>'
+    +   '<div class="stat-num red"><b>' + st.red + '</b><span>' + nextLabel + '·红</span></div>'
+    + '</div>'
+    + '<div class="stat-bar"><div class="seg b" style="flex:' + bpct.toFixed(2) + '"></div><div class="seg r" style="flex:' + (100 - bpct).toFixed(2) + '"></div></div>'
+    + '<div class="stat-meta"><span>蓝 ' + pct(st.blue,total) + '</span><span>红 ' + pct(st.red,total) + '</span></div>'
+    + reco
+    + '<div class="stat-list">' + list + '</div>'
+    + '</div>';
+}
+
+function renderBoxStat(){
+  const el = $('boxStat');
+  const s = state.boxStat;
+  if (!s || s.total === 0){ el.classList.add('none'); return; }
+  el.classList.remove('none');
+  const pct = Math.round(s.match / s.total * 100);
+  el.querySelector('.m b').textContent = s.match;
+  el.querySelector('.n b').textContent = s.mismatch;
+  el.querySelector('.p b').textContent = pct + '%';
+  el.querySelector('.t b').textContent = s.total;
+  const diff = s.match - s.mismatch;
+  const dEl = el.querySelector('.d b');
+  dEl.textContent = (diff > 0 ? '+' : '') + diff;
+  dEl.style.color = diff > 0 ? 'var(--red-deep)' : diff < 0 ? 'var(--blue-deep)' : 'var(--ink)';
+}
+
+function render(){
+  renderSessionStats();
+  renderTotalReco();
+  if (state.results.length === 0){
+    state.boxStat = null;
+    renderBoxStat();
+    $('bigroad').innerHTML = $('bead6').innerHTML = $('bead3').innerHTML = $('bead4').innerHTML = $('bead5').innerHTML = '';
+    $('bead3Reco').innerHTML = $('bead4Reco').innerHTML = $('bead5Reco').innerHTML = $('bead6Reco').innerHTML = '';
+    setBadgeClass($('totalRecoBead4'), 'none'); $('totalRecoBead4').querySelector('.val').textContent = '—';
+    $('smEye').innerHTML = $('smSmall').innerHTML = $('smRoach').innerHTML = '';
+    $('askRoads').innerHTML = '';
+    setBadgeClass($('totalRecoSm'), 'none'); $('totalRecoSm').querySelector('.val').textContent = '—';
+    setBadgeClass($('totalRecoCommon'), 'none'); $('totalRecoCommon').querySelector('.val').textContent = '—';
+    setBadgeClass($('totalRecoSeq'), 'none'); $('totalRecoSeq').querySelector('.val').textContent = '—';
+    setBadgeClass($('totalRecoSeqCommon'), 'none'); $('totalRecoSeqCommon').querySelector('.val').textContent = '—';
+    renderStats();
+    return;
+  }
+  const big = buildBigRoad(state.results);
+  renderSmallRoads(big.grid);
+  renderAskRoads();
+  renderCommonReco();
+  renderBigRoad(big);
+  renderBoxStat();
+  renderBead3();
+  renderBead4();
+  renderBead5();
+  renderBead6();
+  renderBead4RoadReco();
+  renderStats();
+}
+
+/* ============ 交互 ============ */
+// 推荐来源切换：按下哪个就把对应推荐按方框规则写入大路
+document.querySelectorAll('.reco-badge').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const key = btn.dataset.source;
+    state.recoSource = (state.recoSource === key) ? null : key;
+    render();
+  });
+});
+document.querySelectorAll('.btn-round').forEach(btn => {
+  btn.addEventListener('click', () => {
+    state.results.push(btn.dataset.add);
+    render();
+  });
+});
+$('undoBtn').addEventListener('click', () => { if (state.results.length){ state.results.pop(); render(); } });
+$('randomBtn').addEventListener('click', () => {
+  // 随机生成 70 个红/蓝（庄/闲，无和）
+  const arr = [];
+  for (let i = 0; i < 70; i++) arr.push(Math.random() < 0.5 ? 'B' : 'P');
+  state.results = arr;
+  $('bulkInput').value = arr.join('');
+  render();
+});
+$('clearBtn').addEventListener('click', () => { state.results = []; $('bulkInput').value=''; render(); });
+$('sampleBtn').addEventListener('click', () => { state.results = parseInput(SAMPLE); render(); });
+$('loadBtn').addEventListener('click', () => {
+  const parsed = parseInput($('bulkInput').value);
+  if (parsed.length){ state.results = parsed; render(); }
+});
+$('bulkInput').addEventListener('keydown', e => { if (e.key === 'Enter'){ e.preventDefault(); $('loadBtn').click(); } });
+
+function parseInput(text){
+  const out = [];
+  const map = { b:'B', p:'P', t:'T', 庄:'B', 闲:'P', 和:'T' };
+  for (const ch of text){
+    const k = map[ch] || map[ch.toLowerCase()];
+    if (k) out.push(k);
+  }
+  return out;
+}
+
+/* 初始示例 */
+state.results = parseInput(SAMPLE);
+render();
+
+/* PWA：注册离线 Service Worker */
+if ('serviceWorker' in navigator){
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('sw.js').catch(() => {});
+  });
+}
+</script>
+</body>
+</html>

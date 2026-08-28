@@ -1,0 +1,17 @@
+{
+  "name": "乐分析表",
+  "short_name": "乐分析表",
+  "description": "百家乐大路 · 珠盘路 · 珠盘分红 · 三小路分析表",
+  "lang": "zh-CN",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#F3EFE6",
+  "theme_color": "#F3EFE6",
+  "icons": [
+    { "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}
