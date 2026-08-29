@@ -2,16 +2,8 @@
 <html lang="zh-CN">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>乐分析表</title>
-<meta name="theme-color" content="#F3EFE6">
-<meta name="mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="default">
-<meta name="apple-mobile-web-app-title" content="乐分析表">
-<link rel="manifest" href="manifest.json">
-<link rel="icon" href="icons/icon-192.png">
-<link rel="apple-touch-icon" href="icons/icon-192.png">
 <link rel="stylesheet" href="https://miaoda.feishu.cn/fonts/css2?family=Noto+Serif+SC:wght@600;700;900&family=Noto+Sans+SC:wght@300;400;500;700&display=swap">
 <style>
   :root{
@@ -746,30 +738,41 @@ function renderBead4RoadReco(){
 
 /* ============ 三小路（由大路推导） ============ */
 // 红＝有规律（对齐），蓝＝无规律（错位）
-//  大眼仔路 skip=0：自大路第3列起，参考左邻列（c-1）
-//  小路     skip=1：自大路第4列起，参考隔一列（c-2）
-//  曱甴路   skip=2：自大路第5列起，参考隔两列（c-3）
-//  列首（r=0）：比较前两列长度，相等红、不等蓝
-//  列内（r>0）：比较“左格”与“左上格”，同有/同无为红，一有一无为蓝
-function buildDerivedRoad(grid, skip){
+//  大路连列结构：每列＝一段同色连（长度不限，不因超过6行而分段；和局不打断连、也不计数）
+function buildStreakCols(results){
+  const cols = [];
+  let prev = null;
+  for (const r of results){
+    if (r === 'T') continue;
+    if (prev === null) cols.push([r]);
+    else if (r === prev) cols[cols.length - 1].push(r);
+    else cols.push([r]);
+    prev = r;
+  }
+  return cols;
+}
+
+//  下三路（大眼仔/小路/曱甴）计算规则（依据 Microgaming 官方路单手册 + 齐整/有无/直落规则）：
+//    · 大眼仔 skip=0：自大路第2列第2颗起，参考左邻列（c-1）
+//    · 小路     skip=1：自大路第3列第2颗起，参考隔一列（c-2）
+//    · 曱甴路   skip=2：自大路第4列第2颗起，参考隔两列（c-3）
+//    · 列首（r=0，齐整）：比较“前一列”与“再隔 skip 列”的长度，相等红、不等蓝
+//    · 列内（r>0，有无/直落）：比较参考列的“左格”与“左上格”，同有/同无为红，一有一无为蓝
+//    注：基于“完整连列结构”（buildStreakCols）计算，列长不受6行分段影响，与真实路单一致。
+function buildDerivedRoad(cols, skip){
   const marks = []; // 'R' | 'B'
-  const len = c => {
-    const col = grid[c]; if (!col) return 0;
-    let n = 0;
-    for (let r = 0; r < 6; r++){ const v = col[r]; if (v && v.type !== 'T') n++; }
-    return n;
-  };
-  const has = (c, r) => { const col = grid[c]; return !!(col && col[r] && col[r].type !== 'T'); };
-  const start = 2 + skip;
-  for (let c = start; c < grid.length; c++){
-    const col = grid[c];
-    if (!col) continue;
-    for (let r = 0; r < 6; r++){
-      const cell = col[r];
-      if (!cell || cell.type === 'T') continue;
+  const len = c => (c < 0 || c >= cols.length) ? 0 : cols[c].length;
+  const has = (c, r) => { const col = cols[c]; return !!(col && r < col.length); };
+  const skipCols = skip + 1; // 起始列（0 基）：大眼仔=1，小路=2，曱甴=3
+  for (let c = 0; c < cols.length; c++){
+    const col = cols[c];
+    for (let r = 0; r < col.length; r++){
+      // 起始条件：自第 skipCols+1 列起；该起始列需从第2颗（r>=1）开始
+      if (c < skipCols) continue;
+      if (c === skipCols && r < 1) continue;
       let red;
       if (r === 0){
-        red = (len(c - 1 - skip) === len(c - 2 - skip));
+        red = (len(c - 1) === len(c - 2 - skip));
       } else {
         const hasLeft = has(c - 1 - skip, r);
         const hasUpLeft = has(c - 1 - skip, r - 1);
@@ -781,10 +784,11 @@ function buildDerivedRoad(grid, skip){
   return marks;
 }
 
-function renderSmallRoads(grid){
+function renderSmallRoads(results){
+  const cols = buildStreakCols(results);
   const defs = [['smEye', 0], ['smSmall', 1], ['smRoach', 2]];
   for (const [id, skip] of defs){
-    const marks = buildDerivedRoad(grid, skip);
+    const marks = buildDerivedRoad(cols, skip);
     // 与大路显示方式一致：同色堆叠、换色新列、超第6行向右衍生、下行被占则向右衍生
     const big = buildBigRoad(marks.map(m => m === 'R' ? 'B' : 'P'));
     const mat = big.grid.map(col => col.map(cell => cell ? (cell.type === 'B' ? 'R' : 'B') : null));
@@ -800,9 +804,9 @@ function renderSmallRoads(grid){
 // 三小路推荐统计：最新颜色与庄问路/闲问路相反即累计推荐，返回计数与推荐色
 function smallRecoStats(results){
   const pred = predictAskRoads(results);
-  const grid = buildBigRoad(results).grid;
+  const cols = buildStreakCols(results);
   const latest = [0, 1, 2].map(k => {
-    const marks = buildDerivedRoad(grid, k);
+    const marks = buildDerivedRoad(cols, k);
     return marks.length ? marks[marks.length - 1] : null;
   });
   let cntR = 0, cntB = 0;
@@ -862,42 +866,25 @@ function setBadgeClass(el, cls){
   el.className = 'reco-badge ' + cls + sel;
 }
 
-// 模拟下一局（庄/闲）在大路上的落点（不修改网格）
-function simulateNextEntry(grid, streak, nextColor){
-  const has = (c, r) => { const col = grid[c]; return !!(col && col[r]); };
-  const firstFree = (r, from) => { let c = from; while (has(c, r)) c++; return c; };
-  if (streak === null || nextColor !== streak.color){
-    return { col: firstFree(0, 0), row: 0, isTop: true };
-  }
-  if (streak.tailRow !== null){
-    return { col: firstFree(streak.tailRow, streak.tailCol + 1), row: streak.tailRow, isTop: false };
-  }
-  if (streak.height < 6){
-    return { col: streak.col, row: streak.height, isTop: false };
-  }
-  return { col: firstFree(5, streak.col + 1), row: 5, isTop: false };
-}
-
 // 预测：假设下一局为庄/闲，三小路（大眼仔/小路/曱甴）的下一标记
+// 基于完整连列结构模拟下一局落点：延续末列则在其底部新增一颗；换色则新开一列
 function predictAskRoads(results){
-  const big = buildBigRoad(results);
-  const grid = big.grid;
-  const lenOf = c => {
-    const col = grid[c]; if (!col) return 0;
-    let n = 0;
-    for (let r = 0; r < 6; r++){ const v = col[r]; if (v && v.type !== 'T') n++; }
-    return n;
-  };
-  const hasAt = (c, r) => { const col = grid[c]; return !!(col && col[r] && col[r].type !== 'T'); };
+  const cols = buildStreakCols(results);
+  const lenOf = c => (c < 0 || c >= cols.length) ? 0 : cols[c].length;
+  const hasAt = (c, r) => { const col = cols[c]; return !!(col && r < col.length); };
+  const lastCol = cols.length - 1;
   const out = { B: [], P: [] };
   for (const [label, nextType] of [['B', 'B'], ['P', 'P']]){
-    const np = simulateNextEntry(grid, big.streak, nextType);
+    const same = lastCol >= 0 && cols[lastCol][0] === nextType;
+    const np = same ? { col: lastCol, row: cols[lastCol].length, isTop: false }
+                    : { col: lastCol + 1, row: 0, isTop: true };
     for (let skip = 0; skip < 3; skip++){
-      const start = 2 + skip;
-      if (np.col < start){ out[label].push(null); continue; }
+      const skipCols = skip + 1;
+      // 起始条件：列 < skipCols 无标记；起始列（=skipCols）且为列首（r=0）无标记
+      if (np.col < skipCols || (np.col === skipCols && np.row < 1)){ out[label].push(null); continue; }
       let red;
       if (np.isTop){
-        red = (lenOf(np.col - 1 - skip) === lenOf(np.col - 2 - skip));
+        red = (lenOf(np.col - 1) === lenOf(np.col - 2 - skip));
       } else {
         const hasLeft = hasAt(np.col - 1 - skip, np.row);
         const hasUpLeft = hasAt(np.col - 1 - skip, np.row - 1);
@@ -1215,7 +1202,7 @@ function render(){
     return;
   }
   const big = buildBigRoad(state.results);
-  renderSmallRoads(big.grid);
+  renderSmallRoads(state.results);
   renderAskRoads();
   renderCommonReco();
   renderBigRoad(big);
@@ -1273,13 +1260,6 @@ function parseInput(text){
 /* 初始示例 */
 state.results = parseInput(SAMPLE);
 render();
-
-/* PWA：注册离线 Service Worker */
-if ('serviceWorker' in navigator){
-  window.addEventListener('load', () => {
-    navigator.serviceWorker.register('sw.js').catch(() => {});
-  });
-}
 </script>
 </body>
 </html>
