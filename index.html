@@ -97,6 +97,68 @@
   .reco-stat .d b{font-weight:800}
   .reco-stat.none{display:none}
   .reco-badge.none{background:var(--panel-deep);color:var(--muted);font-weight:500}
+  .hyst-btn{background:transparent;border:1px solid var(--line2);color:var(--muted);border-radius:24px;padding:8px 14px;
+    font-size:12.5px;font-weight:600;cursor:pointer;font-family:var(--sans);transition:all .12s;white-space:nowrap}
+  .hyst-btn:hover{border-color:var(--ink);color:var(--ink)}
+  .hyst-btn.on{background:var(--ink);color:var(--paper);border-color:var(--ink);box-shadow:0 0 0 2px var(--ink)}
+
+  /* ===== 投注策略 ===== */
+  .betting{display:grid;grid-template-columns:1fr;gap:16px;margin-bottom:16px}
+  .betting-panel{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:16px 16px 14px}
+  .betting-top{display:flex;align-items:center;gap:18px;flex-wrap:wrap;margin-bottom:12px}
+  .betting-status{display:flex;gap:14px;flex-wrap:wrap;font-size:13px;align-items:center}
+  .betting-status b{font-variant-numeric:tabular-nums;font-weight:800}
+  .betting-status .st-reco{font-weight:800}
+  .betting-status .st-reco.red{color:var(--red-deep)}
+  .betting-status .st-reco.blue{color:var(--blue-deep)}
+  .betting-status .st-reco.none{color:var(--muted)}
+  .betting-status .up{color:var(--red-deep);font-weight:800}
+  .betting-status .down{color:var(--blue-deep);font-weight:800}
+  .betting-params{display:flex;gap:10px;flex-wrap:wrap;margin-left:auto;align-items:center}
+  .betting-params label{display:flex;align-items:center;gap:6px;font-size:12.5px;color:var(--muted)}
+  .betting-params input,.betting-params select{background:var(--paper);border:1px solid var(--line);border-radius:8px;padding:6px 9px;font-size:13px;color:var(--ink);font-family:var(--sans);outline:none}
+  .betting-params input{width:80px}
+  .betting-params select{width:auto;cursor:pointer}
+  .betting-reco{display:flex;align-items:center;gap:16px;flex-wrap:wrap;border-radius:12px;border:1px solid var(--line);
+    background:var(--paper);padding:12px 16px;font-size:13.5px;margin-bottom:10px}
+  .betting-reco .big{font-size:15px;font-weight:800;letter-spacing:.02em}
+  .betting-reco .amt{font-size:24px;font-weight:900;font-variant-numeric:tabular-nums}
+  .betting-reco.red{border-color:rgba(178,59,52,.4);background:var(--red-soft)}
+  .betting-reco.red .amt{color:var(--red-deep)}
+  .betting-reco.blue{border-color:rgba(47,94,136,.4);background:var(--blue-soft)}
+  .betting-reco.blue .amt{color:var(--blue-deep)}
+  .betting-note{font-size:11.5px;color:var(--muted);margin-bottom:10px;line-height:1.6}
+  .betting-backtest{display:grid;gap:10px}
+  .bt-summary{display:flex;gap:10px;flex-wrap:wrap}
+  .bt-chip{background:var(--panel-deep);border:1px solid var(--line);border-radius:9px;padding:7px 12px;font-size:12.5px;display:flex;align-items:baseline;gap:7px}
+  .bt-chip b{font-size:16px;font-weight:800;font-variant-numeric:tabular-nums}
+  .bt-chip.r b{color:var(--red-deep)}
+  .bt-chip.b b{color:var(--blue-deep)}
+  .bt-chip.g b{color:var(--green)}
+  .bt-table-wrap{max-height:280px;overflow:auto;border:1px solid var(--line);border-radius:10px}
+  table.bt-table{border-collapse:collapse;width:100%;font-size:12.5px;background:var(--panel)}
+  .bt-table th{position:sticky;top:0;background:var(--panel-deep);color:var(--muted);font-weight:600;padding:7px 10px;text-align:center;white-space:nowrap;border-bottom:1px solid var(--line2)}
+  .bt-table td{padding:6px 10px;text-align:center;border-bottom:1px solid var(--line);white-space:nowrap;font-variant-numeric:tabular-nums}
+  .bt-table tr:last-child td{border-bottom:none}
+  .bt-table .up{color:var(--red-deep);font-weight:700}
+  .bt-table .down{color:var(--blue-deep);font-weight:700}
+
+  /* ===== 1000次模拟统计 ===== */
+  .simulation{display:grid;grid-template-columns:1fr;gap:16px;margin-bottom:16px}
+  .sim-controls{display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin-bottom:12px}
+  .sim-controls label{display:flex;align-items:center;gap:6px;font-size:12.5px;color:var(--muted)}
+  .sim-controls input{background:var(--paper);border:1px solid var(--line);border-radius:8px;padding:6px 9px;font-size:13px;color:var(--ink);font-family:var(--sans);outline:none;width:90px}
+  .sim-result{display:grid;gap:8px}
+  .sim-summary{font-size:12px;color:var(--muted)}
+  .sim-result-inner{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:12px}
+  .sim-card{background:var(--paper);border:1px solid var(--line);border-radius:12px;padding:12px 16px}
+  .sim-card h4{margin:0 0 8px;font-size:13.5px;letter-spacing:.02em}
+  .sim-card .row{display:flex;gap:16px;flex-wrap:wrap;font-size:13px;align-items:center}
+  .sim-card .row b{font-size:18px;font-weight:800;font-variant-numeric:tabular-nums}
+  .sim-card .hit b{color:var(--red-deep)}
+  .sim-card .miss b{color:var(--blue-deep)}
+  .sim-card .diff b{color:var(--green)}
+  .sim-card .diff.neg b{color:var(--red-deep)}
 
   /* ===== 面板 ===== */
   .panel{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:16px 16px 14px}
@@ -280,11 +342,11 @@
     </div>
     <div class="reco-group">
       <button class="reco-badge none sel" id="totalReco" data-source="zhu" title="按下后按珠盘推荐写入大路"><span class="lbl">珠盘推荐</span><span class="dot"></span><span class="val">—</span></button>
+      <button class="hyst-btn" id="hystBtn" title="滞回开关：按下后从第一个珠盘推荐开始累计一致率——<40% 开始显示后续推荐，累计>50% 后不显示，40%~50% 保持">滞回开关</button>
       <button class="reco-badge none" id="totalRecoSm" data-source="small" title="按下后按三小路推荐写入大路"><span class="lbl">三小路推荐</span><span class="dot"></span><span class="val">—</span></button>
       <button class="reco-badge none" id="totalRecoCommon" data-source="common" title="按下后按共同推荐写入大路"><span class="lbl">共同推荐</span><span class="dot"></span><span class="val">—</span></button>
       <button class="reco-badge none" id="totalRecoSeq" data-source="seq" title="按下后按三顺推荐写入大路"><span class="lbl">三顺推荐</span><span class="dot"></span><span class="val">—</span></button>
       <button class="reco-badge none" id="totalRecoSeqCommon" data-source="seqcommon" title="按下后按珠盘三顺推荐写入大路"><span class="lbl">珠盘三顺推荐</span><span class="dot"></span><span class="val">—</span></button>
-      <button class="reco-badge none" id="totalRecoBead4" data-source="bead4" title="按下后按珠盘4路推荐写入大路"><span class="lbl">珠盘4路推荐</span><span class="dot"></span><span class="val">—</span></button>
     </div>
   </section>
 
@@ -300,6 +362,33 @@
         <span class="d">差额 <b>—</b></span>
       </div>
       <div class="road-scroll"><div class="road-grid" id="bigroad"></div></div>
+    </div>
+  </section>
+
+  <section class="betting">
+    <div class="panel betting-panel">
+      <div class="panel-head"><h3>投注策略</h3><span class="en">Betting Strategy</span><span class="legend">信号触发：最近6次珠盘推荐错误≥5次开始顺着推荐下注 · 累计盈利1个单位(9.5元)停注 · 最少10元/注 · 庄抽水0.95·闲1:1</span></div>
+      <div class="betting-top">
+        <div class="betting-status" id="bettingStatus"></div>
+        <div class="betting-params">
+          <label>本金(元) <input id="bankrollInput" type="number" min="100" step="100" value="1000"></label>
+          <label>最小注(元) <input id="minBetInput" type="number" min="1" step="1" value="10"></label>
+        </div>
+      </div>
+      <div class="betting-reco" id="bettingReco"></div>
+      <div class="betting-note">仅供结果记录与数学观察，不构成投注建议；娱乐理性，量力而行。规则：最近 6 次珠盘推荐中错误 ≥5 次 → 开始顺着珠盘推荐下注（每注=最小注，默认10元）；本会话累计盈利 ≥1 个单位（9.5元）→ 停注；之后等下一次“最近6次错误≥5次”再触发（窗口需先回落再触发）。回测跟随上方所选推荐来源（默认珠盘推荐）。</div>
+      <div class="betting-backtest" id="bettingBacktest"></div>
+    </div>
+  </section>
+
+  <section class="simulation">
+    <div class="panel sim-panel">
+      <div class="panel-head"><h3>1000次模拟统计</h3><span class="en">Monte Carlo</span><span class="legend">随机模拟红蓝序列，分别统计珠盘/三小路/三顺/共同/珠盘三顺推荐的一致/不一致差额（不含和局）</span></div>
+      <div class="sim-controls">
+        <button class="btn-ghost" id="simBtn">重新模拟</button>
+        <label>模拟局数 <input id="simRounds" type="number" min="100" step="100" value="1000"></label>
+      </div>
+      <div class="sim-result" id="simResult"></div>
     </div>
   </section>
 
@@ -370,7 +459,7 @@
 
 <script>
 /* ============ 状态 ============ */
-const state = { results: [], recoSource: 'zhu' };   // 'B' | 'P' | 'T'；recoSource: 'zhu'|'small'|'common'|null
+const state = { results: [], recoSource: 'zhu', zhuHyst: false, zhuRecoOn: true };   // 'B' | 'P' | 'T'；recoSource: 'zhu'|'small'|'common'|null；zhuHyst: 滞回开关；zhuRecoOn: 滞回内部状态
 const SAMPLE = "BBBBPPBPBBPPPPBPPBTBBPPPPBBPBBPBTBP";
 const COLOR_KEY = { B:'red', P:'blue', T:'green' };
 
@@ -802,42 +891,92 @@ function renderSmallRoads(results){
 
 /* ============ 庄问路 / 闲问路 ============ */
 // 三小路推荐统计：最新颜色与庄问路/闲问路相反即累计推荐，返回计数与推荐色
+// 规则：某条三小路“最新列”只有 1 个标记（或为空）时，该路不参与比较推荐；同列 2 个及以上才参与
+// “最新列”按逻辑列统计＝末尾同色连续标记数；显示超过6个向右衍生的尾巴仍算该列标记，参与比较
 function smallRecoStats(results){
   const pred = predictAskRoads(results);
   const cols = buildStreakCols(results);
-  const latest = [0, 1, 2].map(k => {
+  const roads = [0, 1, 2].map(k => {
     const marks = buildDerivedRoad(cols, k);
-    return marks.length ? marks[marks.length - 1] : null;
+    let lastLen = 0;
+    if (marks.length){
+      const last = marks[marks.length - 1];
+      for (let i = marks.length - 1; i >= 0 && marks[i] === last; i--) lastLen++;
+    }
+    return { latest: marks.length ? marks[marks.length - 1] : null, lastLen };
   });
-  let cntR = 0, cntB = 0;
-  for (let i = 0; i < 3; i++){
-    if (latest[i] && pred.B[i] && latest[i] !== pred.B[i]) cntR++;
-    if (latest[i] && pred.P[i] && latest[i] !== pred.P[i]) cntB++;
+  const latest = roads.map(r => r.latest);
+  const colLen = roads.map(r => r.lastLen);
+  // 大路最新列连续同色数量
+  const bigLastLen = cols.length ? cols[cols.length - 1].length : 0;
+  // 大路末尾连续单跳（每列仅 1 个、颜色交替，即列长均为 1）数量
+  let zigzag = 0;
+  for (let i = cols.length - 1; i >= 0 && cols[i].length === 1; i--) zigzag++;
+  let cntR = 0, cntB = 0, color = null, status = 'none';
+  if (zigzag >= 4 || bigLastLen >= 4){
+    // 大路同一列出现 4 个及以上，或单跳出现 4 个及以上 → 改用三顺推荐
+    const q = seqRecoCounts(results);
+    cntR = q.cntR; cntB = q.cntB;
+    if (cntR > 0 && cntB > 0){ status = 'tie'; }   // 颜色不一致 → 不推荐
+    else if (cntR > 0){ color = 'red'; status = 'red'; }
+    else if (cntB > 0){ color = 'blue'; status = 'blue'; }
+  } else {
+    // 常规：三小路推荐（最新颜色与庄问路/闲问路相反即推荐）
+    for (let i = 0; i < 3; i++){
+      if (colLen[i] < 2) continue;   // 最新列只有1个（或空）：该路不参与比较推荐
+      if (latest[i] && pred.B[i] && latest[i] !== pred.B[i]) cntR++;
+      if (latest[i] && pred.P[i] && latest[i] !== pred.P[i]) cntB++;
+    }
+    if (cntR > 0 && cntB > 0){ color = null; status = 'tie'; }   // 颜色不一致 → 不推荐
+    else if (cntR > 0){ color = 'red'; status = 'red'; }
+    else if (cntB > 0){ color = 'blue'; status = 'blue'; }
   }
   return {
-    pred, latest, cntR, cntB,
-    color: (cntR === 0 && cntB === 0 || cntR === cntB) ? null : (cntR > cntB ? 'red' : 'blue'),
-    status: cntR > cntB ? 'red' : cntB > cntR ? 'blue' : (cntR === 0 && cntB === 0 ? 'none' : 'tie')
+    pred, latest, colLen, cntR, cntB, color, status, noReco: false
   };
 }
 
-// 三顺推荐：实际最新颜色与庄问路/闲问路一致的数量，多的显示推荐色（'red'|'blue'|null）
-function seqRecoColorAt(results){
-  const s = smallRecoStats(results);
+// 三顺推荐计数（独立于三小路推荐结果，供三小路在大路同列≥4时改用）
+function seqRecoCounts(results){
+  const pred = predictAskRoads(results);
+  const cols = buildStreakCols(results);
+  const roads = [0, 1, 2].map(k => {
+    const marks = buildDerivedRoad(cols, k);
+    let lastLen = 0;
+    if (marks.length){
+      const last = marks[marks.length - 1];
+      for (let i = marks.length - 1; i >= 0 && marks[i] === last; i--) lastLen++;
+    }
+    return { latest: marks.length ? marks[marks.length - 1] : null, lastLen };
+  });
+  const latest = roads.map(r => r.latest);
+  const colLen = roads.map(r => r.lastLen);
   let cntR = 0, cntB = 0;
   for (let i = 0; i < 3; i++){
-    if (s.latest[i] && s.pred.B[i] && s.latest[i] === s.pred.B[i]) cntR++;
-    if (s.latest[i] && s.pred.P[i] && s.latest[i] === s.pred.P[i]) cntB++;
+    if (colLen[i] < 2) continue;
+    if (latest[i] && pred.B[i] && latest[i] === pred.B[i]) cntR++;
+    if (latest[i] && pred.P[i] && latest[i] === pred.P[i]) cntB++;
   }
-  if (cntR === 0 && cntB === 0 || cntR === cntB) return null;
-  return cntR > cntB ? 'red' : 'blue';
+  return { pred, latest, colLen, cntR, cntB };
+}
+
+// 三顺推荐：实际最新颜色与庄问路/闲问路一致的数量，多的显示推荐色（'red'|'blue'|null）
+// 规则：某条三小路“最新列”只有 1 个标记（或为空）时，该路不参与三顺比较；
+//       三条路的推荐里既有庄又有闲（颜色不一致）→ 不推荐
+function seqRecoColorAt(results){
+  const s = seqRecoCounts(results);
+  const cntR = s.cntR, cntB = s.cntB;
+  if (cntR > 0 && cntB > 0) return null;   // 颜色不一致 → 不推荐
+  if (cntR === 0 && cntB === 0) return null;
+  return cntR > 0 ? 'red' : 'blue';
 }
 
 // 指定推荐来源在某局结果前缀下的推荐色：'red' | 'blue' | null
+// 滞回开关关闭时，珠盘/共同/珠盘三顺一律不推荐
 function recoColorAt(source, results){
   if (!source) return null;   // 未选择任何来源：不写方框
   if (source === 'small') return smallRecoStats(results).color;
-  const z = computeTotalStats(results).cls;
+  const z = zhuRecoEnabled() ? computeTotalStats(results).cls : 'none';
   if (source === 'common'){
     const st = smallRecoStats(results);
     // 仅当珠盘与三小路同色时显示该颜色，其余不显示
@@ -913,14 +1052,15 @@ function renderAskRoads(){
   let html = '<div class="ask-head"><span class="ask-road"></span><span class="ask-col b">庄问路</span><span class="ask-col p">闲问路</span><span class="ask-col">三小路推荐</span><span class="ask-col">三顺推荐</span></div>';
   let seqR = 0, seqB = 0;
   for (let i = 0; i < 3; i++){
+    const active = (s.colLen[i] || 0) >= 2;   // 最新列≥2个才参与比较推荐
     const parts = [];
-    if (latest[i] && pred.B[i] && latest[i] !== pred.B[i]) parts.push('<span class="ask-rb">推荐庄</span>');
-    if (latest[i] && pred.P[i] && latest[i] !== pred.P[i]) parts.push('<span class="ask-rp">推荐闲</span>');
+    if (active && latest[i] && pred.B[i] && latest[i] !== pred.B[i]) parts.push('<span class="ask-rb">推荐庄</span>');
+    if (active && latest[i] && pred.P[i] && latest[i] !== pred.P[i]) parts.push('<span class="ask-rp">推荐闲</span>');
     const reco = parts.length ? parts.join('<span class="ask-sep">/</span>') : '<span class="ask-na">—</span>';
     // 三顺推荐：实际最新颜色与庄问路一致 → 推荐庄；与闲问路一致 → 推荐闲
     const seqParts = [];
-    if (latest[i] && pred.B[i] && latest[i] === pred.B[i]){ seqParts.push('<span class="ask-rb">推荐庄</span>'); seqR++; }
-    if (latest[i] && pred.P[i] && latest[i] === pred.P[i]){ seqParts.push('<span class="ask-rp">推荐闲</span>'); seqB++; }
+    if (active && latest[i] && pred.B[i] && latest[i] === pred.B[i]){ seqParts.push('<span class="ask-rb">推荐庄</span>'); seqR++; }
+    if (active && latest[i] && pred.P[i] && latest[i] === pred.P[i]){ seqParts.push('<span class="ask-rp">推荐闲</span>'); seqB++; }
     const seq = seqParts.length ? seqParts.join('<span class="ask-sep">/</span>') : '<span class="ask-na">—</span>';
     html += '<div class="ask-row"><span class="ask-road">' + names[i] + '</span>'
       + '<span class="ask-cell">' + markHtml(i, pred.B[i]) + '</span>'
@@ -928,43 +1068,47 @@ function renderAskRoads(){
       + '<span class="ask-cell">' + reco + '</span>'
       + '<span class="ask-cell">' + seq + '</span></div>';
   }
-  // 三小路推荐：统计三条路中推荐庄/推荐闲的数量，多的显示推荐哪个
-  const { cntR, cntB } = s;
+  // 三小路推荐合计：大路同列超3个 → 不推荐；颜色不一致（既有庄又有闲）→ 不推荐；单一颜色 → 推荐该色
+  const { cntR, cntB, noReco } = s;
   let total;
-  if (cntR === 0 && cntB === 0) total = '<span class="ask-na">—</span>';
-  else if (cntR === cntB) total = '<span class="ask-na">平</span>';
-  else if (cntR > cntB) total = '<span class="ask-rb">推荐庄</span>';
-  else total = '<span class="ask-rp">推荐闲</span>';
+  if (noReco) total = '<span class="ask-na">—</span>';   // 大路同一列超过3个 → 不推荐
+  else if (cntR > 0 && cntB > 0) total = '<span class="ask-na">—</span>';   // 颜色不一致 → 不推荐
+  else if (cntR > 0) total = '<span class="ask-rb">推荐庄</span>';
+  else if (cntB > 0) total = '<span class="ask-rp">推荐闲</span>';
+  else total = '<span class="ask-na">—</span>';
   html += '<div class="ask-row ask-total"><span class="ask-road">三小路推荐</span><span class="ask-cell"></span><span class="ask-cell"></span><span class="ask-cell">' + total + '</span><span class="ask-cell"></span></div>';
-  // 三顺路推荐合计：三顺推荐列中推荐庄/推荐闲的数量，多的显示推荐哪个
+  // 三顺路推荐合计：三顺推荐列颜色不一致（既有庄又有闲）→ 不推荐；单一颜色 → 推荐该色
   let seqTotal;
-  if (seqR === 0 && seqB === 0) seqTotal = '<span class="ask-na">—</span>';
-  else if (seqR === seqB) seqTotal = '<span class="ask-na">平</span>';
-  else if (seqR > seqB) seqTotal = '<span class="ask-rb">推荐庄</span>';
-  else seqTotal = '<span class="ask-rp">推荐闲</span>';
+  if (seqR > 0 && seqB > 0) seqTotal = '<span class="ask-na">—</span>';   // 颜色不一致 → 不推荐
+  else if (seqR > 0) seqTotal = '<span class="ask-rb">推荐庄</span>';
+  else if (seqB > 0) seqTotal = '<span class="ask-rp">推荐闲</span>';
+  else seqTotal = '<span class="ask-na">—</span>';
   html += '<div class="ask-row ask-total"><span class="ask-road">三顺路推荐</span><span class="ask-cell"></span><span class="ask-cell"></span><span class="ask-cell"></span><span class="ask-cell">' + seqTotal + '</span></div>';
   el.innerHTML = html;
-  // 记录三小路推荐状态（供共同推荐使用）：red | blue | tie(平) | none
+  // 记录三小路推荐状态（供共同推荐使用）：red | blue | tie(颜色不一致) | none
   state.smallRecoStatus = s.status;
   // 顶部三小路推荐徽标同步（珠盘推荐右侧）
   const smEl = $('totalRecoSm');
   if (smEl){
-    if (cntR === 0 && cntB === 0){ setBadgeClass(smEl, 'none'); smEl.querySelector('.val').textContent = '—'; }
-    else if (cntR === cntB){ setBadgeClass(smEl, ''); smEl.querySelector('.val').textContent = '平'; }
-    else { setBadgeClass(smEl, cntR > cntB ? 'red' : 'blue'); smEl.querySelector('.val').textContent = cntR > cntB ? '推荐庄' : '推荐闲'; }
+    if (noReco){ setBadgeClass(smEl, 'none'); smEl.querySelector('.val').textContent = '—'; }
+    else if (cntR > 0 && cntB > 0){ setBadgeClass(smEl, 'none'); smEl.querySelector('.val').textContent = '—'; }
+    else if (cntR > 0){ setBadgeClass(smEl, 'red'); smEl.querySelector('.val').textContent = '推荐庄'; }
+    else if (cntB > 0){ setBadgeClass(smEl, 'blue'); smEl.querySelector('.val').textContent = '推荐闲'; }
+    else { setBadgeClass(smEl, 'none'); smEl.querySelector('.val').textContent = '—'; }
   }
   // 顶部三顺推荐徽标同步（共同推荐右侧）
   const seqEl = $('totalRecoSeq');
   if (seqEl){
-    if (seqR === 0 && seqB === 0){ setBadgeClass(seqEl, 'none'); seqEl.querySelector('.val').textContent = '—'; }
-    else if (seqR === seqB){ setBadgeClass(seqEl, ''); seqEl.querySelector('.val').textContent = '平'; }
-    else { setBadgeClass(seqEl, seqR > seqB ? 'red' : 'blue'); seqEl.querySelector('.val').textContent = seqR > seqB ? '推荐庄' : '推荐闲'; }
+    if (seqR > 0 && seqB > 0){ setBadgeClass(seqEl, 'none'); seqEl.querySelector('.val').textContent = '—'; }
+    else if (seqR > 0){ setBadgeClass(seqEl, 'red'); seqEl.querySelector('.val').textContent = '推荐庄'; }
+    else if (seqB > 0){ setBadgeClass(seqEl, 'blue'); seqEl.querySelector('.val').textContent = '推荐闲'; }
+    else { setBadgeClass(seqEl, 'none'); seqEl.querySelector('.val').textContent = '—'; }
   }
-  // 顶部珠盘三顺推荐徽标同步（三顺推荐右侧）：珠盘推荐与三顺推荐同色时显示
+  // 顶部珠盘三顺推荐徽标同步（三顺推荐右侧）：珠盘推荐与三顺推荐同色时显示（滞回关闭时同步不显示）
   const seqCommonEl = $('totalRecoSeqCommon');
   if (seqCommonEl){
-    const zc = computeTotalStats().cls;
-    const seqCls = seqR > seqB ? 'red' : seqB > seqR ? 'blue' : 'none';
+    const zc = zhuRecoEnabled() ? computeTotalStats().cls : 'none';
+    const seqCls = (seqR > 0 && seqB > 0) ? 'none' : (seqR > 0 ? 'red' : (seqB > 0 ? 'blue' : 'none'));
     if ((zc === 'red' || zc === 'blue') && zc === seqCls){
       setBadgeClass(seqCommonEl, zc);
       seqCommonEl.querySelector('.val').textContent = zc === 'red' ? '推荐庄' : '推荐闲';
@@ -1042,6 +1186,39 @@ function computeTotalStats(results){
   return { configs, stats, tBlue, tRed, tTotal, cls, text };
 }
 
+// 珠盘推荐滞回门控：
+//  - 滞回开关未按下：珠盘推荐正常显示（不门控）
+//  - 按下后：从第一个珠盘推荐开始累计统计一致率（有推荐的历史局，和局不计），
+//    累计一致率 < 40% → 开始显示后续推荐；累计 > 50% → 后续推荐不显示；40%~50% 保持当前状态
+function zhuRecoEnabled(){ return !state.zhuHyst || state.zhuRecoOn; }
+
+function updateZhuRecoSwitch(){
+  if (!state.zhuHyst){ state.zhuRecoOn = true; return; }   // 未启用：始终可推荐
+  const r = state.results;
+  if (r.length === 0){ state.zhuRecoOn = false; return; }
+  // 从第一个珠盘推荐开始累计统计（全部历史）
+  let hits = 0, total = 0;
+  for (let i = 0; i < r.length; i++){
+    if (r[i] === 'T') continue;
+    const prefix = r.slice(0, i);
+    if (prefix.length < 2) continue;
+    const cls = computeTotalStats(prefix).cls;
+    if (cls !== 'red' && cls !== 'blue') continue;
+    total++;
+    if (cls === (r[i] === 'B' ? 'red' : 'blue')) hits++;
+  }
+  if (total === 0) return;   // 尚无珠盘推荐历史：保持当前状态
+  const rate = hits / total;
+  if (rate < 0.4) state.zhuRecoOn = true;          // 累计一致率低于 40% → 开始显示后续推荐
+  else if (rate > 0.5) state.zhuRecoOn = false;    // 累计一致率高于 50% → 后续推荐不显示
+}
+
+// 滞回开关按钮样式
+function renderHystBtn(){
+  const el = $('hystBtn');
+  if (el) el.className = 'hyst-btn' + (state.zhuHyst ? ' on' : '');
+}
+
 // 顶部珠盘推荐徽标（载入按钮右侧）
 function renderTotalReco(){
   const el = $('totalReco');
@@ -1052,14 +1229,16 @@ function renderTotalReco(){
     return;
   }
   const { cls, text } = computeTotalStats();
+  if (!zhuRecoEnabled()){ setBadgeClass(el, 'none'); el.querySelector('.val').textContent = '—'; return; }   // 滞回关闭：不显示推荐
   setBadgeClass(el, cls);
   el.querySelector('.val').textContent = text;
 }
 
-// 共同推荐：珠盘与三小路同色 → 显示该颜色；其余情况不显示
+// 共同推荐：珠盘与三小路同色 → 显示该颜色；其余情况不显示（滞回关闭时同步不显示）
 function renderCommonReco(){
   const el = $('totalRecoCommon');
   if (!el) return;
+  if (!zhuRecoEnabled()){ setBadgeClass(el, 'none'); el.querySelector('.val').textContent = '—'; return; }   // 滞回关闭：不显示推荐
   const z = computeTotalStats();
   const s = state.smallRecoStatus || 'none';
   let show = null;
@@ -1183,7 +1362,189 @@ function renderBoxStat(){
   dEl.style.color = diff > 0 ? 'var(--red-deep)' : diff < 0 ? 'var(--blue-deep)' : 'var(--ink)';
 }
 
+/* ============ 投注策略 ============ */
+// 信号触发式顺向下注策略：
+//  - 触发：最近 6 次珠盘推荐中错误 ≥5 次 → 开始顺着珠盘推荐下注（押推荐本身颜色）
+//  - 停止：本会话累计盈利 ≥ 1 个单位（9.5元，即 10 元注的庄胜净赢）→ 停注
+//  - 之后等下一次“最近6次推荐中错误≥5次”再次出现（需窗口先回落再触发，避免刚停就重开）→ 再下注
+//  - 单注下注额 = 最小注（默认10元）；赔率：庄 0.95（抽水5%），闲 1:1；和局退回（不计数）
+//  - 回测：逐局用“截至该局”的历史推荐复现触发与停注逻辑
+function computeBetting(){
+  const results = state.results;
+  const source = state.recoSource || 'zhu';   // 跟随当前选中的推荐来源（默认珠盘推荐）
+  const bankroll = Math.max(50, Math.round(+(($('bankrollInput')||{}).value) || 1000));
+  const minBet = Math.max(1, Math.round(+(($('minBetInput')||{}).value) || 10));
+  const TARGET = 9.5;      // 累计盈利目标：1 个单位（9.5元，即 10 元注庄胜的净赢）
+  const WIN = 6;           // 触发窗口：最近 6 次推荐
+  const NEED_MISS = 5;     // 其中错误 ≥5 次
+  const oddsOf = side => side === 'red' ? 0.95 : 1.0; // 庄抽水5%，闲1:1
+  const sideOf = v => v === 'B' ? 'red' : 'blue';
+
+  // 逐局预计算：该局是否有珠盘推荐、是否可判定命中（非和局）
+  const meta = results.map((actual, i) => {
+    const reco = recoColorAt(source, results.slice(0, i));
+    const judged = (reco === 'red' || reco === 'blue') && actual !== 'T';
+    return { reco, actual, judged, hit: judged ? reco === sideOf(actual) : null };
+  });
+  const judgedIdx = [];
+  meta.forEach((m, i) => { if (m.judged) judgedIdx.push(i); });
+  // 给定已完成判断轮数 j（judged 前 j 轮），最近 WIN 次推荐里的错误数
+  const missInWindow = function(j){
+    let c = 0;
+    for (let k = Math.max(0, j - WIN); k < j; k++){
+      if (meta[judgedIdx[k]].hit === false) c++;
+    }
+    return c;
+  };
+
+  let hit = 0, miss = 0;                 // 总体统计（顶部一致率口径，仅展示）
+  let sessionActive = false;             // 当前是否在下注会话中
+  let sessionProfit = 0;                 // 本会话累计盈利
+  let sessionCount = 0;                  // 已开启会话数
+  let reachedCount = 0;                  // 达标停止的会话数
+  let prevTrigger = false;               // 上一局窗口是否触发（用于上升沿）
+  let bank = bankroll, flatBank = bankroll;
+  let peak = bankroll, maxDD = 0;
+  let bets = 0, wins = 0, losses = 0, pushes = 0;
+  let flatBets = 0, flatWins = 0, flatLosses = 0, flatPushes = 0;
+  const series = [];
+
+  let j = 0;                             // 已完成判断的轮数（本局之前）
+  for (let i = 0; i < results.length; i++){
+    const m = meta[i];
+    const wMiss = missInWindow(j);       // 窗口基于本局之前的判断
+    const trigger = wMiss >= NEED_MISS;
+    // 开始新会话：窗口触发 且 当前不在会话 且 上升沿（避免刚停就重开）
+    if (!sessionActive && trigger && !prevTrigger){
+      sessionActive = true; sessionProfit = 0; sessionCount++;
+    }
+    prevTrigger = trigger;
+
+    let bet = 0, flat = 0, profit = 0, flatProfit = 0;
+    if (sessionActive && m.judged){
+      bet = minBet; flat = minBet;
+      const odds = oddsOf(m.reco);
+      if (m.hit){ profit = bet * odds; flatProfit = flat * odds; wins++; flatWins++; }
+      else { profit = -bet; flatProfit = -flat; losses++; flatLosses++; }
+      bets++; flatBets++;
+      sessionProfit += profit;
+      if (sessionProfit >= TARGET){   // 达标停止（累计盈利≥1个单位 9.5元）
+        sessionActive = false; reachedCount++;
+      }
+    }
+    bank += profit; flatBank += flatProfit;
+    if (m.judged){ if (m.hit) hit++; else miss++; }
+    peak = Math.max(peak, bank);
+    maxDD = Math.max(maxDD, peak - bank);
+    series.push({
+      i: i + 1,
+      reco: m.reco === 'red' ? '红' : m.reco === 'blue' ? '蓝' : '—',
+      betSide: bet ? (m.reco === 'red' ? '顺红' : '顺蓝') : null,
+      session: sessionCount,
+      actual: m.actual === 'B' ? '红' : m.actual === 'P' ? '蓝' : '和',
+      bet, flat, profit,
+      cum: Math.round(bank * 100) / 100
+    });
+    if (m.judged) j++;
+  }
+
+  // 当前状态（下一局建议）
+  const curReco = recoColorAt(source, results);
+  const totalJudged = j;
+  const curWindowMiss = missInWindow(totalJudged);
+  const curTrigger = curWindowMiss >= NEED_MISS;
+  const nextStart = !sessionActive && curTrigger && !prevTrigger;   // 下一局将开始新会话
+  let curAction = null, curSide = null, curAmount = 0, curOdds = 0;
+  if ((sessionActive || nextStart) && (curReco === 'red' || curReco === 'blue')){
+    curSide = curReco;                       // 顺向：押珠盘推荐的方向
+    curOdds = oddsOf(curSide);
+    curAmount = minBet;
+    curAction = curSide;
+  }
+
+  const net = Math.round((bank - bankroll) * 100) / 100;
+  const flatNet = Math.round((flatBank - bankroll) * 100) / 100;
+  const winRate = bets > 0 ? Math.round(wins / bets * 100) : 0;
+  return {
+    source, curReco, curOn: sessionActive, nextStart, curAction, curSide, curAmount, curOdds,
+    window: { judged: totalJudged, miss: curWindowMiss }, win: WIN, needMiss: NEED_MISS,
+    target: TARGET, sessionProfit, sessionCount, reachedCount,
+    hits: hit, misses: miss, bets, wins, losses, pushes, winRate,
+    bankroll, minBet, net, flatNet, maxDD: Math.round(maxDD * 100) / 100,
+    series
+  };
+}
+
+function renderBetting(){
+  const el = $('bettingStatus'); if (!el) return;
+  const b = computeBetting();
+  const sideText = b.curReco === 'red' ? '红（庄）' : b.curReco === 'blue' ? '蓝（闲）' : '无';
+  const winTxt = b.window.miss >= 0 ? (b.window.judged - b.window.miss) : 0;
+  const stateTxt = b.curOn ? '下注中' : (b.nextStart ? '信号就绪' : '等待信号');
+  el.innerHTML =
+    '<span class="st-reco ' + (b.curReco || 'none') + '">珠盘推荐 <b>' + sideText + '</b></span>'
+    + '<span>最近' + b.win + '次推荐 中<b>' + winTxt + '</b>/错<b>' + b.window.miss + '</b></span>'
+    + '<span>触发阈值 错≥' + b.needMiss + '</span>'
+    + '<span>会话 <b>' + (b.curOn ? ('第' + b.sessionCount + '个·盈利' + b.sessionProfit.toFixed(0)) : (b.reachedCount ? ('已达标' + b.reachedCount + '次') : '0次')) + '</b></span>'
+    + '<span>策略 <b class="' + (b.curOn ? 'up' : '') + '">' + stateTxt + '</b></span>'
+    + '<span>回测净盈亏 <b class="' + (b.net >= 0 ? 'up' : 'down') + '">' + (b.net >= 0 ? '+' : '') + b.net.toFixed(2) + ' 元</b></span>';
+
+  const recoEl = $('bettingReco');
+  if (b.curAction){
+    const side = b.curAction === 'red' ? '庄' : '闲';
+    recoEl.className = 'betting-reco ' + b.curAction;
+    const needMore = Math.max(0, Math.round((b.target - b.sessionProfit) * 100) / 100);
+    recoEl.innerHTML =
+      '<span class="big">建议下注 <b>' + side + '</b></span>'
+      + '<span class="amt">' + b.curAmount + ' 元</span>'
+      + '<span>顺' + (b.curReco === 'red' ? '庄' : '闲') + '（与珠盘推荐一致）</span>'
+      + '<span>会话盈利 <b>' + (b.sessionProfit >= 0 ? '+' : '') + b.sessionProfit.toFixed(2) + ' 元</b>，再盈利 ' + needMore.toFixed(0) + ' 元达标(+' + b.target + '元)停注</span>'
+      + '<span>触发：最近' + b.win + '次推荐错 ' + b.window.miss + ' 次（≥' + b.needMiss + '）</span>';
+  } else {
+    recoEl.className = 'betting-reco';
+    let why;
+    if (b.curTrigger){
+      why = '最近' + b.win + '次推荐已错 ' + b.window.miss + ' 次（达到 ≥' + b.needMiss + '）→ 窗口需先回落，下次触发再下注';
+    } else {
+      why = '等待触发：最近' + b.win + '次推荐错 ' + b.window.miss + ' 次（需 ≥' + b.needMiss + ' 才开始顺向下注），当前观望';
+    }
+    recoEl.innerHTML = '<span class="big" style="color:var(--muted)">观望（暂不下注）</span><span style="color:var(--muted)">' + why + '</span>';
+  }
+
+  const btEl = $('bettingBacktest');
+  const rows = b.series.map(s => {
+    const resCls = s.profit > 0 ? 'up' : s.profit < 0 ? 'down' : '';
+    const cumCls = s.cum >= b.bankroll ? 'up' : 'down';
+    return '<tr>'
+      + '<td>' + s.i + '</td>'
+      + '<td>' + s.reco + '</td>'
+      + '<td>' + (s.betSide || '—') + '</td>'
+      + '<td>' + s.actual + '</td>'
+      + '<td>' + (s.bet ? s.bet : '—') + '</td>'
+      + '<td class="' + resCls + '">' + (s.profit > 0 ? '+' : '') + s.profit.toFixed(2) + '</td>'
+      + '<td class="' + cumCls + '">' + s.cum.toFixed(2) + '</td>'
+      + '<td>' + (s.bet ? s.session : '—') + '</td>'
+      + '</tr>';
+  }).join('');
+  btEl.innerHTML =
+    '<div class="bt-summary">'
+    + '<span class="bt-chip"><b>' + b.bets + '</b><span class="d">下注</span></span>'
+    + '<span class="bt-chip r"><b>' + b.wins + '</b><span class="d">胜</span></span>'
+    + '<span class="bt-chip b"><b>' + b.losses + '</b><span class="d">负</span></span>'
+    + '<span class="bt-chip"><b>' + b.winRate + '%</b><span class="d">胜率</span></span>'
+    + '<span class="bt-chip"><b>' + b.sessionCount + '</b><span class="d">会话</span></span>'
+    + '<span class="bt-chip g"><b>' + b.reachedCount + '</b><span class="d">达标停注</span></span>'
+    + '<span class="bt-chip r"><b>' + (b.net >= 0 ? '+' : '') + b.net.toFixed(2) + '</b><span class="d">策略净盈亏</span></span>'
+    + '<span class="bt-chip"><b>' + b.maxDD.toFixed(2) + '</b><span class="d">最大回撤</span></span>'
+    + '</div>'
+    + (b.series.length ? '<div class="bt-table-wrap"><table class="bt-table"><thead><tr>'
+        + '<th>#</th><th>珠盘推荐</th><th>下注方向</th><th>开牌</th><th>下注(元)</th><th>盈亏(元)</th><th>累计(元)</th><th>会</th></tr></thead>'
+        + '<tbody>' + rows + '</tbody></table></div>' : '<p style="color:var(--muted);font-size:12.5px">暂无数据</p>');
+}
+
 function render(){
+  updateZhuRecoSwitch();
+  renderHystBtn();
   renderSessionStats();
   renderTotalReco();
   if (state.results.length === 0){
@@ -1191,7 +1552,6 @@ function render(){
     renderBoxStat();
     $('bigroad').innerHTML = $('bead6').innerHTML = $('bead3').innerHTML = $('bead4').innerHTML = $('bead5').innerHTML = '';
     $('bead3Reco').innerHTML = $('bead4Reco').innerHTML = $('bead5Reco').innerHTML = $('bead6Reco').innerHTML = '';
-    setBadgeClass($('totalRecoBead4'), 'none'); $('totalRecoBead4').querySelector('.val').textContent = '—';
     $('smEye').innerHTML = $('smSmall').innerHTML = $('smRoach').innerHTML = '';
     $('askRoads').innerHTML = '';
     setBadgeClass($('totalRecoSm'), 'none'); $('totalRecoSm').querySelector('.val').textContent = '—';
@@ -1199,6 +1559,7 @@ function render(){
     setBadgeClass($('totalRecoSeq'), 'none'); $('totalRecoSeq').querySelector('.val').textContent = '—';
     setBadgeClass($('totalRecoSeqCommon'), 'none'); $('totalRecoSeqCommon').querySelector('.val').textContent = '—';
     renderStats();
+    renderBetting();
     return;
   }
   const big = buildBigRoad(state.results);
@@ -1213,9 +1574,16 @@ function render(){
   renderBead6();
   renderBead4RoadReco();
   renderStats();
+  renderBetting();
 }
 
 /* ============ 交互 ============ */
+// 滞回开关：按下后按最近10次珠盘推荐一致率门控（<40% 显示，>50% 不显示，40%~50% 保持）
+$('hystBtn').addEventListener('click', () => {
+  state.zhuHyst = !state.zhuHyst;
+  render();
+});
+
 // 推荐来源切换：按下哪个就把对应推荐按方框规则写入大路
 document.querySelectorAll('.reco-badge').forEach(btn => {
   btn.addEventListener('click', () => {
@@ -1247,6 +1615,91 @@ $('loadBtn').addEventListener('click', () => {
 });
 $('bulkInput').addEventListener('keydown', e => { if (e.key === 'Enter'){ e.preventDefault(); $('loadBtn').click(); } });
 
+// 投注策略参数：变更即重算
+['bankrollInput', 'minBetInput'].forEach(id => {
+  const el = $(id);
+  el.addEventListener('input', () => render());
+  el.addEventListener('change', () => render());
+});
+
+// ============ 1000次模拟统计 ============
+// 随机生成红蓝序列，分别统计 珠盘/三顺/共同/珠盘三顺 推荐的一致/不一致差额
+function runSimulation(){
+  const el = $('simResult'); if (!el) return;
+  const n = Math.max(100, Math.min(50000, Math.round(+(($('simRounds')||{}).value) || 1000)));
+  const seq = [];
+  for (let i = 0; i < n; i++) seq.push(Math.random() < 0.5 ? 'B' : 'P');
+  const st = {
+    zhu:    { hit: 0, miss: 0 },
+    small:  { hit: 0, miss: 0 },
+    sq:     { hit: 0, miss: 0 },
+    common: { hit: 0, miss: 0 },
+    seqcom: { hit: 0, miss: 0 }
+  };
+  // 模拟珠盘推荐滞回门控（跟随页面滞回开关；启用时按“从第一个珠盘推荐起累计一致率”：<40% 显示、>50% 不显示）
+  let simOn = true;
+  const hyst = state.zhuHyst;
+  for (let i = 0; i < n; i++){
+    const prefix = seq.slice(0, i);
+    const side = seq[i] === 'B' ? 'red' : 'blue';
+    if (hyst){
+      // 依据 prefix 内从第一局起的累计珠盘推荐（未过滤门控）一致率更新模拟开关
+      let hits = 0, tot = 0;
+      for (let j = 0; j < i; j++){
+        if (seq[j] === 'T') continue;
+        const p = seq.slice(0, j);
+        if (p.length < 2) continue;
+        const cls = computeTotalStats(p).cls;
+        if (cls !== 'red' && cls !== 'blue') continue;
+        tot++;
+        if (cls === (seq[j] === 'B' ? 'red' : 'blue')) hits++;
+      }
+      if (tot > 0){
+        const rate = hits / tot;
+        if (rate < 0.4) simOn = true;
+        else if (rate > 0.5) simOn = false;
+      }
+    }
+    const z = simOn ? computeTotalStats(prefix).cls : 'none';
+    // 珠盘推荐
+    if (z === 'red' || z === 'blue'){ if (z === side) st.zhu.hit++; else st.zhu.miss++; }
+    // 三小路推荐
+    const sm = smallRecoStats(prefix).color;
+    if (sm === 'red' || sm === 'blue'){ if (sm === side) st.small.hit++; else st.small.miss++; }
+    // 三顺推荐
+    const sq = seqRecoColorAt(prefix);
+    if (sq === 'red' || sq === 'blue'){ if (sq === side) st.sq.hit++; else st.sq.miss++; }
+    // 共同推荐：珠盘与三小路同色
+    if ((z === 'red' || z === 'blue') && sm === z){ if (z === side) st.common.hit++; else st.common.miss++; }
+    // 珠盘三顺推荐：珠盘与三顺同色
+    if ((z === 'red' || z === 'blue') && sq === z){ if (z === side) st.seqcom.hit++; else st.seqcom.miss++; }
+  }
+  const card = function(title, s){
+    const total = s.hit + s.miss;
+    const diff = s.hit - s.miss;
+    const rate = total ? (s.hit / total * 100) : 0;
+    return '<div class="sim-card"><h4>' + title + '</h4>'
+      + '<div class="row">'
+      + '<span class="hit">一致 <b>' + s.hit + '</b></span>'
+      + '<span class="miss">不一致 <b>' + s.miss + '</b></span>'
+      + '<span class="diff' + (diff < 0 ? ' neg' : '') + '">差额 <b>' + (diff >= 0 ? '+' : '') + diff + '</b></span>'
+      + '<span>合计 <b>' + total + '</b></span>'
+      + '<span>一致率 <b>' + rate.toFixed(1) + '%</b></span>'
+      + '</div></div>';
+  };
+  el.innerHTML =
+    '<div class="sim-summary">本次随机模拟 ' + n + ' 局红蓝（50/50，不含和局）· 推荐存在时计一致/不一致，无推荐不计</div>'
+    + '<div class="sim-result-inner">'
+    + card('珠盘推荐', st.zhu)
+    + card('三小路推荐', st.small)
+    + card('三顺推荐', st.sq)
+    + card('共同推荐', st.common)
+    + card('珠盘三顺推荐', st.seqcom)
+    + '</div>';
+}
+$('simBtn').addEventListener('click', runSimulation);
+$('simRounds').addEventListener('change', runSimulation);
+
 function parseInput(text){
   const out = [];
   const map = { b:'B', p:'P', t:'T', 庄:'B', 闲:'P', 和:'T' };
@@ -1260,6 +1713,7 @@ function parseInput(text){
 /* 初始示例 */
 state.results = parseInput(SAMPLE);
 render();
+runSimulation();
 </script>
 </body>
 </html>
