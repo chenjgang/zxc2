@@ -1,5 +1,6 @@
-/* 乐分析表 PWA Service Worker：离线缓存 */
-const CACHE = 'lefenxi-v1';
+/* 乐分析表 PWA Service Worker：网络优先 + 离线缓存 */
+/* 版本 v2：在线时始终获取最新文件并更新缓存；断网时回退到缓存，避免旧版缓存不更新 */
+const CACHE = 'lefenxi-v2';
 const ASSETS = [
   './',
   './index.html',
@@ -25,13 +26,10 @@ self.addEventListener('fetch', e => {
   // 跨域请求（如字体 CDN）不缓存
   if (url.origin !== self.location.origin) return;
   e.respondWith(
-    caches.match(e.request).then(cached => {
-      if (cached) return cached;
-      return fetch(e.request).then(res => {
-        const copy = res.clone();
-        caches.open(CACHE).then(c => c.put(e.request, copy));
-        return res;
-      }).catch(() => caches.match('./index.html'));
-    })
+    fetch(e.request).then(res => {
+      const copy = res.clone();
+      caches.open(CACHE).then(c => c.put(e.request, copy));
+      return res;
+    }).catch(() => caches.match(e.request).then(c => c || caches.match('./index.html')))
   );
 });
