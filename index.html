@@ -243,6 +243,29 @@
     body{padding:20px 14px 40px}
     .toolbar{flex-direction:column;align-items:stretch}
   }
+
+  /* 走势分析 */
+  .trend-panel{padding:12px 16px;font-size:13px;color:var(--ink)}
+  .trend-cur{display:flex;align-items:center;gap:8px;margin-bottom:10px;font-size:13.5px}
+  .trend-cur .dot{width:12px;height:12px;border-radius:50%;display:inline-block}
+  .trend-cur .dot.red{background:var(--red)} .trend-cur .dot.blue{background:var(--blue)}
+  .trend-cur b{font-weight:600}
+  .trend-table{width:100%;border-collapse:collapse;margin:6px 0 10px;font-size:12.5px}
+  .trend-table th,.trend-table td{border:1px solid var(--line);padding:5px 4px;text-align:center}
+  .trend-table th{background:var(--bg);font-weight:500;color:var(--muted)}
+  .trend-table td.hit{background:rgba(255,180,80,.18);font-weight:700}
+  .trend-summary{margin-top:4px;line-height:1.7;color:var(--ink)}
+  .trend-summary b{font-weight:600}
+  .trend-empty{color:var(--muted);padding:18px 0;text-align:center}
+
+
+  /* 大路推荐：本次==最多时红色色点闪烁 */
+  @keyframes recoBlink { 0%,100% { opacity:1; } 50% { opacity:.15; } }
+  .reco-badge.blink .dot { animation: recoBlink 1s ease-in-out infinite; }
+
+
+  .jump-blink { display:inline-block; margin-left:4px; animation: recoBlink 1s ease-in-out infinite; font-weight:700; color:var(--red); }
+
 </style>
 </head>
 <body>
@@ -273,14 +296,11 @@
       <button class="btn-ghost" id="clearBtn">清空</button>
     </div>
     <div class="reco-group">
-      <div class="reco-wrap"><span class="reco-rate" id="recoRateZhu">一致率 —</span><button class="reco-badge none sel" id="totalReco" data-source="zhu" title="按下后按珠盘推荐写入大路"><span class="lbl">珠盘推荐</span><span class="dot"></span><span class="val">—</span></button></div>
-      <div class="reco-wrap"><span class="reco-rate" id="recoRateSmall">一致率 —</span><button class="reco-badge none" id="totalRecoSm" data-source="small" title="按下后按三小路推荐写入大路"><span class="lbl">三小路推荐</span><span class="dot"></span><span class="val">—</span></button></div>
-      <div class="reco-wrap"><span class="reco-rate" id="recoRateCommon">一致率 —</span><button class="reco-badge none" id="totalRecoCommon" data-source="common" title="按下后按共同推荐写入大路"><span class="lbl">共同推荐</span><span class="dot"></span><span class="val">—</span></button></div>
-      <div class="reco-wrap"><span class="reco-rate" id="recoRateSeq">一致率 —</span><button class="reco-badge none" id="totalRecoSeq" data-source="seq" title="按下后按三顺推荐写入大路"><span class="lbl">三顺推荐</span><span class="dot"></span><span class="val">—</span></button></div>
-      <div class="reco-wrap"><span class="reco-rate" id="recoRateSeqCommon">一致率 —</span><button class="reco-badge none" id="totalRecoSeqCommon" data-source="seqcommon" title="按下后按珠盘三顺推荐写入大路"><span class="lbl">珠盘三顺推荐</span><span class="dot"></span><span class="val">—</span></button></div>
-      <div class="reco-wrap"><span class="reco-rate" id="recoRateRoach">一致率 —</span><button class="reco-badge none" id="totalRecoRoach" data-source="roach" title="按下后按曱甴路推荐写入大路（曱甴路最新列恰好2个时，对比庄问路/闲问路颜色相反即推荐，两个以上不推荐）"><span class="lbl">曱甴路推荐</span><span class="dot"></span><span class="val">—</span></button></div>
-      <button class="btn-ghost" id="randRateBtn" title="用随机生成的1000局计算6个推荐的一致率/差额；再点切回真实数据">随机1000</button>
-      <button class="btn-ghost" id="sim100kBtn" title="后台模拟10万次（每次随机1000局），统计6个推荐的一致率/差额/合计；再点切回真实数据">模拟10万次</button>
+      <div class="reco-wrap"><span class="reco-rate" id="recoRateBig">一致率 —</span><button class="reco-badge none" id="totalRecoBig" data-source="big" title="大路走势推荐：当前列高为历史众数→反向，否则同色"><span class="lbl">大路推荐</span><span class="dot"></span><span class="val">—</span></button></div>
+      <div class="reco-wrap"><span class="reco-rate" id="recoRateEye">一致率 —</span><button class="reco-badge none" id="totalRecoEye" data-source="eye" title="大眼仔路推荐：众数时与庄/闲问路反向，否则同色"><span class="lbl">大眼仔路推荐</span><span class="dot"></span><span class="val">—</span></button></div>
+      <div class="reco-wrap"><span class="reco-rate" id="recoRateSmallRoad">一致率 —</span><button class="reco-badge none" id="totalRecoSmallRoad" data-source="smallroad" title="小路推荐：众数时与庄/闲问路反向，否则同色"><span class="lbl">小路推荐</span><span class="dot"></span><span class="val">—</span></button></div>
+      <div class="reco-wrap"><span class="reco-rate" id="recoRateRoach">一致率 —</span><button class="reco-badge none" id="totalRecoRoach" data-source="roach" title="曱甴路推荐：众数时与庄/闲问路反向，否则同色；本次==最多时闪烁"><span class="lbl">曱甴路推荐</span><span class="dot"></span><span class="val">—</span></button></div>
+      <div class="reco-wrap"><span class="reco-rate" id="recoRateRoachSpecial">一致率 —</span><button class="reco-badge none" id="totalRecoRoachSpecial" data-source="roachspecial" title="与庄/闲问路相反的推荐色若与大路最新色一致则推荐"><span class="lbl">曱甴特别推荐</span><span class="dot"></span><span class="val">—</span></button></div>
     </div>
   </section>
 
@@ -296,6 +316,34 @@
         <span class="d">差额 <b>—</b></span>
       </div>
       <div class="road-scroll"><div class="road-grid" id="bigroad"></div></div>
+    </div>
+  </section>
+
+  <section class="roads-main">
+    <div class="panel">
+      <div class="panel-head"><h3>大路走势分析</h3><span class="en">Column Trend</span><span class="legend">最新列同色历史列高分布：本次列高在历史同色列中出现的次数与占比</span></div>
+      <div class="trend-panel" id="trendPanel"></div>
+    </div>
+  </section>
+
+  <section class="roads-main">
+    <div class="panel">
+      <div class="panel-head"><h3>大眼仔路走势分析</h3><span class="en">Big Eye Boy Trend</span><span class="legend">与大路走势分析逻辑相同：最新连续同色段的列高在历史同色段中出现的次数与占比</span></div>
+      <div class="trend-panel" id="eyeTrendPanel"></div>
+    </div>
+  </section>
+
+  <section class="roads-main">
+    <div class="panel">
+      <div class="panel-head"><h3>小路走势分析</h3><span class="en">Small Road Trend</span><span class="legend">与大路走势分析逻辑相同：最新连续同色段的列高在历史同色段中出现的次数与占比</span></div>
+      <div class="trend-panel" id="smallTrendPanel"></div>
+    </div>
+  </section>
+
+  <section class="roads-main">
+    <div class="panel">
+      <div class="panel-head"><h3>曱甴路走势分析</h3><span class="en">Cockroach Road Trend</span><span class="legend">与大路走势分析逻辑相同：最新连续同色段的列高在历史同色段中出现的次数与占比</span></div>
+      <div class="trend-panel" id="roachTrendPanel"></div>
     </div>
   </section>
 
@@ -334,7 +382,7 @@
 
 <script>
 /* ============ 状态 ============ */
-const state = { results: [], recoSource: 'zhu', recoRateMode: 'real', randSeq: null };   // recoRateMode: 'real'|'rand'（一致率统计来源）
+const state = { results: [], recoSource: 'big', recoRateMode: 'real', randSeq: null };   // recoRateMode: 'real'|'rand'（一致率统计来源）
 const SAMPLE = "BBBBPPBPBBPPPPBPPBTBBPPPPBBPBBPBTBP";
 const COLOR_KEY = { B:'red', P:'blue', T:'green' };
 
@@ -693,34 +741,30 @@ function smallRecoStats(results){
 function roachRecoStats(results){
   const pred = predictAskRoads(results);
   const cols = buildStreakCols(results);
-  const marks = buildDerivedRoad(cols, 2);
-  let lastLen = 0;
-  if (marks.length){
-    const last = marks[marks.length - 1];
-    for (let i = marks.length - 1; i >= 0 && marks[i] === last; i--) lastLen++;
+  const marks = buildDerivedRoad(cols, 2);   // 曱甴路
+  const seq = marks.map(m => m === 'R' ? 'B' : 'P');
+  const t = computeTrendFromCols(buildStreakCols(seq));
+  if (!t) return { color: null, status: 'none', hitCount: 0, pct: 0, maxBucket: 0, maxPct: 0, isMode: false, total: 0 };
+  let maxBucket = 0, maxKey = null;
+  for (const k of [1,2,3,4,5,6,'6+']){
+    if (t.buckets[k] > maxBucket){ maxBucket = t.buckets[k]; maxKey = k; }
   }
+  const isMode = t.total > 0 && t.buckets[t.hitKey] === maxBucket && maxBucket > 0;
+  const maxPct = t.total > 0 ? (maxBucket / t.total * 100) : 0;
   const latest = marks.length ? marks[marks.length - 1] : null;
-  // 大路最新列连续同色数量
-  const bigLastLen = cols.length ? cols[cols.length - 1].length : 0;
-  // 大路末尾连续单跳（每列仅 1 个、颜色交替，即列长均为 1）数量
-  let zigzag = 0;
-  for (let i = cols.length - 1; i >= 0 && cols[i].length === 1; i--) zigzag++;
-  let cntR = 0, cntB = 0, color = null, status = 'none';
-  if (zigzag >= 4 || bigLastLen >= 4){
-    // 大路同一列出现 4 个及以上，或单跳出现 4 个及以上 → 改用三顺推荐
-    const q = seqRecoCounts(results);
-    cntR = q.cntR; cntB = q.cntB;
-    if (cntR > 0 && cntB > 0){ status = 'tie'; }   // 颜色不一致 → 不推荐
-    else if (cntR > 0){ color = 'red'; status = 'red'; }
-    else if (cntB > 0){ color = 'blue'; status = 'blue'; }
-  } else if (lastLen === 2){   // 恰好 2 个才比较；少于 2 或超过 2 不推荐
+  let cntR = 0, cntB = 0;
+  if (isMode){
     if (latest && pred.B[2] && latest !== pred.B[2]) cntR++;
     if (latest && pred.P[2] && latest !== pred.P[2]) cntB++;
-    if (cntR > 0 && cntB > 0){ status = 'tie'; }
-    else if (cntR > 0){ color = 'red'; status = 'red'; }
-    else if (cntB > 0){ color = 'blue'; status = 'blue'; }
+  } else {
+    if (latest && pred.B[2] && latest === pred.B[2]) cntR++;
+    if (latest && pred.P[2] && latest === pred.P[2]) cntB++;
   }
-  return { latest, lastLen, cntR, cntB, color, status };
+  let color = null, status = 'none';
+  if (cntR > 0 && cntB > 0){ status = 'tie'; }
+  else if (cntR > 0){ color = 'red'; status = 'red'; }
+  else if (cntB > 0){ color = 'blue'; status = 'blue'; }
+  return { color, status, hitCount: t.hitCount, pct: t.pct, maxBucket, maxKey, maxPct, isMode, total: t.total, curH: t.curH };
 }
 
 // 三顺推荐计数（独立于三小路推荐结果，供三小路在大路同列≥4时改用）
@@ -761,6 +805,10 @@ function seqRecoColorAt(results){
 // 指定推荐来源在某局结果前缀下的推荐色：'red' | 'blue' | null
 function recoColorAt(source, results){
   if (!source) return null;   // 未选择任何来源：不写方框
+  if (source === 'big') return computeBigTrendReco(results).color;
+  if (source === 'eye') return computeEyeReco(results).color;
+  if (source === 'smallroad') return computeSmallRoadReco(results).color;
+  if (source === 'roachspecial') return computeRoachSpecialReco(results);
   if (source === 'small') return smallRecoStats(results).color;
   if (source === 'roach') return roachRecoStats(results).color;
   const z = computeTotalStats(results).cls;
@@ -995,54 +1043,13 @@ function simRunFast(eng, perSim, totalAcc){
     simPushFast(eng, s);
   }
 }
-// 模拟10万次按钮：后台分批执行（每片约120ms，避免卡界面）
-$('sim100kBtn').addEventListener('click', () => {
-  if (state.sim100kBusy) return;
-  if (state.recoRateMode === 'sim100k'){
-    state.recoRateMode = 'real';
-    $('sim100kBtn').textContent = '模拟10万次';
-    render();
-    return;
-  }
-  if (state.sim100k){
-    state.recoRateMode = 'sim100k';
-    $('sim100kBtn').textContent = '模拟10万次·退出';
-    render();
-    return;
-  }
-  state.sim100kBusy = true;
-  const TOTAL = { zhu:[0,0], small:[0,0], common:[0,0], seq:[0,0], seqcommon:[0,0], roach:[0,0] };
-  const acc6 = [[0,0],[0,0],[0,0],[0,0],[0,0],[0,0]];
-  const eng = mkEng(); resetEng(eng);
-  let done = 0;
-  const step = () => {
-    const tEnd = Date.now() + 120;
-    while (done < 100000 && Date.now() < tEnd){
-      simRunFast(eng, 1000, acc6);
-      resetEng(eng);
-      done++;
-    }
-    if (done < 100000){
-      $('sim100kBtn').textContent = '模拟中 ' + Math.round(done / 1000) + '%';
-      setTimeout(step, 0);
-    } else {
-      state.sim100k = { zhu: {hit: acc6[0][0], miss: acc6[0][1]}, small: {hit: acc6[1][0], miss: acc6[1][1]}, common: {hit: acc6[2][0], miss: acc6[2][1]}, seq: {hit: acc6[3][0], miss: acc6[3][1]}, seqcommon: {hit: acc6[4][0], miss: acc6[4][1]}, roach: {hit: acc6[5][0], miss: acc6[5][1]} };
-      state.sim100kBusy = false;
-      state.recoRateMode = 'sim100k';
-      $('sim100kBtn').textContent = '模拟10万次·退出';
-      render();
-    }
-  };
-  $('sim100kBtn').textContent = '模拟中 0%';
-  step();
-});
 
 // 顶部各推荐按钮上方的一致率标签
 // 顶部各推荐按钮上方的一致率标签
 function renderRecoRates(){
   const map = [
-    ['zhu', 'recoRateZhu'], ['small', 'recoRateSmall'], ['common', 'recoRateCommon'],
-    ['seq', 'recoRateSeq'], ['seqcommon', 'recoRateSeqCommon'], ['roach', 'recoRateRoach']
+    ['big', 'recoRateBig'], ['eye', 'recoRateEye'], ['smallroad', 'recoRateSmallRoad'], ['roachspecial', 'recoRateRoachSpecial'], 
+      ['roach', 'recoRateRoach']
   ];
   const isRand = state.recoRateMode === 'rand' && state.randSeq;
   const isSim = state.recoRateMode === 'sim100k' && state.sim100k;
@@ -1172,13 +1179,19 @@ function renderAskRoads(){
     else if (seqB > 0){ setBadgeClass(seqEl, 'blue'); seqEl.querySelector('.val').textContent = '推荐闲'; }
     else { setBadgeClass(seqEl, 'none'); seqEl.querySelector('.val').textContent = '—'; }
   }
-  // 顶部曱甴路推荐徽标同步：曱甴路最新列恰好2个时对比庄问路/闲问路反向推荐
+  // 顶部曱甴路推荐徽标同步：基于曱甴路走势分析
   const roachEl = $('totalRecoRoach');
   if (roachEl){
     const rrs = roachRecoStats(state.results);
-    if (rrs.status === 'red'){ setBadgeClass(roachEl, 'red'); roachEl.querySelector('.val').textContent = '推荐庄'; }
-    else if (rrs.status === 'blue'){ setBadgeClass(roachEl, 'blue'); roachEl.querySelector('.val').textContent = '推荐闲'; }
-    else { setBadgeClass(roachEl, 'none'); roachEl.querySelector('.val').textContent = '—'; }
+    if (rrs.color){
+      setBadgeClass(roachEl, rrs.color);
+      if (rrs.isMode) roachEl.classList.add('blink'); else roachEl.classList.remove('blink');
+      roachEl.querySelector('.val').innerHTML = '本次' + rrs.hitCount + '/' + rrs.pct.toFixed(0) + '% 最多' + rrs.maxBucket + '/' + rrs.maxPct.toFixed(0) + '%' + ((rrs.isMode && rrs.curH === 1) ? '<span class="jump-blink">单跳</span>' : '');
+    } else {
+      setBadgeClass(roachEl, 'none');
+      roachEl.classList.remove('blink');
+      roachEl.querySelector('.val').textContent = '—';
+    }
   }
   // 顶部珠盘三顺推荐徽标同步（三顺推荐右侧）：珠盘推荐与三顺推荐同色时显示
   const seqCommonEl = $('totalRecoSeqCommon');
@@ -1260,6 +1273,185 @@ function computeTotalStats(results){
     else { cls = 'none'; text = '红蓝持平'; }
   }
   return { configs, stats, tBlue, tRed, tTotal, cls, text };
+}
+
+// 大眼仔路推荐：基于大眼仔路走势分析；众数时与庄/闲问路反向，否则同色
+function computeEyeReco(results){
+  const cols = buildStreakCols(results);
+  const marks = buildDerivedRoad(cols, 0);
+  const seq = marks.map(m => m === 'R' ? 'B' : 'P');
+  const t = computeTrendFromCols(buildStreakCols(seq));
+  if (!t) return { color: null, hitCount: 0, pct: 0, maxBucket: 0, maxPct: 0, isMode: false, total: 0 };
+  let maxBucket = 0, maxKey = null;
+  for (const k of [1,2,3,4,5,6,'6+']){
+    if (t.buckets[k] > maxBucket){ maxBucket = t.buckets[k]; maxKey = k; }
+  }
+  const isMode = t.total > 0 && t.buckets[t.hitKey] === maxBucket && maxBucket > 0;
+  const maxPct = t.total > 0 ? (maxBucket / t.total * 100) : 0;
+  const pred = predictAskRoads(results);
+  const latest = marks.length ? marks[marks.length - 1] : null;
+  let cntR = 0, cntB = 0;
+  if (isMode){
+    if (latest && pred.B[0] && latest !== pred.B[0]) cntR++;
+    if (latest && pred.P[0] && latest !== pred.P[0]) cntB++;
+  } else {
+    if (latest && pred.B[0] && latest === pred.B[0]) cntR++;
+    if (latest && pred.P[0] && latest === pred.P[0]) cntB++;
+  }
+  let color = null, status = 'none';
+  if (cntR > 0 && cntB > 0){ status = 'tie'; }
+  else if (cntR > 0){ color = 'red'; status = 'red'; }
+  else if (cntB > 0){ color = 'blue'; status = 'blue'; }
+  return { color, hitCount: t.hitCount, pct: t.pct, maxBucket, maxKey, maxPct, isMode, total: t.total, curH: t.curH };
+}
+
+function renderEyeReco(){
+  const el = $('totalRecoEye');
+  if (!el) return;
+  if (state.results.length === 0){
+    setBadgeClass(el, 'none');
+    el.classList.remove('blink');
+    el.querySelector('.val').textContent = '—';
+    return;
+  }
+  const r = computeEyeReco(state.results);
+  if (!r.color){
+    setBadgeClass(el, 'none');
+    el.classList.remove('blink');
+    el.querySelector('.val').textContent = '—';
+    return;
+  }
+  setBadgeClass(el, r.color);
+  if (r.isMode) el.classList.add('blink'); else el.classList.remove('blink');
+  el.querySelector('.val').innerHTML = '本次' + r.hitCount + '/' + r.pct.toFixed(0) + '% 最多' + r.maxBucket + '/' + r.maxPct.toFixed(0) + '%' + ((r.isMode && r.curH === 1) ? '<span class="jump-blink">单跳</span>' : '');
+  el.title = '大眼仔路当前列高' + r.curH + '：本次出现 ' + r.hitCount + ' 次占 ' + r.pct.toFixed(1) + '%；历史最多列高=' + r.maxKey + ' 出现 ' + r.maxBucket + ' 次占 ' + r.maxPct.toFixed(1) + '%' + (r.isMode ? '（众数→反向问路）' : '（非众数→同色问路）');
+}
+
+// 大路走势推荐：当前列高桶是历史同色列众数 → 反向；否则 → 同色
+function computeBigTrendReco(results){
+  const cols = buildStreakCols(results);
+  if (!cols.length) return { color: null, hitCount: 0, pct: 0, isMode: false, total: 0 };
+  const t = computeTrendFromCols(cols);
+  if (!t) return { color: null, hitCount: 0, pct: 0, isMode: false, total: 0 };
+  let maxBucket = 0;
+  let maxKey = null;
+  for (const k of [1,2,3,4,5,6,'6+']){
+    if (t.buckets[k] > maxBucket){ maxBucket = t.buckets[k]; maxKey = k; }
+  }
+  const isMode = t.total > 0 && t.buckets[t.hitKey] === maxBucket && maxBucket > 0;
+  const curColor = t.color === 'B' ? 'red' : 'blue';
+  let reco = isMode ? (curColor === 'red' ? 'blue' : 'red') : curColor;
+  const maxPct = t.total > 0 ? (maxBucket / t.total * 100) : 0;
+  return { color: reco, hitCount: t.hitCount, pct: t.pct, isMode, total: t.total, curColor, curH: t.curH, maxBucket, maxKey, maxPct };
+}
+
+// 小路推荐：基于小路走势分析（skip=1）；众数时与庄/闲问路反向，否则同色
+function computeSmallRoadReco(results){
+  const cols = buildStreakCols(results);
+  const marks = buildDerivedRoad(cols, 1);
+  const seq = marks.map(m => m === 'R' ? 'B' : 'P');
+  const t = computeTrendFromCols(buildStreakCols(seq));
+  if (!t) return { color: null, hitCount: 0, pct: 0, maxBucket: 0, maxPct: 0, isMode: false, total: 0 };
+  let maxBucket = 0, maxKey = null;
+  for (const k of [1,2,3,4,5,6,'6+']){
+    if (t.buckets[k] > maxBucket){ maxBucket = t.buckets[k]; maxKey = k; }
+  }
+  const isMode = t.total > 0 && t.buckets[t.hitKey] === maxBucket && maxBucket > 0;
+  const maxPct = t.total > 0 ? (maxBucket / t.total * 100) : 0;
+  const pred = predictAskRoads(results);
+  const latest = marks.length ? marks[marks.length - 1] : null;
+  let cntR = 0, cntB = 0;
+  if (isMode){
+    if (latest && pred.B[1] && latest !== pred.B[1]) cntR++;
+    if (latest && pred.P[1] && latest !== pred.P[1]) cntB++;
+  } else {
+    if (latest && pred.B[1] && latest === pred.B[1]) cntR++;
+    if (latest && pred.P[1] && latest === pred.P[1]) cntB++;
+  }
+  let color = null, status = 'none';
+  if (cntR > 0 && cntB > 0){ status = 'tie'; }
+  else if (cntR > 0){ color = 'red'; status = 'red'; }
+  else if (cntB > 0){ color = 'blue'; status = 'blue'; }
+  return { color, hitCount: t.hitCount, pct: t.pct, maxBucket, maxKey, maxPct, isMode, total: t.total, curH: t.curH };
+}
+
+function renderSmallRoadReco(){
+  const el = $('totalRecoSmallRoad');
+  if (!el) return;
+  if (state.results.length === 0){
+    setBadgeClass(el, 'none');
+    el.classList.remove('blink');
+    el.querySelector('.val').textContent = '—';
+    return;
+  }
+  const r = computeSmallRoadReco(state.results);
+  if (!r.color){
+    setBadgeClass(el, 'none');
+    el.classList.remove('blink');
+    el.querySelector('.val').textContent = '—';
+    return;
+  }
+  setBadgeClass(el, r.color);
+  if (r.isMode) el.classList.add('blink'); else el.classList.remove('blink');
+  el.querySelector('.val').innerHTML = '本次' + r.hitCount + '/' + r.pct.toFixed(0) + '% 最多' + r.maxBucket + '/' + r.maxPct.toFixed(0) + '%' + ((r.isMode && r.curH === 1) ? '<span class="jump-blink">单跳</span>' : '');
+  el.title = '小路当前列高' + r.curH + '：本次出现 ' + r.hitCount + ' 次占 ' + r.pct.toFixed(1) + '%；历史最多列高=' + r.maxKey + ' 出现 ' + r.maxBucket + ' 次占 ' + r.maxPct.toFixed(1) + '%' + (r.isMode ? '（众数→反向问路）' : '（非众数→同色问路）');
+}
+
+function renderBigReco(){
+  const el = $('totalRecoBig');
+  if (!el) return;
+  if (state.results.length === 0){
+    setBadgeClass(el, 'none');
+    el.querySelector('.val').textContent = '—';
+    return;
+  }
+  const r = computeBigTrendReco(state.results);
+  if (!r.color){
+    setBadgeClass(el, 'none');
+    el.querySelector('.val').textContent = '—';
+    return;
+  }
+  setBadgeClass(el, r.color);
+  if (r.isMode) el.classList.add('blink'); else el.classList.remove('blink');
+  el.querySelector('.val').innerHTML = '本次' + r.hitCount + '/' + r.pct.toFixed(0) + '% 最多' + r.maxBucket + '/' + r.maxPct.toFixed(0) + '%' + ((r.isMode && r.curH === 1) ? '<span class="jump-blink">单跳</span>' : '');
+  el.title = '当前列高' + r.curH + '：本次历史出现 ' + r.hitCount + ' 次占 ' + r.pct.toFixed(1) + '%；历史最多列高=' + r.maxKey + ' 出现 ' + r.maxBucket + ' 次占 ' + r.maxPct.toFixed(1) + '%' + (r.isMode ? '（众数→反向）' : '（非众数→同色）');
+}
+
+// 曱甴路特别推荐：与庄/闲问路相反的推荐色，若与大路最新色一致则推荐该色
+function computeRoachSpecialReco(results){
+  const cols = buildStreakCols(results);
+  if (!cols.length) return null;
+  const marks = buildDerivedRoad(cols, 2);
+  const pred = predictAskRoads(results);
+  const latest = marks.length ? marks[marks.length - 1] : null;
+  if (!latest) return null;
+  const bigColor = cols[cols.length - 1][0];   // 'B'/'P'
+  const bigSide = bigColor === 'B' ? 'red' : 'blue';
+  // 与庄问路相反 → 推庄；与闲问路相反 → 推闲
+  let recommend = null;
+  if (pred.B[2] && latest !== pred.B[2]) recommend = 'red';
+  if (pred.P[2] && latest !== pred.P[2]) recommend = 'blue';
+  if (recommend && recommend === bigSide) return recommend;
+  return null;
+}
+
+function renderRoachSpecialReco(){
+  const el = $('totalRecoRoachSpecial');
+  if (!el) return;
+  if (state.results.length === 0){
+    setBadgeClass(el, 'none');
+    el.querySelector('.val').textContent = '—';
+    return;
+  }
+  const c = computeRoachSpecialReco(state.results);
+  if (c){
+    setBadgeClass(el, c);
+    el.classList.add('blink');
+    el.querySelector('.val').textContent = c === 'red' ? '推荐庄' : '推荐闲';
+  } else {
+    setBadgeClass(el, 'none');
+    el.querySelector('.val').textContent = '—';
+  }
 }
 
 // 顶部珠盘推荐徽标（载入按钮右侧）
@@ -1403,19 +1595,117 @@ function renderBoxStat(){
   dEl.style.color = diff > 0 ? 'var(--red-deep)' : diff < 0 ? 'var(--blue-deep)' : 'var(--ink)';
 }
 
+
+/* ============ 走势分析 ============ */
+// 分析最新列：按列色统计历史同色列的列高分布（1/2/3/4/5/6/6+），
+// 本次列高在历史同色列中出现的次数与占比
+// 通用：对一列列结构（每列为同色连续段，元素为 'B'/'P'）做走势分桶
+function computeTrendFromCols(cols){
+  if (!cols.length) return null;
+  const lastCol = cols[cols.length - 1];
+  const color = lastCol[0];
+  const curH = lastCol.length;
+  const buckets = {1:0,2:0,3:0,4:0,5:0,6:0,'6+':0};
+  let total = 0;
+  for (let i = 0; i < cols.length - 1; i++){
+    if (cols[i][0] !== color) continue;
+    const h = cols[i].length;
+    const k = h >= 6 ? '6+' : h;
+    buckets[k]++;
+    total++;
+  }
+  const hitKey = curH >= 6 ? '6+' : curH;
+  const hitCount = buckets[hitKey];
+  const pct = total > 0 ? (hitCount / total * 100) : 0;
+  return { color, curH, buckets, total, hitKey, hitCount, pct };
+}
+
+function computeTrend(){
+  return computeTrendFromCols(buildStreakCols(state.results));
+}
+
+// 大眼仔路走势分析：把大眼仔路标记序列(R=红/B=蓝)当作结果序列，逻辑与大路走势一致
+function computeEyeTrend(){
+  const cols = buildStreakCols(state.results);
+  const marks = buildDerivedRoad(cols, 0);
+  const seq = marks.map(m => m === 'R' ? 'B' : 'P');
+  return computeTrendFromCols(buildStreakCols(seq));
+}
+
+// 小路走势分析：逻辑与大路走势一致
+function computeSmallTrend(){
+  const cols = buildStreakCols(state.results);
+  const marks = buildDerivedRoad(cols, 1);
+  const seq = marks.map(m => m === 'R' ? 'B' : 'P');
+  return computeTrendFromCols(buildStreakCols(seq));
+}
+
+// 曱甴路走势分析：逻辑与大路走势一致
+function computeRoachTrend(){
+  const cols = buildStreakCols(state.results);
+  const marks = buildDerivedRoad(cols, 2);
+  const seq = marks.map(m => m === 'R' ? 'B' : 'P');
+  return computeTrendFromCols(buildStreakCols(seq));
+}
+
+function renderTrendInto(el, t, colorLabel){
+  if (!el) return;
+  if (!t){
+    el.innerHTML = '<div class="trend-empty">暂无数据</div>';
+    return;
+  }
+  const colorName = t.color === 'B' ? colorLabel.red : colorLabel.blue;
+  const dotCls = t.color === 'B' ? 'red' : 'blue';
+  const keys = [1,2,3,4,5,6,'6+'];
+  let cells = '', vals = '';
+  for (const k of keys){
+    const hit = String(k) === String(t.hitKey) ? ' class="hit"' : '';
+    cells += '<th>' + k + '</th>';
+    vals += '<td' + hit + '>' + t.buckets[k] + '</td>';
+  }
+  el.innerHTML =
+    '<div class="trend-cur"><span class="dot ' + dotCls + '"></span>最新列：<b>' + colorName + '</b>　本次列高 <b>' + t.curH + '</b></div>' +
+    '<table class="trend-table"><tr><th>列高</th>' + cells + '</tr>' +
+    '<tr><th>历史列数</th>' + vals + '</tr></table>' +
+    '<div class="trend-summary">本次列高 <b>' + t.curH + '</b>：历史' + colorName + '列中列高为 <b>' + t.hitKey + '</b> 的共 <b>' + t.hitCount + '</b> 列' +
+    (t.total > 0 ? '，占历史' + colorName + '列总数(' + t.total + ')的 <b>' + t.pct.toFixed(1) + '%</b>' : '（暂无历史' + colorName + '列）') +
+    '</div>';
+}
+
+function renderTrend(){
+  renderTrendInto($('trendPanel'), computeTrend(), {red:'庄(红)', blue:'闲(蓝)'});
+}
+
+function renderEyeTrend(){
+  renderTrendInto($('eyeTrendPanel'), computeEyeTrend(), {red:'红(有规律)', blue:'蓝(无规律)'});
+}
+
+function renderSmallTrend(){
+  renderTrendInto($('smallTrendPanel'), computeSmallTrend(), {red:'红(有规律)', blue:'蓝(无规律)'});
+}
+
+function renderRoachTrend(){
+  renderTrendInto($('roachTrendPanel'), computeRoachTrend(), {red:'红(有规律)', blue:'蓝(无规律)'});
+}
+
 function render(){
   renderSessionStats();
   renderTotalReco();
+  renderBigReco();
+  renderEyeReco();
+  renderSmallRoadReco();
+  renderRoachSpecialReco();
   renderRecoRates();
   if (state.results.length === 0){
     state.boxStat = null;
     renderBoxStat();
     $('bigroad').innerHTML = '';
     $('smEye').innerHTML = $('smSmall').innerHTML = $('smRoach').innerHTML = '';
+    renderTrend();
+  renderEyeTrend();
+    renderSmallTrend();
+    renderRoachTrend();
     $('askRoads').innerHTML = '';
-    setBadgeClass($('totalRecoSm'), 'none'); $('totalRecoSm').querySelector('.val').textContent = '—';
-    setBadgeClass($('totalRecoCommon'), 'none'); $('totalRecoCommon').querySelector('.val').textContent = '—';
-    setBadgeClass($('totalRecoSeq'), 'none'); $('totalRecoSeq').querySelector('.val').textContent = '—';
     setBadgeClass($('totalRecoSeqCommon'), 'none'); $('totalRecoSeqCommon').querySelector('.val').textContent = '—';
     setBadgeClass($('totalRecoRoach'), 'none'); $('totalRecoRoach').querySelector('.val').textContent = '—';
     renderStats();
@@ -1426,6 +1716,10 @@ function render(){
   renderAskRoads();
   renderCommonReco();
   renderBigRoad(big);
+  renderTrend();
+  renderEyeTrend();
+  renderSmallTrend();
+  renderRoachTrend();
   renderBoxStat();
   renderStats();
 }
@@ -1444,21 +1738,6 @@ document.querySelectorAll('.btn-round').forEach(btn => {
     state.results.push(btn.dataset.add);
     render();
   });
-});
-// 随机1000：用随机1000局统计6个推荐的一致率/差额；再点切回真实数据
-$('randRateBtn').addEventListener('click', () => {
-  if (state.recoRateMode === 'rand'){
-    state.recoRateMode = 'real';
-    state.randSeq = null;
-    $('randRateBtn').textContent = '随机1000';
-  } else {
-    const arr = [];
-    for (let i = 0; i < 1000; i++) arr.push(Math.random() < 0.5 ? 'B' : 'P');
-    state.randSeq = arr;
-    state.recoRateMode = 'rand';
-    $('randRateBtn').textContent = '真实';
-  }
-  render();
 });
 $('undoBtn').addEventListener('click', () => { if (state.results.length){ state.results.pop(); render(); } });
 $('randomBtn').addEventListener('click', () => {
