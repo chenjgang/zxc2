@@ -69,7 +69,7 @@
     font-size:13px;color:var(--ink);font-family:var(--sans);outline:none}
   .bulk input:focus{border-color:var(--line2)}
   .toolbar .spacer{flex:1}
-  .reco-group{display:flex;align-items:flex-end;gap:8px;margin-left:auto}
+  .reco-group{display:flex;align-items:flex-end;gap:8px;margin-left:auto;flex-wrap:wrap}
   .reco-wrap{display:flex;flex-direction:column;align-items:center;gap:3px}
   .reco-rate{font-size:10.5px;color:var(--muted);letter-spacing:.02em;white-space:nowrap;line-height:1.2}
   .reco-rate b{color:var(--ink);font-variant-numeric:tabular-nums;font-weight:800}
@@ -299,7 +299,7 @@
       <div class="reco-wrap"><span class="reco-rate" id="recoRateBig">一致率 —</span><button class="reco-badge none" id="totalRecoBig" data-source="big" title="大路走势推荐：当前列高为历史众数→反向，否则同色"><span class="lbl">大路推荐</span><span class="dot"></span><span class="val">—</span></button></div>
       <div class="reco-wrap"><span class="reco-rate" id="recoRateEye">一致率 —</span><button class="reco-badge none" id="totalRecoEye" data-source="eye" title="大眼仔路推荐：众数时与庄/闲问路反向，否则同色"><span class="lbl">大眼仔路推荐</span><span class="dot"></span><span class="val">—</span></button></div>
       <div class="reco-wrap"><span class="reco-rate" id="recoRateSmallRoad">一致率 —</span><button class="reco-badge none" id="totalRecoSmallRoad" data-source="smallroad" title="小路推荐：众数时与庄/闲问路反向，否则同色"><span class="lbl">小路推荐</span><span class="dot"></span><span class="val">—</span></button></div>
-      <div class="reco-wrap"><span class="reco-rate" id="recoRateRoach">一致率 —</span><button class="reco-badge none" id="totalRecoRoach" data-source="roach" title="曱甴路推荐：众数时与庄/闲问路反向，否则同色；本次==最多时闪烁"><span class="lbl">曱甴路推荐</span><span class="dot"></span><span class="val">—</span></button></div>
+      <div style="flex-basis:100%;height:0"></div><div class="reco-wrap"><span class="reco-rate" id="recoRateRoach">一致率 —</span><button class="reco-badge none" id="totalRecoRoach" data-source="roach" title="曱甴路推荐：众数时与庄/闲问路反向，否则同色；本次==最多时闪烁"><span class="lbl">曱甴路推荐</span><span class="dot"></span><span class="val">—</span></button></div>
       <div class="reco-wrap"><span class="reco-rate" id="recoRateRoachSpecial">一致率 —</span><button class="reco-badge none" id="totalRecoRoachSpecial" data-source="roachspecial" title="与庄/闲问路相反的推荐色若与大路最新色一致则推荐"><span class="lbl">曱甴特别推荐</span><span class="dot"></span><span class="val">—</span></button></div>
     </div>
   </section>
@@ -1447,7 +1447,9 @@ function renderRoachSpecialReco(){
   if (c){
     setBadgeClass(el, c);
     el.classList.add('blink');
-    el.querySelector('.val').textContent = c === 'red' ? '推荐庄' : '推荐闲';
+    const rrs = roachRecoStats(state.results);
+    const jumpTag = (rrs.isMode && rrs.curH === 1) ? '<span class="jump-blink">单跳</span>' : '';
+    el.querySelector('.val').innerHTML = (c === 'red' ? '推荐庄' : '推荐闲') + jumpTag;
   } else {
     setBadgeClass(el, 'none');
     el.querySelector('.val').textContent = '—';
