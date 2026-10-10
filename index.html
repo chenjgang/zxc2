@@ -1449,7 +1449,8 @@ function renderRoachSpecialReco(){
     el.classList.add('blink');
     const rrs = roachRecoStats(state.results);
     const jumpTag = (rrs.isMode && rrs.curH === 1) ? '<span class="jump-blink">单跳</span>' : '';
-    el.querySelector('.val').innerHTML = (c === 'red' ? '推荐庄' : '推荐闲') + jumpTag;
+    const hTag = (rrs.curH > 3) ? '<span class="jump-blink">' + rrs.curH + '个</span>' : (rrs.curH + '个');
+    el.querySelector('.val').innerHTML = (c === 'red' ? '推荐庄' : '推荐闲') + '·' + hTag + jumpTag;
   } else {
     setBadgeClass(el, 'none');
     el.querySelector('.val').textContent = '—';
