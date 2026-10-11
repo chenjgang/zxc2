@@ -301,6 +301,7 @@
       <div class="reco-wrap"><span class="reco-rate" id="recoRateSmallRoad">一致率 —</span><button class="reco-badge none" id="totalRecoSmallRoad" data-source="smallroad" title="小路推荐：众数时与庄/闲问路反向，否则同色"><span class="lbl">小路推荐</span><span class="dot"></span><span class="val">—</span></button></div>
       <div style="flex-basis:100%;height:0"></div><div class="reco-wrap"><span class="reco-rate" id="recoRateRoach">一致率 —</span><button class="reco-badge none" id="totalRecoRoach" data-source="roach" title="曱甴路推荐：众数时与庄/闲问路反向，否则同色；本次==最多时闪烁"><span class="lbl">曱甴路推荐</span><span class="dot"></span><span class="val">—</span></button></div>
       <div class="reco-wrap"><span class="reco-rate" id="recoRateRoachSpecial">一致率 —</span><button class="reco-badge none" id="totalRecoRoachSpecial" data-source="roachspecial" title="与庄/闲问路相反的推荐色若与大路最新色一致则推荐"><span class="lbl">曱甴特别推荐</span><span class="dot"></span><span class="val">—</span></button></div>
+      <div class="reco-wrap"><span class="reco-rate" id="recoRateCombo">一致率 —</span><button class="reco-badge none" id="totalRecoCombo" data-source="combo" title="5个推荐全部同色才推荐"><span class="lbl">综合推荐</span><span class="dot"></span><span class="val">—</span></button></div>
     </div>
   </section>
 
@@ -810,6 +811,7 @@ function recoColorAt(source, results){
   if (source === 'eye') return computeEyeReco(results).color;
   if (source === 'smallroad') return computeSmallRoadReco(results).color;
   if (source === 'roachspecial') return computeRoachSpecialReco(results);
+  if (source === 'combo') return computeComboReco(results);
   if (source === 'small') return smallRecoStats(results).color;
   if (source === 'roach') return roachRecoStats(results).color;
   const z = computeTotalStats(results).cls;
@@ -1049,7 +1051,7 @@ function simRunFast(eng, perSim, totalAcc){
 // 顶部各推荐按钮上方的一致率标签
 function renderRecoRates(){
   const map = [
-    ['big', 'recoRateBig'], ['eye', 'recoRateEye'], ['smallroad', 'recoRateSmallRoad'], ['roachspecial', 'recoRateRoachSpecial'], 
+    ['big', 'recoRateBig'], ['eye', 'recoRateEye'], ['smallroad', 'recoRateSmallRoad'], ['roachspecial', 'recoRateRoachSpecial'], ['combo', 'recoRateCombo'], 
       ['roach', 'recoRateRoach']
   ];
   const isRand = state.recoRateMode === 'rand' && state.randSeq;
@@ -1191,7 +1193,7 @@ function renderAskRoads(){
     } else {
       setBadgeClass(roachEl, 'none');
       roachEl.classList.remove('blink');
-      roachEl.querySelector('.val').textContent = '—';
+      roachEl.querySelector('.val').innerHTML = '本次' + rrs.hitCount + '/' + rrs.pct.toFixed(0) + '% 最多' + rrs.maxBucket + '/' + rrs.maxPct.toFixed(0) + '%';
     }
   }
   // 顶部珠盘三顺推荐徽标同步（三顺推荐右侧）：珠盘推荐与三顺推荐同色时显示
@@ -1320,7 +1322,7 @@ function renderEyeReco(){
   if (!r.color){
     setBadgeClass(el, 'none');
     el.classList.remove('blink');
-    el.querySelector('.val').textContent = '—';
+    el.querySelector('.val').innerHTML = '本次' + r.hitCount + '/' + r.pct.toFixed(0) + '% 最多' + r.maxBucket + '/' + r.maxPct.toFixed(0) + '%';
     return;
   }
   setBadgeClass(el, r.color);
@@ -1391,7 +1393,7 @@ function renderSmallRoadReco(){
   if (!r.color){
     setBadgeClass(el, 'none');
     el.classList.remove('blink');
-    el.querySelector('.val').textContent = '—';
+    el.querySelector('.val').innerHTML = '本次' + r.hitCount + '/' + r.pct.toFixed(0) + '% 最多' + r.maxBucket + '/' + r.maxPct.toFixed(0) + '%';
     return;
   }
   setBadgeClass(el, r.color);
@@ -1411,13 +1413,48 @@ function renderBigReco(){
   const r = computeBigTrendReco(state.results);
   if (!r.color){
     setBadgeClass(el, 'none');
-    el.querySelector('.val').textContent = '—';
+    el.classList.remove('blink');
+    el.querySelector('.val').innerHTML = '本次' + r.hitCount + '/' + r.pct.toFixed(0) + '% 最多' + r.maxBucket + '/' + r.maxPct.toFixed(0) + '%';
     return;
   }
   setBadgeClass(el, r.color);
   if (r.isMode) el.classList.add('blink'); else el.classList.remove('blink');
   el.querySelector('.val').innerHTML = '本次' + r.hitCount + '/' + r.pct.toFixed(0) + '% 最多' + r.maxBucket + '/' + r.maxPct.toFixed(0) + '%' + ((r.isMode && r.curH === 1) ? '<span class="jump-blink">单跳</span>' : '');
   el.title = '当前列高' + r.curH + '：本次历史出现 ' + r.hitCount + ' 次占 ' + r.pct.toFixed(1) + '%；历史最多列高=' + r.maxKey + ' 出现 ' + r.maxBucket + ' 次占 ' + r.maxPct.toFixed(1) + '%' + (r.isMode ? '（众数→反向）' : '（非众数→同色）');
+}
+
+// 综合推荐：5个推荐全部同色才输出
+function computeComboReco(results){
+  const sp = recoColorAt('roachspecial', results);
+  if (!sp) return null;
+  const others = [
+    recoColorAt('big', results),
+    recoColorAt('eye', results),
+    recoColorAt('smallroad', results),
+    recoColorAt('roach', results)
+  ];
+  for (const c of others){ if (c && c !== sp) return null; }
+  return sp;
+}
+function renderComboReco(){
+  const el = $('totalRecoCombo');
+  if (!el) return;
+  if (state.results.length === 0){
+    setBadgeClass(el, 'none');
+    el.classList.remove('blink');
+    el.querySelector('.val').textContent = '—';
+    return;
+  }
+  const c = computeComboReco(state.results);
+  if (c){
+    setBadgeClass(el, c);
+    el.classList.add('blink');
+    el.querySelector('.val').textContent = c === 'red' ? '推荐庄' : '推荐闲';
+  } else {
+    setBadgeClass(el, 'none');
+    el.classList.remove('blink');
+    el.querySelector('.val').textContent = '—';
+  }
 }
 
 // 曱甴路特别推荐：与庄/闲问路相反的推荐色，若与大路最新色一致则推荐该色
@@ -1456,7 +1493,9 @@ function renderRoachSpecialReco(){
     el.querySelector('.val').innerHTML = (c === 'red' ? '推荐庄' : '推荐闲') + '·' + hTag + jumpTag;
   } else {
     setBadgeClass(el, 'none');
-    el.querySelector('.val').textContent = '—';
+    el.classList.remove('blink');
+    const r0 = roachRecoStats(state.results);
+    el.querySelector('.val').innerHTML = '本次' + r0.hitCount + '/' + r0.pct.toFixed(0) + '% 最多' + r0.maxBucket + '/' + r0.maxPct.toFixed(0) + '%';
   }
 }
 
@@ -1701,6 +1740,7 @@ function render(){
   renderEyeReco();
   renderSmallRoadReco();
   renderRoachSpecialReco();
+  renderComboReco();
   renderRecoRates();
   if (state.results.length === 0){
     state.boxStat = null;
