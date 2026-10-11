@@ -760,6 +760,7 @@ function roachRecoStats(results){
     if (latest && pred.B[2] && latest === pred.B[2]) cntR++;
     if (latest && pred.P[2] && latest === pred.P[2]) cntB++;
   }
+  if (!isMode){ cntR = 0; cntB = 0; }
   let color = null, status = 'none';
   if (cntR > 0 && cntB > 0){ status = 'tie'; }
   else if (cntR > 0){ color = 'red'; status = 'red'; }
@@ -1298,6 +1299,7 @@ function computeEyeReco(results){
     if (latest && pred.B[0] && latest === pred.B[0]) cntR++;
     if (latest && pred.P[0] && latest === pred.P[0]) cntB++;
   }
+  if (!isMode){ cntR = 0; cntB = 0; }
   let color = null, status = 'none';
   if (cntR > 0 && cntB > 0){ status = 'tie'; }
   else if (cntR > 0){ color = 'red'; status = 'red'; }
@@ -1340,7 +1342,7 @@ function computeBigTrendReco(results){
   }
   const isMode = t.total > 0 && t.buckets[t.hitKey] === maxBucket && maxBucket > 0;
   const curColor = t.color === 'B' ? 'red' : 'blue';
-  let reco = isMode ? (curColor === 'red' ? 'blue' : 'red') : curColor;
+  let reco = isMode ? (curColor === 'red' ? 'blue' : 'red') : null;
   const maxPct = t.total > 0 ? (maxBucket / t.total * 100) : 0;
   return { color: reco, hitCount: t.hitCount, pct: t.pct, isMode, total: t.total, curColor, curH: t.curH, maxBucket, maxKey, maxPct };
 }
@@ -1368,6 +1370,7 @@ function computeSmallRoadReco(results){
     if (latest && pred.B[1] && latest === pred.B[1]) cntR++;
     if (latest && pred.P[1] && latest === pred.P[1]) cntB++;
   }
+  if (!isMode){ cntR = 0; cntB = 0; }
   let color = null, status = 'none';
   if (cntR > 0 && cntB > 0){ status = 'tie'; }
   else if (cntR > 0){ color = 'red'; status = 'red'; }
