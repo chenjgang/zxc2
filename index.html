@@ -302,6 +302,7 @@
       <div style="flex-basis:100%;height:0"></div><div class="reco-wrap"><span class="reco-rate" id="recoRateRoach">一致率 —</span><button class="reco-badge none" id="totalRecoRoach" data-source="roach" title="曱甴路推荐：众数时与庄/闲问路反向，否则同色；本次==最多时闪烁"><span class="lbl">曱甴路推荐</span><span class="dot"></span><span class="val">—</span></button></div>
       <div class="reco-wrap"><span class="reco-rate" id="recoRateRoachSpecial">一致率 —</span><button class="reco-badge none" id="totalRecoRoachSpecial" data-source="roachspecial" title="与庄/闲问路相反的推荐色若与大路最新色一致则推荐"><span class="lbl">曱甴特别推荐</span><span class="dot"></span><span class="val">—</span></button></div>
       <div class="reco-wrap"><span class="reco-rate" id="recoRateCombo">一致率 —</span><button class="reco-badge none" id="totalRecoCombo" data-source="combo" title="5个推荐全部同色才推荐"><span class="lbl">综合推荐</span><span class="dot"></span><span class="val">—</span></button></div>
+      <div class="reco-wrap"><span class="reco-rate" id="recoRateThreeAll">一致率 —</span><button class="reco-badge none" id="totalRecoThreeAll" data-source="threeall" title="大眼仔/小路/曱甴路三个都有推荐且同色才推荐"><span class="lbl">三全推荐</span><span class="dot"></span><span class="val">—</span></button></div>
     </div>
   </section>
 
@@ -739,7 +740,48 @@ function smallRecoStats(results){
 
 // 曱甴路推荐：仅当曱甴路最新列恰好 2 个标记时，对比庄问路/闲问路，颜色相反即推荐；
 // 少于 2 个或超过 2 个（两个以上）不推荐
+// 曱甴路纯走势推荐（不含长龙跟买）
+function _roachTrendColor(prefix){
+  const pc = buildStreakCols(prefix);
+  const pm = buildDerivedRoad(pc, 2);
+  const ps = pm.map(m => m === 'R' ? 'B' : 'P');
+  const pt = computeTrendFromCols(buildStreakCols(ps));
+  if (!pt) return null;
+  let pmx = 0;
+  for (const k of [1,2,3,4,5,6,'6+']) pmx = Math.max(pmx, pt.buckets[k]);
+  const pMode = pt.total > 0 && pt.buckets[pt.hitKey] === pmx && pmx > 0;
+  if (!pMode) return null;
+  const pp = predictAskRoads(prefix);
+  const pl = pm.length ? pm[pm.length - 1] : null;
+  if (!pl) return null;
+  if (pp.B[2] && pl !== pp.B[2]) return 'red';
+  if (pp.P[2] && pl !== pp.P[2]) return 'blue';
+  return null;
+}
+
 function roachRecoStats(results){
+
+  // 长龙跟买：当前列高>2，本列内任意一次曱甴路推荐正确即锁定当前列色，直到换列
+  {
+    const cols0 = buildStreakCols(results);
+    const curH0 = cols0.length ? cols0[cols0.length - 1].length : 0;
+    if (curH0 > 2){
+      const startHand = results.length - curH0;
+      for (let i = startHand + 1; i < results.length; i++){
+        const side = results[i] === 'B' ? 'red' : results[i] === 'P' ? 'blue' : null;
+        if (!side) continue;
+        const c = _roachTrendColor(results.slice(0, i));
+        if (c === side){
+          const curSide = cols0[cols0.length - 1][0] === 'B' ? 'red' : 'blue';
+          const marks = buildDerivedRoad(cols0, 2);
+          const t = computeTrendFromCols(buildStreakCols(marks.map(m => m === 'R' ? 'B' : 'P')));
+          let mb = 0;
+          if (t) for (const k of [1,2,3,4,5,6,'6+']) mb = Math.max(mb, t.buckets[k]);
+          return { color: curSide, status: curSide, hitCount: t?t.hitCount:0, pct: t?t.pct:0, maxBucket: mb, maxPct: t?(t.total?mb/t.total*100:0):0, isMode: true, total: t?t.total:0, curH: curH0 };
+        }
+      }
+    }
+  }
   const pred = predictAskRoads(results);
   const cols = buildStreakCols(results);
   const marks = buildDerivedRoad(cols, 2);   // 曱甴路
@@ -812,6 +854,7 @@ function recoColorAt(source, results){
   if (source === 'smallroad') return computeSmallRoadReco(results).color;
   if (source === 'roachspecial') return computeRoachSpecialReco(results);
   if (source === 'combo') return computeComboReco(results);
+  if (source === 'threeall') return computeThreeAllReco(results);
   if (source === 'small') return smallRecoStats(results).color;
   if (source === 'roach') return roachRecoStats(results).color;
   const z = computeTotalStats(results).cls;
@@ -1051,7 +1094,7 @@ function simRunFast(eng, perSim, totalAcc){
 // 顶部各推荐按钮上方的一致率标签
 function renderRecoRates(){
   const map = [
-    ['big', 'recoRateBig'], ['eye', 'recoRateEye'], ['smallroad', 'recoRateSmallRoad'], ['roachspecial', 'recoRateRoachSpecial'], ['combo', 'recoRateCombo'], 
+    ['big', 'recoRateBig'], ['eye', 'recoRateEye'], ['smallroad', 'recoRateSmallRoad'], ['roachspecial', 'recoRateRoachSpecial'], ['combo', 'recoRateCombo'], ['threeall', 'recoRateThreeAll'], 
       ['roach', 'recoRateRoach']
   ];
   const isRand = state.recoRateMode === 'rand' && state.randSeq;
@@ -1345,6 +1388,7 @@ function computeBigTrendReco(results){
   const isMode = t.total > 0 && t.buckets[t.hitKey] === maxBucket && maxBucket > 0;
   const curColor = t.color === 'B' ? 'red' : 'blue';
   let reco = isMode ? (curColor === 'red' ? 'blue' : 'red') : null;
+  if (reco === curColor) reco = null;
   const maxPct = t.total > 0 ? (maxBucket / t.total * 100) : 0;
   return { color: reco, hitCount: t.hitCount, pct: t.pct, isMode, total: t.total, curColor, curH: t.curH, maxBucket, maxKey, maxPct };
 }
@@ -1423,18 +1467,38 @@ function renderBigReco(){
   el.title = '当前列高' + r.curH + '：本次历史出现 ' + r.hitCount + ' 次占 ' + r.pct.toFixed(1) + '%；历史最多列高=' + r.maxKey + ' 出现 ' + r.maxBucket + ' 次占 ' + r.maxPct.toFixed(1) + '%' + (r.isMode ? '（众数→反向）' : '（非众数→同色）');
 }
 
+// 三全推荐：大眼仔/小路/曱甴路三个都有推荐且同色
+function computeThreeAllReco(results){
+  const cols = buildStreakCols(results);
+  if (!cols.length) return null;
+  const curH = cols[cols.length - 1].length;
+  if (curH <= 1) return recoColorAt('big', results);
+  return recoColorAt('roachspecial', results);
+}
+function renderThreeAllReco(){
+  const el = $('totalRecoThreeAll');
+  if (!el) return;
+  if (state.results.length === 0){
+    setBadgeClass(el, 'none'); el.classList.remove('blink');
+    el.querySelector('.val').textContent = '—'; return;
+  }
+  const c = computeThreeAllReco(state.results);
+  if (c){
+    setBadgeClass(el, c); el.classList.add('blink');
+    el.querySelector('.val').textContent = c === 'red' ? '推荐庄' : '推荐闲';
+  } else {
+    setBadgeClass(el, 'none'); el.classList.remove('blink');
+    el.querySelector('.val').textContent = '—';
+  }
+}
+
 // 综合推荐：5个推荐全部同色才输出
 function computeComboReco(results){
-  const sp = recoColorAt('roachspecial', results);
-  if (!sp) return null;
-  const others = [
-    recoColorAt('big', results),
-    recoColorAt('eye', results),
-    recoColorAt('smallroad', results),
-    recoColorAt('roach', results)
-  ];
-  for (const c of others){ if (c && c !== sp) return null; }
-  return sp;
+  const cols = buildStreakCols(results);
+  if (!cols.length) return null;
+  const curH = cols[cols.length - 1].length;
+  if (curH <= 2) return recoColorAt('eye', results);
+  return recoColorAt('roachspecial', results);
 }
 function renderComboReco(){
   const el = $('totalRecoCombo');
@@ -1457,8 +1521,40 @@ function renderComboReco(){
   }
 }
 
+// 曱甴特别推荐纯逻辑（不含长龙锁定）
+function _roachSpecialColor(prefix){
+  const cols = buildStreakCols(prefix);
+  if (!cols.length) return null;
+  const marks = buildDerivedRoad(cols, 2);
+  const pred = predictAskRoads(prefix);
+  const latest = marks.length ? marks[marks.length - 1] : null;
+  if (!latest) return null;
+  const bigColor = cols[cols.length - 1][0];
+  const bigSide = bigColor === 'B' ? 'red' : 'blue';
+  let recommend = null;
+  if (pred.B[2] && latest !== pred.B[2]) recommend = 'red';
+  if (pred.P[2] && latest !== pred.P[2]) recommend = 'blue';
+  if (recommend && recommend === bigSide) return recommend;
+  return null;
+}
+
 // 曱甴路特别推荐：与庄/闲问路相反的推荐色，若与大路最新色一致则推荐该色
 function computeRoachSpecialReco(results){
+  // 长龙锁定：当前列高>2，本列内任意一次特别推荐正确即锁定当前列色
+  {
+    const colsL = buildStreakCols(results);
+    const curHL = colsL.length ? colsL[colsL.length - 1].length : 0;
+    if (curHL > 2){
+      const startHand = results.length - curHL;
+      for (let i = startHand + 1; i < results.length; i++){
+        const side = results[i] === 'B' ? 'red' : results[i] === 'P' ? 'blue' : null;
+        if (!side) continue;
+        if (_roachSpecialColor(results.slice(0, i)) === side){
+          return colsL[colsL.length - 1][0] === 'B' ? 'red' : 'blue';
+        }
+      }
+    }
+  }
   const cols = buildStreakCols(results);
   if (!cols.length) return null;
   const marks = buildDerivedRoad(cols, 2);
@@ -1741,6 +1837,7 @@ function render(){
   renderSmallRoadReco();
   renderRoachSpecialReco();
   renderComboReco();
+  renderThreeAllReco();
   renderRecoRates();
   if (state.results.length === 0){
     state.boxStat = null;
