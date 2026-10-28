@@ -266,6 +266,27 @@
 
   .jump-blink { display:inline-block; margin-left:4px; animation: recoBlink 1s ease-in-out infinite; font-weight:700; color:var(--red); }
 
+
+  .kline-wrap{overflow-x:auto;padding:6px 2px}
+  .kline-wrap canvas{display:block;max-width:100%;height:auto}
+
+  .kline-flip{margin-left:10px;padding:2px 10px;font-size:12px;border:1px solid var(--line);border-radius:12px;background:transparent;color:var(--ink);cursor:pointer}
+  .kline-flip.on{background:var(--red);color:#fff;border-color:var(--red)}
+
+  .tp-panel{margin:0 0 18px;background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:14px 16px}
+  .tp-panel .panel-head{margin-bottom:10px}
+  .tp-row{display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+  .tp-main{display:flex;align-items:center;gap:10px;padding-right:14px;border-right:1px solid var(--line)}
+  .tp-label{font-size:12px;color:var(--muted);letter-spacing:.05em}
+  .tp-badge{width:26px;height:26px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:11px;font-weight:800}
+  .tp-badge.red{background:var(--red);color:#fff}
+  .tp-badge.blue{background:var(--blue);color:#fff}
+  .tp-badge.na{background:var(--paper);color:var(--muted);border:1px solid var(--line)}
+  .tp-item{display:flex;align-items:center;gap:6px;font-size:12.5px;color:var(--ink)}
+  .tp-dot{width:13px;height:13px;border-radius:50%;display:inline-block}
+  .tp-dot.red{background:var(--red)}
+  .tp-dot.blue{background:var(--blue)}
+  .tp-dot.na{background:var(--paper);border:1px solid var(--line)}
 </style>
 </head>
 <body>
@@ -295,15 +316,7 @@
       <button class="btn-ghost" id="randomBtn">随机</button>
       <button class="btn-ghost" id="clearBtn">清空</button>
     </div>
-    <div class="reco-group">
-      <div class="reco-wrap"><span class="reco-rate" id="recoRateBig">一致率 —</span><button class="reco-badge none" id="totalRecoBig" data-source="big" title="大路走势推荐：当前列高为历史众数→反向，否则同色"><span class="lbl">大路推荐</span><span class="dot"></span><span class="val">—</span></button></div>
-      <div class="reco-wrap"><span class="reco-rate" id="recoRateEye">一致率 —</span><button class="reco-badge none" id="totalRecoEye" data-source="eye" title="大眼仔路推荐：众数时与庄/闲问路反向，否则同色"><span class="lbl">大眼仔路推荐</span><span class="dot"></span><span class="val">—</span></button></div>
-      <div class="reco-wrap"><span class="reco-rate" id="recoRateSmallRoad">一致率 —</span><button class="reco-badge none" id="totalRecoSmallRoad" data-source="smallroad" title="小路推荐：众数时与庄/闲问路反向，否则同色"><span class="lbl">小路推荐</span><span class="dot"></span><span class="val">—</span></button></div>
-      <div style="flex-basis:100%;height:0"></div><div class="reco-wrap"><span class="reco-rate" id="recoRateRoach">一致率 —</span><button class="reco-badge none" id="totalRecoRoach" data-source="roach" title="曱甴路推荐：众数时与庄/闲问路反向，否则同色；本次==最多时闪烁"><span class="lbl">曱甴路推荐</span><span class="dot"></span><span class="val">—</span></button></div>
-      <div class="reco-wrap"><span class="reco-rate" id="recoRateRoachSpecial">一致率 —</span><button class="reco-badge none" id="totalRecoRoachSpecial" data-source="roachspecial" title="与庄/闲问路相反的推荐色若与大路最新色一致则推荐"><span class="lbl">曱甴特别推荐</span><span class="dot"></span><span class="val">—</span></button></div>
-      <div class="reco-wrap"><span class="reco-rate" id="recoRateCombo">一致率 —</span><button class="reco-badge none" id="totalRecoCombo" data-source="combo" title="5个推荐全部同色才推荐"><span class="lbl">综合推荐</span><span class="dot"></span><span class="val">—</span></button></div>
-      <div class="reco-wrap"><span class="reco-rate" id="recoRateThreeAll">一致率 —</span><button class="reco-badge none" id="totalRecoThreeAll" data-source="threeall" title="大眼仔/小路/曱甴路三个都有推荐且同色才推荐"><span class="lbl">三全推荐</span><span class="dot"></span><span class="val">—</span></button></div>
-    </div>
+
   </section>
 
   <section class="roads-main">
@@ -318,6 +331,23 @@
         <span class="d">差额 <b>—</b></span>
       </div>
       <div class="road-scroll"><div class="road-grid" id="bigroad"></div></div>
+    </div>
+  </section>
+
+  <section class="tp-panel" id="trendPredict">
+    <div class="panel-head"><h3>趋势预测</h3><span class="en">K线 · 均线 · MACD · 共振 · 大路</span></div>
+    <div class="tp-row">
+      <div class="tp-main"><span class="tp-label">综合推荐</span><b class="tp-badge na" id="tpCombo">—</b></div>
+      <div class="tp-item"><span class="tp-dot na" id="tpMemaDot"></span>均线</div>
+      <div class="tp-item"><span class="tp-dot na" id="tpMacdDot"></span>MACD</div>
+      <div class="tp-item"><span class="tp-dot na" id="tpResDot"></span>共振</div>
+    </div>
+  </section>
+
+  <section class="roads-main">
+    <div class="panel">
+      <div class="panel-head"><h3>K线走势</h3><span class="en">Stock Candles · 依据大路红蓝</span><button class="kline-flip" id="klineFlipBtn">反转</button><span class="legend">红=庄(+1) 蓝=闲(-1) · 实体单位1 · 宽度0.5 · 不计和局</span></div>
+      <div class="kline-wrap"><canvas id="klineCanvas" width="920" height="240"></canvas></div>
     </div>
   </section>
 
@@ -353,14 +383,17 @@
     <div class="panel">
       <div class="panel-head"><h3>大眼仔路</h3><span class="en">Big Eye Boy</span><span class="legend">红＝有规律　蓝＝无规律</span></div>
       <div class="road-scroll"><div class="road-grid smroad" id="smEye"></div></div>
+      <div class="kline-wrap"><canvas id="eyeKlineCanvas" width="920" height="372"></canvas></div>
     </div>
     <div class="panel">
       <div class="panel-head"><h3>小路</h3><span class="en">Small Road</span><span class="legend">红＝有规律　蓝＝无规律</span></div>
       <div class="road-scroll"><div class="road-grid smroad" id="smSmall"></div></div>
+      <div class="kline-wrap"><canvas id="smallKlineCanvas" width="920" height="372"></canvas></div>
     </div>
     <div class="panel">
       <div class="panel-head"><h3>曱甴路</h3><span class="en">Cockroach Pig</span><span class="legend">红＝有规律　蓝＝无规律</span></div>
       <div class="road-scroll"><div class="road-grid smroad" id="smRoach"></div></div>
+      <div class="kline-wrap"><canvas id="roachKlineCanvas" width="920" height="372"></canvas></div>
     </div>
   </section>
 
@@ -384,7 +417,7 @@
 
 <script>
 /* ============ 状态 ============ */
-const state = { results: [], recoSource: 'big', recoRateMode: 'real', randSeq: null };   // recoRateMode: 'real'|'rand'（一致率统计来源）
+const state = { results: [], recoSource: 'big', recoRateMode: 'real', randSeq: null, klineFlip: false };   // recoRateMode: 'real'|'rand'（一致率统计来源）
 const SAMPLE = "BBBBPPBPBBPPPPBPPBTBBPPPPBBPBBPBTBP";
 const COLOR_KEY = { B:'red', P:'blue', T:'green' };
 
@@ -564,37 +597,7 @@ function renderBigRoad(big){
     // 开局连续和局：在大路左上角以绿色格标注
     if (grid[0][0] === null) grid[0][0] = { type:'T', ties:big.leadingTies };
   }
-  // 推荐方框整体后移一格：
-  //  历史：第 i 颗的推荐（按截至该局的数据）显示在下一颗圆圈的位置
-  //  最新：显示在下一个空格处；若按推荐色会换列，则随新列走
-  const boxColor = {}; // "col,row" -> 'red'|'blue'
-  const chrono = [];
-  for (const col of buildStreakColumns(state.results).cols){
-    for (const cell of col) chrono.push(cell);
-  }
-  if (chrono.length){
-    const handPos = {};
-    for (let c = 0; c < grid.length; c++){
-      for (let r = 0; r < 6; r++){
-        const cell = grid[c][r];
-        if (cell && cell.type !== 'T') handPos[cell.hand] = { col: c, row: r };
-      }
-    }
-    for (let i = 0; i < chrono.length; i++){
-      const cell = chrono[i];
-      const R = recoColorAt(state.recoSource, state.results.slice(0, cell.hand));
-      if (R !== 'red' && R !== 'blue') continue;
-      if (i < chrono.length - 1){
-        const np = handPos[chrono[i + 1].hand];
-        if (np) boxColor[np.col + ',' + np.row] = R;
-      } else if (big.streak){
-        // 最新：模拟下一结果位置（按推荐色决定是否换列，推荐色→大路色码）
-        const np = nextBeadPos(grid, big.streak, R === 'red' ? 'B' : 'P');
-        while (grid.length <= np.col) grid.push([null,null,null,null,null,null]);
-        boxColor[np.col + ',' + np.row] = R;
-      }
-    }
-  }
+  const boxColor = {}; // 推荐已删除：不再写入方框
   // 统计方框与圆圈一致 / 不一致数量
   let match = 0, mismatch = 0;
   for (let c = 0; c < grid.length; c++){
@@ -1374,7 +1377,7 @@ function renderEyeReco(){
   el.title = '大眼仔路当前列高' + r.curH + '：本次出现 ' + r.hitCount + ' 次占 ' + r.pct.toFixed(1) + '%；历史最多列高=' + r.maxKey + ' 出现 ' + r.maxBucket + ' 次占 ' + r.maxPct.toFixed(1) + '%' + (r.isMode ? '（众数→反向问路）' : '（非众数→同色问路）');
 }
 
-// 大路走势推荐：当前列高桶是历史同色列众数 → 反向；否则 → 同色
+// 大路推荐：curH=1 → 列高1历史占比>40%反向否则同色；curH>1 → 不计1个后相同列占比>=60%反向否则同色
 function computeBigTrendReco(results){
   const cols = buildStreakCols(results);
   if (!cols.length) return { color: null, hitCount: 0, pct: 0, isMode: false, total: 0 };
@@ -1387,8 +1390,16 @@ function computeBigTrendReco(results){
   }
   const isMode = t.total > 0 && t.buckets[t.hitKey] === maxBucket && maxBucket > 0;
   const curColor = t.color === 'B' ? 'red' : 'blue';
-  let reco = isMode ? (curColor === 'red' ? 'blue' : 'red') : null;
-  if (reco === curColor) reco = null;
+  let reco;
+  if (t.curH === 1){
+    const r1 = t.total > 0 ? (t.buckets[1] / t.total * 100) : 0;
+    reco = r1 > 40 ? (curColor === 'red' ? 'blue' : 'red') : curColor;
+  } else {
+    const ex = t.total - (t.buckets[1] || 0);
+    const same = t.hitCount;
+    const rSame = ex > 0 ? (same / ex * 100) : 0;
+    reco = rSame >= 60 ? (curColor === 'red' ? 'blue' : 'red') : curColor;
+  }
   const maxPct = t.total > 0 ? (maxBucket / t.total * 100) : 0;
   return { color: reco, hitCount: t.hitCount, pct: t.pct, isMode, total: t.total, curColor, curH: t.curH, maxBucket, maxKey, maxPct };
 }
@@ -1789,7 +1800,7 @@ function computeRoachTrend(){
   return computeTrendFromCols(buildStreakCols(seq));
 }
 
-function renderTrendInto(el, t, colorLabel){
+function renderTrendInto(el, t, colorLabel, showSameRatio){
   if (!el) return;
   if (!t){
     el.innerHTML = '<div class="trend-empty">暂无数据</div>';
@@ -1810,23 +1821,414 @@ function renderTrendInto(el, t, colorLabel){
     '<tr><th>历史列数</th>' + vals + '</tr></table>' +
     '<div class="trend-summary">本次列高 <b>' + t.curH + '</b>：历史' + colorName + '列中列高为 <b>' + t.hitKey + '</b> 的共 <b>' + t.hitCount + '</b> 列' +
     (t.total > 0 ? '，占历史' + colorName + '列总数(' + t.total + ')的 <b>' + t.pct.toFixed(1) + '%</b>' : '（暂无历史' + colorName + '列）') +
-    '</div>';
+    '</div>' +
+    (showSameRatio && t.curH > 1 && t.total > 0 ?
+      (function(){ const ex = t.total - (t.buckets[1] || 0); if (ex <= 0) return ''; const same = t.hitCount; const diff = ex - same; return '<div class="trend-summary">本次列高 <b>' + t.curH + '</b>：历史' + colorName + '列(不计1个)中列高相同 <b>' + same + '</b> 列占 <b>' + (same / ex * 100).toFixed(1) + '%</b>，不相同 <b>' + diff + '</b> 列占 <b>' + (diff / ex * 100).toFixed(1) + '%</b></div>'; })() :
+      '');
 }
 
+
+// K线走势：依据大路红蓝生成股票K线（红=庄+1，蓝=闲-1，实体单位1、宽度0.5，不计和局）
+function drawKlineInto(cv, seq){
+  if (!cv) return;
+  const ctx = cv.getContext('2d');
+  const wrap = cv.parentElement;
+  const cssW = Math.max(320, wrap ? wrap.clientWidth - 8 : 920);
+  const H = 372, kTop = 12, kH = 150, mTop = kTop + kH + 24, mH = 96, rTop = mTop + mH + 24, rH = 62;
+  const dpr = window.devicePixelRatio || 1;
+  cv.width = Math.round(cssW * dpr);
+  cv.height = Math.round(H * dpr);
+  cv.style.width = cssW + 'px';
+  cv.style.height = H + 'px';
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  ctx.clearRect(0, 0, cssW, H);
+  ctx.font = '10px sans-serif';
+  if (seq.length === 0){
+    ctx.fillStyle = '#888';
+    ctx.fillText('暂无数据', 12, 20);
+    return;
+  }
+  const prices = [0];
+  const opens = [0];
+  const closes = [];
+  for (let i = 0; i < seq.length; i++){
+    const o = prices[i];
+    const c = o + (seq[i] === 'B' ? (state.klineFlip ? -1 : 1) : (state.klineFlip ? 1 : -1));
+    opens.push(o); closes.push(c); prices.push(c);
+  }
+  let minP = 0, maxP = 0;
+  for (const p of prices){ if (p < minP) minP = p; if (p > maxP) maxP = p; }
+  const range = maxP - minP || 1;
+  const leftPad = 38, rightPad = 8;
+  const plotW = cssW - leftPad - rightPad;
+  const n = seq.length;
+  const cellW = Math.min(24, plotW / n);
+  const bodyW = Math.max(2, cellW * 0.5);
+  const yOf = function(v){ return kTop + kH - (v - minP) / range * kH; };
+  const ema = function(arr, len){
+    const k = 2 / (len + 1);
+    const out = [arr[0]];
+    for (let i = 1; i < arr.length; i++) out.push(arr[i] * k + out[i - 1] * (1 - k));
+    return out;
+  };
+  const ema7 = ema(closes, 7);
+  const ema10 = ema(closes, 10);
+  ctx.strokeStyle = 'rgba(128,128,128,.18)';
+  ctx.fillStyle = '#888';
+  for (let g = 0; g <= 4; g++){
+    const v = minP + (maxP - minP) * g / 4;
+    const y = yOf(v);
+    ctx.beginPath(); ctx.moveTo(leftPad, y); ctx.lineTo(cssW - rightPad, y); ctx.stroke();
+    ctx.fillText(String(Math.round(v * 10) / 10), 4, y + 3);
+  }
+  for (let i = 0; i < n; i++){
+    const x = leftPad + i * cellW + cellW / 2;
+    const up = closes[i] >= opens[i];
+    const c = up ? '#e03131' : '#1971c2';
+    const yOpen = yOf(opens[i]);
+    const yClose = yOf(closes[i]);
+    const yTop = Math.min(yOpen, yClose);
+    const h = Math.max(1, Math.abs(yOpen - yClose));
+    ctx.fillStyle = c;
+    ctx.fillRect(x - bodyW / 2, yTop, bodyW, h);
+  }
+  // ===== MEMA 均线 =====
+  ctx.fillStyle = '#888';
+  ctx.fillText('MEMA7 #22d3ee · MEMA10 #f59f00', leftPad + 2, 11);
+  const drawMa = function(arr, color){
+    ctx.strokeStyle = color;
+    ctx.lineWidth = 1.2;
+    ctx.beginPath();
+    for (let i = 0; i < n; i++){
+      const x = leftPad + i * cellW + cellW / 2;
+      const y = yOf(arr[i]);
+      if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+    }
+    ctx.stroke();
+    ctx.lineWidth = 1;
+  };
+  drawMa(ema7, '#22d3ee');
+  drawMa(ema10, '#f59f00');
+  const last = prices[prices.length - 1];
+  const yLast = yOf(last);
+  ctx.strokeStyle = '#f59f00';
+  ctx.setLineDash([4, 3]);
+  ctx.beginPath(); ctx.moveTo(leftPad, yLast); ctx.lineTo(cssW - rightPad, yLast); ctx.stroke();
+  ctx.setLineDash([]);
+  ctx.fillStyle = '#f59f00';
+  ctx.fillText('最新 ' + (last >= 0 ? '+' : '') + last, cssW - rightPad - 64, yLast - 4);
+
+  // ===== MACD(12,26,9) =====
+  ctx.fillStyle = '#aaa';
+  ctx.fillText('MACD(12,26,9)', leftPad, kTop + kH + 14);
+  const e12 = ema(closes, 12), e26 = ema(closes, 26);
+  const dif = [];
+  for (let i = 0; i < n; i++) dif.push(e12[i] - e26[i]);
+  const deaArr = ema(dif, 9);
+  const macd = [];
+  for (let i = 0; i < n; i++) macd.push((dif[i] - deaArr[i]) * 2);
+  let mn = 0, mx = 0;
+  for (const v of dif) { if (v < mn) mn = v; if (v > mx) mx = v; }
+  for (const v of deaArr) { if (v < mn) mn = v; if (v > mx) mx = v; }
+  for (const v of macd) { if (v < mn) mn = v; if (v > mx) mx = v; }
+  const mrange = (mx - mn) || 1;
+  const mOf = function(v){ return mTop + mH - (v - mn) / mrange * mH; };
+  ctx.strokeStyle = 'rgba(128,128,128,.4)';
+  const y0 = mOf(0);
+  if (y0 >= mTop && y0 <= mTop + mH){
+    ctx.beginPath(); ctx.moveTo(leftPad, y0); ctx.lineTo(cssW - rightPad, y0); ctx.stroke();
+  }
+  for (let i = 0; i < n; i++){
+    const x = leftPad + i * cellW + cellW / 2;
+    const v = macd[i];
+    const yv = mOf(v);
+    const h = Math.max(1, Math.abs(yv - y0));
+    ctx.fillStyle = v >= 0 ? 'rgba(224,49,49,.75)' : 'rgba(25,113,194,.75)';
+    ctx.fillRect(x - bodyW / 2, Math.min(yv, y0), bodyW, h);
+  }
+  const line = function(arr, color){
+    ctx.strokeStyle = color;
+    ctx.beginPath();
+    for (let i = 0; i < n; i++){
+      const x = leftPad + i * cellW + cellW / 2;
+      const y = mOf(arr[i]);
+      if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+    }
+    ctx.stroke();
+  };
+  line(dif, '#ff922b');
+  line(deaArr, '#fcc419');
+
+  // ===== 六指标共振（DIFF/KD/RSI/LWR/BBI/MTM） =====
+  ctx.fillStyle = '#aaa';
+  ctx.fillText('共振(6指标) 洋红=持有 黄=买入', leftPad, mTop + mH + 14);
+  const high = [], low = [];
+  for (let i = 0; i < n; i++){ high.push(Math.max(opens[i], closes[i])); low.push(Math.min(opens[i], closes[i])); }
+  const ma = function(arr, len){
+    const out = [];
+    for (let i = 0; i < arr.length; i++){
+      let s = 0; const st = Math.max(0, i - len + 1);
+      for (let j = st; j <= i; j++) s += arr[j];
+      out.push(s / (i - st + 1));
+    }
+    return out;
+  };
+  const sma = function(arr, len, m){
+    const out = [arr[0]];
+    for (let i = 1; i < arr.length; i++) out.push((m * arr[i] + (len - m) * out[i - 1]) / len);
+    return out;
+  };
+  const ref = function(arr, off){
+    const out = [];
+    for (let i = 0; i < arr.length; i++) out.push(i >= off ? arr[i - off] : 0);
+    return out;
+  };
+  const hhv = function(arr, len){
+    const out = [];
+    for (let i = 0; i < arr.length; i++){
+      let m = -Infinity; const st = Math.max(0, i - len + 1);
+      for (let j = st; j <= i; j++) m = Math.max(m, arr[j]);
+      out.push(m);
+    }
+    return out;
+  };
+  const llv = function(arr, len){
+    const out = [];
+    for (let i = 0; i < arr.length; i++){
+      let m = Infinity; const st = Math.max(0, i - len + 1);
+      for (let j = st; j <= i; j++) m = Math.min(m, arr[j]);
+      out.push(m);
+    }
+    return out;
+  };
+  // TJ1: DIFF>DEA
+  const diff8 = [], dea5 = [];
+  for (let i = 0; i < n; i++) diff8.push(ema(closes, 8)[i] - ema(closes, 13)[i]);
+  const dea5Arr = ema(diff8, 5);
+  // TJ2: K>D (RSV 平滑)
+  const hh8 = hhv(high, 8), ll8 = llv(low, 8);
+  const rsv1 = [];
+  for (let i = 0; i < n; i++) rsv1.push((closes[i] - ll8[i]) / ((hh8[i] - ll8[i]) || 1) * 100);
+  const kArr = sma(rsv1, 3, 1), dArr = sma(kArr, 3, 1);
+  // TJ3: RSI1>RSI2
+  const lc = ref(closes, 1);
+  const upArr = [], abArr = [];
+  for (let i = 0; i < n; i++){ upArr.push(Math.max(closes[i] - lc[i], 0)); abArr.push(Math.abs(closes[i] - lc[i])); }
+  const sa5 = sma(upArr, 5, 1), sab5 = sma(abArr, 5, 1);
+  const sa13 = sma(upArr, 13, 1), sab13 = sma(abArr, 13, 1);
+  const rsi1 = [], rsi2 = [];
+  for (let i = 0; i < n; i++){
+    rsi1.push(sab5[i] > 0 ? sa5[i] / sab5[i] * 100 : 50);
+    rsi2.push(sab13[i] > 0 ? sa13[i] / sab13[i] * 100 : 50);
+  }
+  // TJ4: LWR1>LWR2
+  const hh13 = hhv(high, 13), ll13 = llv(low, 13);
+  const rsv2 = [];
+  for (let i = 0; i < n; i++) rsv2.push(-(hh13[i] - closes[i]) / ((hh13[i] - ll13[i]) || 1) * 100);
+  const lwr1 = sma(rsv2, 3, 1), lwr2 = sma(lwr1, 3, 1);
+  // TJ5: CLOSE>BBI
+  const bbi = [];
+  for (let i = 0; i < n; i++) bbi.push((ma(closes, 3)[i] + ma(closes, 5)[i] + ma(closes, 8)[i] + ma(closes, 13)[i]) / 4);
+  // TJ6: MMS>MMM
+  const mtm = [];
+  for (let i = 0; i < n; i++) mtm.push(closes[i] - lc[i]);
+  const amtm = [];
+  for (let i = 0; i < n; i++) amtm.push(Math.abs(closes[i] - lc[i]));
+  const eMt5 = ema(ema(mtm, 5), 3), eAm5 = ema(ema(amtm, 5), 3);
+  const eMt13 = ema(ema(mtm, 13), 8), eAm13 = ema(ema(amtm, 13), 8);
+  const mms = [], mmm = [];
+  for (let i = 0; i < n; i++){
+    mms.push(eAm5[i] > 0 ? 100 * eMt5[i] / eAm5[i] : 50);
+    mmm.push(eAm13[i] > 0 ? 100 * eMt13[i] / eAm13[i] : 50);
+  }
+  const res = [], buy = [];
+  for (let i = 0; i < n; i++){
+    const t1 = diff8[i] > dea5Arr[i];
+    const t2 = kArr[i] > dArr[i];
+    const t3 = rsi1[i] > rsi2[i];
+    const t4 = lwr1[i] > lwr2[i];
+    const t5 = closes[i] > bbi[i];
+    const t6 = mms[i] > mmm[i];
+    const g = t1 && t2 && t3 && t4 && t5 && t6;
+    res.push(g);
+    buy.push(g && !(i > 0 ? res[i - 1] : false));
+  }
+  const rOf = function(v){ return rTop + rH - (v / 6) * rH; };
+  ctx.strokeStyle = 'rgba(128,128,128,.4)';
+  ctx.beginPath(); ctx.moveTo(leftPad, rTop + rH); ctx.lineTo(cssW - rightPad, rTop + rH); ctx.stroke();
+  for (let i = 0; i < n; i++){
+    const x = leftPad + i * cellW + cellW / 2;
+    if (res[i]){
+      ctx.fillStyle = 'rgba(201,73,214,.75)';
+      ctx.fillRect(x - bodyW / 2, rOf(0), bodyW, rH);
+    }
+    if (buy[i]){
+      ctx.fillStyle = '#fdd835';
+      ctx.fillRect(x - 1.5, rOf(6) - 3, 3, rH + 3);
+    }
+  }
+}
+
+
+
+function computeKlineSignals(){
+  const seq = state.results.filter(function(r){ return r !== 'T'; });
+  if (seq.length < 14) return null;
+  const closes = [];
+  let price = 0;
+  for (let i = 0; i < seq.length; i++){
+    price += seq[i] === 'B' ? (state.klineFlip ? -1 : 1) : (state.klineFlip ? 1 : -1);
+    closes.push(price);
+  }
+  const n = seq.length, last = n - 1;
+  const ema = function(arr, len){
+    const k = 2 / (len + 1);
+    const out = [arr[0]];
+    for (let i = 1; i < arr.length; i++) out.push(arr[i] * k + out[i - 1] * (1 - k));
+    return out;
+  };
+  const ma = function(arr, len){
+    const out = [];
+    for (let i = 0; i < arr.length; i++){
+      let s = 0; const st = Math.max(0, i - len + 1);
+      for (let j = st; j <= i; j++) s += arr[j];
+      out.push(s / (i - st + 1));
+    }
+    return out;
+  };
+  const sma = function(arr, len, m){
+    const out = [arr[0]];
+    for (let i = 1; i < arr.length; i++) out.push((m * arr[i] + (len - m) * out[i - 1]) / len);
+    return out;
+  };
+  const ref = function(arr, off){
+    const out = [];
+    for (let i = 0; i < arr.length; i++) out.push(i >= off ? arr[i - off] : 0);
+    return out;
+  };
+  const hhv = function(arr, len){
+    const out = [];
+    for (let i = 0; i < arr.length; i++){
+      let m = -Infinity; const st = Math.max(0, i - len + 1);
+      for (let j = st; j <= i; j++) m = Math.max(m, arr[j]);
+      out.push(m);
+    }
+    return out;
+  };
+  const llv = function(arr, len){
+    const out = [];
+    for (let i = 0; i < arr.length; i++){
+      let m = Infinity; const st = Math.max(0, i - len + 1);
+      for (let j = st; j <= i; j++) m = Math.min(m, arr[j]);
+      out.push(m);
+    }
+    return out;
+  };
+  // 均线 MEMA7 vs MEMA10
+  const e7 = ema(closes, 7), e10 = ema(closes, 10);
+  const sigMa = e7[last] > e10[last] ? 'red' : 'blue';
+  // MACD(12,26,9)
+  const e12 = ema(closes, 12), e26 = ema(closes, 26);
+  const difA = [];
+  for (let i = 0; i < n; i++) difA.push(e12[i] - e26[i]);
+  const deaA = ema(difA, 9);
+  const sigMacd = difA[last] > deaA[last] ? 'red' : 'blue';
+  // 六指标共振（与K线副图同公式）
+  const opens = [0];
+  for (let i = 1; i < n; i++) opens.push(closes[i - 1]);
+  const high = [], low = [];
+  for (let i = 0; i < n; i++){ high.push(Math.max(opens[i], closes[i])); low.push(Math.min(opens[i], closes[i])); }
+  const diff8 = [];
+  for (let i = 0; i < n; i++) diff8.push(ema(closes, 8)[i] - ema(closes, 13)[i]);
+  const dea5Arr = ema(diff8, 5);
+  const hh8 = hhv(high, 8), ll8 = llv(low, 8);
+  const rsv1 = [];
+  for (let i = 0; i < n; i++) rsv1.push((closes[i] - ll8[i]) / ((hh8[i] - ll8[i]) || 1) * 100);
+  const kArr = sma(rsv1, 3, 1), dArr = sma(kArr, 3, 1);
+  const lc = ref(closes, 1);
+  const upArr = [], abArr = [];
+  for (let i = 0; i < n; i++){ upArr.push(Math.max(closes[i] - lc[i], 0)); abArr.push(Math.abs(closes[i] - lc[i])); }
+  const sa5 = sma(upArr, 5, 1), sab5 = sma(abArr, 5, 1);
+  const sa13 = sma(upArr, 13, 1), sab13 = sma(abArr, 13, 1);
+  const rsi1 = [], rsi2 = [];
+  for (let i = 0; i < n; i++){
+    rsi1.push(sab5[i] > 0 ? sa5[i] / sab5[i] * 100 : 50);
+    rsi2.push(sab13[i] > 0 ? sa13[i] / sab13[i] * 100 : 50);
+  }
+  const hh13 = hhv(high, 13), ll13 = llv(low, 13);
+  const rsv2 = [];
+  for (let i = 0; i < n; i++) rsv2.push(-(hh13[i] - closes[i]) / ((hh13[i] - ll13[i]) || 1) * 100);
+  const lwr1 = sma(rsv2, 3, 1), lwr2 = sma(lwr1, 3, 1);
+  const bbi = [];
+  for (let i = 0; i < n; i++) bbi.push((ma(closes, 3)[i] + ma(closes, 5)[i] + ma(closes, 8)[i] + ma(closes, 13)[i]) / 4);
+  const mtm = [], amtm = [];
+  for (let i = 0; i < n; i++){ mtm.push(closes[i] - lc[i]); amtm.push(Math.abs(closes[i] - lc[i])); }
+  const eMt5 = ema(ema(mtm, 5), 3), eAm5 = ema(ema(amtm, 5), 3);
+  const eMt13 = ema(ema(mtm, 13), 8), eAm13 = ema(ema(amtm, 13), 8);
+  const mms = [], mmm = [];
+  for (let i = 0; i < n; i++){
+    mms.push(eAm5[i] > 0 ? 100 * eMt5[i] / eAm5[i] : 50);
+    mmm.push(eAm13[i] > 0 ? 100 * eMt13[i] / eAm13[i] : 50);
+  }
+  const t1 = diff8[last] > dea5Arr[last];
+  const t2 = kArr[last] > dArr[last];
+  const t3 = rsi1[last] > rsi2[last];
+  const t4 = lwr1[last] > lwr2[last];
+  const t5 = closes[last] > bbi[last];
+  const t6 = mms[last] > mmm[last];
+  const sigRes = (t1 && t2 && t3 && t4 && t5 && t6) ? 'red' : 'blue';
+  const sigs = { mema: sigMa, macd: sigMacd, res: sigRes };
+  let rn = 0, bn = 0;
+  for (const k in sigs){ if (sigs[k] === 'red') rn++; else bn++; }
+  const combo = rn > bn ? 'red' : rn < bn ? 'blue' : null;
+  return { sigs: sigs, combo: combo };
+}
+function renderTrendPredict(){
+  const el = $('trendPredict'); if (!el) return;
+  const s = computeKlineSignals();
+  const setDot = function(id, c){ const d = $(id); if (d) d.className = 'tp-dot ' + (c || 'na'); };
+  const comboEl = $('tpCombo');
+  if (!s){
+setDot('tpMemaDot', null); setDot('tpMacdDot', null); setDot('tpResDot', null);
+    if (comboEl){ comboEl.className = 'tp-badge na'; comboEl.textContent = '—'; }
+    return;
+  }
+  setDot('tpMemaDot', s.sigs.mema);
+  setDot('tpMacdDot', s.sigs.macd);
+  setDot('tpResDot', s.sigs.res);
+  if (comboEl){
+    if (s.combo){ comboEl.className = 'tp-badge ' + s.combo; comboEl.textContent = s.combo === 'red' ? '庄' : '闲'; }
+    else { comboEl.className = 'tp-badge na'; comboEl.textContent = '—'; }
+  }
+}
+
+function drawKline(){
+  drawKlineInto(document.getElementById('klineCanvas'), state.results.filter(function(r){ return r !== 'T'; }));
+}
+function klineSeqForRoad(kind){
+  const cols = buildStreakCols(state.results);
+  const skip = kind === 'eye' ? 0 : kind === 'small' ? 1 : 2;
+  const marks = buildDerivedRoad(cols, skip);
+  return marks.map(function(m){ return m === 'R' ? 'B' : 'P'; });
+}
+function drawEyeKline(){ drawKlineInto(document.getElementById('eyeKlineCanvas'), klineSeqForRoad('eye')); }
+function drawSmallKline(){ drawKlineInto(document.getElementById('smallKlineCanvas'), klineSeqForRoad('small')); }
+function drawRoachKline(){ drawKlineInto(document.getElementById('roachKlineCanvas'), klineSeqForRoad('roach')); }
+
 function renderTrend(){
-  renderTrendInto($('trendPanel'), computeTrend(), {red:'庄(红)', blue:'闲(蓝)'});
+  renderTrendInto($('trendPanel'), computeTrend(), {red:'庄(红)', blue:'闲(蓝)'}, true);
 }
 
 function renderEyeTrend(){
-  renderTrendInto($('eyeTrendPanel'), computeEyeTrend(), {red:'红(有规律)', blue:'蓝(无规律)'});
+  renderTrendInto($('eyeTrendPanel'), computeEyeTrend(), {red:'红(有规律)', blue:'蓝(无规律)'}, true);
 }
 
 function renderSmallTrend(){
-  renderTrendInto($('smallTrendPanel'), computeSmallTrend(), {red:'红(有规律)', blue:'蓝(无规律)'});
+  renderTrendInto($('smallTrendPanel'), computeSmallTrend(), {red:'红(有规律)', blue:'蓝(无规律)'}, true);
 }
 
 function renderRoachTrend(){
-  renderTrendInto($('roachTrendPanel'), computeRoachTrend(), {red:'红(有规律)', blue:'蓝(无规律)'});
+  renderTrendInto($('roachTrendPanel'), computeRoachTrend(), {red:'红(有规律)', blue:'蓝(无规律)'}, true);
 }
 
 function render(){
@@ -1848,6 +2250,11 @@ function render(){
   renderEyeTrend();
     renderSmallTrend();
     renderRoachTrend();
+    renderTrendPredict();
+    drawKline();
+    drawEyeKline();
+    drawSmallKline();
+    drawRoachKline();
     $('askRoads').innerHTML = '';
     setBadgeClass($('totalRecoSeqCommon'), 'none'); $('totalRecoSeqCommon').querySelector('.val').textContent = '—';
     setBadgeClass($('totalRecoRoach'), 'none'); $('totalRecoRoach').querySelector('.val').textContent = '—';
@@ -1863,6 +2270,11 @@ function render(){
   renderEyeTrend();
   renderSmallTrend();
   renderRoachTrend();
+  renderTrendPredict();
+  drawKline();
+  drawEyeKline();
+  drawSmallKline();
+  drawRoachKline();
   renderBoxStat();
   renderStats();
 }
@@ -1892,6 +2304,14 @@ $('randomBtn').addEventListener('click', () => {
   render();
 });
 $('clearBtn').addEventListener('click', () => { state.results = []; $('bulkInput').value=''; render(); });
+$('klineFlipBtn').addEventListener('click', () => {
+  state.klineFlip = !state.klineFlip;
+  $('klineFlipBtn').classList.toggle('on', state.klineFlip);
+  drawKline();
+  drawEyeKline();
+  drawSmallKline();
+  drawRoachKline();
+});
 $('sampleBtn').addEventListener('click', () => { state.results = parseInput(SAMPLE); render(); });
 $('loadBtn').addEventListener('click', () => {
   const parsed = parseInput($('bulkInput').value);
