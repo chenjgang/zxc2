@@ -1692,7 +1692,7 @@ function drawKlineInto(cv, seq){
   const ctx = cv.getContext('2d');
   const wrap = cv.parentElement;
   const cssW = Math.max(320, wrap ? wrap.clientWidth - 8 : 920);
-  const H = 372, kTop = 12, kH = 150, mTop = kTop + kH + 24, mH = 96, rTop = mTop + mH + 24, rH = 62;
+  const H = 412, kTop = 12, kH = 190, mTop = kTop + kH + 24, mH = 96, rTop = mTop + mH + 24, rH = 62;
   const dpr = window.devicePixelRatio || 1;
   cv.width = Math.round(cssW * dpr);
   cv.height = Math.round(H * dpr);
@@ -1707,7 +1707,7 @@ function drawKlineInto(cv, seq){
     return;
   }
   const prices = [0];
-  const opens = [0];
+  const opens = [];
   const closes = [];
   for (let i = 0; i < seq.length; i++){
     const o = prices[i];
@@ -1716,12 +1716,20 @@ function drawKlineInto(cv, seq){
   }
   let minP = 0, maxP = 0;
   for (const p of prices){ if (p < minP) minP = p; if (p > maxP) maxP = p; }
-  const range = maxP - minP || 1;
+  let range = maxP - minP || 1;
+  // 固定单位高度：每 1 单位价格至少 12px，超出画布的柱线顶部/底部裁剪（0 基线优先可见）
+  const maxRange = kH / 12;
+  if (range > maxRange){
+    range = maxRange;
+    if (minP >= 0){ maxP = minP + range; }
+    else if (maxP <= 0){ minP = maxP - range; }
+    else { const mid = (minP + maxP) / 2; minP = mid - range / 2; maxP = mid + range / 2; }
+  }
   const leftPad = 38, rightPad = 8;
   const plotW = cssW - leftPad - rightPad;
   const n = seq.length;
   const cellW = Math.min(24, plotW / n);
-  const bodyW = Math.max(2, cellW * 0.5);
+  const bodyW = Math.max(5, cellW * 0.55);
   const yOf = function(v){ return kTop + kH - (v - minP) / range * kH; };
   const ema = function(arr, len){
     const k = 2 / (len + 1);
@@ -1746,7 +1754,7 @@ function drawKlineInto(cv, seq){
     const yOpen = yOf(opens[i]);
     const yClose = yOf(closes[i]);
     const yTop = Math.min(yOpen, yClose);
-    const h = Math.max(1, Math.abs(yOpen - yClose));
+    const h = Math.max(3, Math.abs(yOpen - yClose));
     ctx.fillStyle = c;
     ctx.fillRect(x - bodyW / 2, yTop, bodyW, h);
   }
