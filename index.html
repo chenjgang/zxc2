@@ -1749,8 +1749,7 @@ function drawKlineInto(cv, seq){
   }
   for (let i = 0; i < n; i++){
     const x = leftPad + i * cellW + cellW / 2;
-    const up = closes[i] >= opens[i];
-    const c = up ? '#e03131' : '#1971c2';
+    const c = seq[i] === 'B' ? '#e03131' : '#1971c2';   // 颜色与大路一致：庄=红、闲=蓝，反转只改方向不改色
     const yOpen = yOf(opens[i]);
     const yClose = yOf(closes[i]);
     const yTop = Math.min(yOpen, yClose);
