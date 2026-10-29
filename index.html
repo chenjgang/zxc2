@@ -273,20 +273,10 @@
   .kline-flip{margin-left:10px;padding:2px 10px;font-size:12px;border:1px solid var(--line);border-radius:12px;background:transparent;color:var(--ink);cursor:pointer}
   .kline-flip.on{background:var(--red);color:#fff;border-color:var(--red)}
 
-  .tp-panel{margin:0 0 18px;background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:14px 16px}
-  .tp-panel .panel-head{margin-bottom:10px}
-  .tp-row{display:flex;align-items:center;gap:14px;flex-wrap:wrap}
-  .tp-main{display:flex;align-items:center;gap:10px;padding-right:14px;border-right:1px solid var(--line)}
-  .tp-label{font-size:12px;color:var(--muted);letter-spacing:.05em}
-  .tp-badge{width:26px;height:26px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:11px;font-weight:800}
-  .tp-badge.red{background:var(--red);color:#fff}
-  .tp-badge.blue{background:var(--blue);color:#fff}
-  .tp-badge.na{background:var(--paper);color:var(--muted);border:1px solid var(--line)}
-  .tp-item{display:flex;align-items:center;gap:6px;font-size:12.5px;color:var(--ink)}
-  .tp-dot{width:13px;height:13px;border-radius:50%;display:inline-block}
-  .tp-dot.red{background:var(--red)}
-  .tp-dot.blue{background:var(--blue)}
-  .tp-dot.na{background:var(--paper);border:1px solid var(--line)}
+
+  .ask-seq-tag{font-size:11px;margin-left:8px;padding:1px 8px;border-radius:10px;border:1px solid var(--line);color:var(--muted);white-space:nowrap}
+  .ask-seq-tag.red{background:var(--red);color:#fff;border-color:var(--red)}
+  .ask-seq-tag.blue{background:var(--blue);color:#fff;border-color:var(--blue)}
 </style>
 </head>
 <body>
@@ -334,16 +324,6 @@
     </div>
   </section>
 
-  <section class="tp-panel" id="trendPredict">
-    <div class="panel-head"><h3>趋势预测</h3><span class="en">K线 · 均线 · MACD · 共振 · 大路</span></div>
-    <div class="tp-row">
-      <div class="tp-main"><span class="tp-label">综合推荐</span><b class="tp-badge na" id="tpCombo">—</b></div>
-      <div class="tp-item"><span class="tp-dot na" id="tpMemaDot"></span>均线</div>
-      <div class="tp-item"><span class="tp-dot na" id="tpMacdDot"></span>MACD</div>
-      <div class="tp-item"><span class="tp-dot na" id="tpResDot"></span>共振</div>
-    </div>
-  </section>
-
   <section class="roads-main">
     <div class="panel">
       <div class="panel-head"><h3>K线走势</h3><span class="en">Stock Candles · 依据大路红蓝</span><button class="kline-flip" id="klineFlipBtn">反转</button><span class="legend">红=庄(+1) 蓝=闲(-1) · 实体单位1 · 宽度0.5 · 不计和局</span></div>
@@ -351,47 +331,19 @@
     </div>
   </section>
 
-  <section class="roads-main">
-    <div class="panel">
-      <div class="panel-head"><h3>大路走势分析</h3><span class="en">Column Trend</span><span class="legend">最新列同色历史列高分布：本次列高在历史同色列中出现的次数与占比</span></div>
-      <div class="trend-panel" id="trendPanel"></div>
-    </div>
-  </section>
-
-  <section class="roads-main">
-    <div class="panel">
-      <div class="panel-head"><h3>大眼仔路走势分析</h3><span class="en">Big Eye Boy Trend</span><span class="legend">与大路走势分析逻辑相同：最新连续同色段的列高在历史同色段中出现的次数与占比</span></div>
-      <div class="trend-panel" id="eyeTrendPanel"></div>
-    </div>
-  </section>
-
-  <section class="roads-main">
-    <div class="panel">
-      <div class="panel-head"><h3>小路走势分析</h3><span class="en">Small Road Trend</span><span class="legend">与大路走势分析逻辑相同：最新连续同色段的列高在历史同色段中出现的次数与占比</span></div>
-      <div class="trend-panel" id="smallTrendPanel"></div>
-    </div>
-  </section>
-
-  <section class="roads-main">
-    <div class="panel">
-      <div class="panel-head"><h3>曱甴路走势分析</h3><span class="en">Cockroach Road Trend</span><span class="legend">与大路走势分析逻辑相同：最新连续同色段的列高在历史同色段中出现的次数与占比</span></div>
-      <div class="trend-panel" id="roachTrendPanel"></div>
-    </div>
-  </section>
-
   <section class="roads-main three-roads">
     <div class="panel">
-      <div class="panel-head"><h3>大眼仔路</h3><span class="en">Big Eye Boy</span><span class="legend">红＝有规律　蓝＝无规律</span></div>
+      <div class="panel-head"><h3>大眼仔路</h3><span class="en">Big Eye Boy</span><span class="ask-seq-tag" id="smSeqEye">三顺：—</span></div>
       <div class="road-scroll"><div class="road-grid smroad" id="smEye"></div></div>
       <div class="kline-wrap"><canvas id="eyeKlineCanvas" width="920" height="372"></canvas></div>
     </div>
     <div class="panel">
-      <div class="panel-head"><h3>小路</h3><span class="en">Small Road</span><span class="legend">红＝有规律　蓝＝无规律</span></div>
+      <div class="panel-head"><h3>小路</h3><span class="en">Small Road</span><span class="ask-seq-tag" id="smSeqSmall">三顺：—</span></div>
       <div class="road-scroll"><div class="road-grid smroad" id="smSmall"></div></div>
       <div class="kline-wrap"><canvas id="smallKlineCanvas" width="920" height="372"></canvas></div>
     </div>
     <div class="panel">
-      <div class="panel-head"><h3>曱甴路</h3><span class="en">Cockroach Pig</span><span class="legend">红＝有规律　蓝＝无规律</span></div>
+      <div class="panel-head"><h3>曱甴路</h3><span class="en">Cockroach Pig</span><span class="ask-seq-tag" id="smSeqRoach">三顺：—</span></div>
       <div class="road-scroll"><div class="road-grid smroad" id="smRoach"></div></div>
       <div class="kline-wrap"><canvas id="roachKlineCanvas" width="920" height="372"></canvas></div>
     </div>
@@ -402,14 +354,6 @@
       <div class="panel-head"><h3>庄问路 · 闲问路　/　三小路推荐</h3><span class="en">Ask & Recommend</span><span class="legend">问路＝假设下一局为庄/闲时三小路的下一标记；最新颜色与庄问路相反显示“推荐庄”、与闲问路相反显示“推荐闲”</span></div>
       <div class="ask-grid" id="askRoads"></div>
     </div>
-  </section>
-
-  <section class="stats">
-    <div class="section-title">
-      <h2>珠盘分红统计</h2>
-      <p class="note">珠盘路 3/4/5/6 行：分别取最近 2/3/4/5 局为模式，在大路中从前到后检索相同模式，统计其后第 3/4/5/6 局的红蓝，红多推荐红、蓝多推荐蓝，和局不参与检索；顶部四行合计为四卡红蓝相加。</p>
-    </div>
-    <div class="stat-cards" id="statCards"></div>
   </section>
 
   <footer class="foot">百家乐分红分析表 · 仅供结果记录与模式观察</footer>
@@ -1172,54 +1116,37 @@ function renderAskRoads(){
     if (road === 1) return '<span class="mk solid ' + (v === 'R' ? 'red' : 'blue') + '"></span>';
     return '<span class="mk-slash ' + (v === 'R' ? 'red' : 'blue') + '"></span>';
   };
-  // 庄问路 / 闲问路 / 三小路推荐 / 三顺推荐 表（5列）
-  let html = '<div class="ask-head"><span class="ask-road"></span><span class="ask-col b">庄问路</span><span class="ask-col p">闲问路</span><span class="ask-col">三小路推荐</span><span class="ask-col">三顺推荐</span></div>';
+  // 庄问路 / 闲问路 / 三顺推荐 表（4列）
+  let html = '<div class="ask-head"><span class="ask-road"></span><span class="ask-col b">庄问路</span><span class="ask-col p">闲问路</span><span class="ask-col">三顺推荐</span></div>';
   let seqR = 0, seqB = 0;
   for (let i = 0; i < 3; i++){
-    const active = (s.colLen[i] || 0) >= 2;   // 最新列≥2个才参与比较推荐
-    const parts = [];
-    if (active && latest[i] && pred.B[i] && latest[i] !== pred.B[i]) parts.push('<span class="ask-rb">推荐庄</span>');
-    if (active && latest[i] && pred.P[i] && latest[i] !== pred.P[i]) parts.push('<span class="ask-rp">推荐闲</span>');
-    const reco = parts.length ? parts.join('<span class="ask-sep">/</span>') : '<span class="ask-na">—</span>';
+    const active = (s.colLen[i] || 0) >= 1;   // 最新列1个也参与比较推荐
     // 三顺推荐：实际最新颜色与庄问路一致 → 推荐庄；与闲问路一致 → 推荐闲
     const seqParts = [];
     if (active && latest[i] && pred.B[i] && latest[i] === pred.B[i]){ seqParts.push('<span class="ask-rb">推荐庄</span>'); seqR++; }
     if (active && latest[i] && pred.P[i] && latest[i] === pred.P[i]){ seqParts.push('<span class="ask-rp">推荐闲</span>'); seqB++; }
     const seq = seqParts.length ? seqParts.join('<span class="ask-sep">/</span>') : '<span class="ask-na">—</span>';
+    const tagEl = $(['smSeqEye','smSeqSmall','smSeqRoach'][i]);
+    if (tagEl){
+      const isRed = seqParts.some(function(p){ return p.indexOf('推荐庄') >= 0; });
+      const isBlue = seqParts.some(function(p){ return p.indexOf('推荐闲') >= 0; });
+      if (isRed && !isBlue){ tagEl.className = 'ask-seq-tag red'; tagEl.textContent = '三顺：庄'; }
+      else if (isBlue && !isRed){ tagEl.className = 'ask-seq-tag blue'; tagEl.textContent = '三顺：闲'; }
+      else { tagEl.className = 'ask-seq-tag'; tagEl.textContent = '三顺：—'; }
+    }
     html += '<div class="ask-row"><span class="ask-road">' + names[i] + '</span>'
       + '<span class="ask-cell">' + markHtml(i, pred.B[i]) + '</span>'
       + '<span class="ask-cell">' + markHtml(i, pred.P[i]) + '</span>'
-      + '<span class="ask-cell">' + reco + '</span>'
       + '<span class="ask-cell">' + seq + '</span></div>';
   }
-  // 三小路推荐合计：大路同列超3个 → 不推荐；颜色不一致（既有庄又有闲）→ 不推荐；单一颜色 → 推荐该色
-  const { cntR, cntB, noReco } = s;
-  let total;
-  if (noReco) total = '<span class="ask-na">—</span>';   // 大路同一列超过3个 → 不推荐
-  else if (cntR > 0 && cntB > 0) total = '<span class="ask-na">—</span>';   // 颜色不一致 → 不推荐
-  else if (cntR > 0) total = '<span class="ask-rb">推荐庄</span>';
-  else if (cntB > 0) total = '<span class="ask-rp">推荐闲</span>';
-  else total = '<span class="ask-na">—</span>';
-  html += '<div class="ask-row ask-total"><span class="ask-road">三小路推荐</span><span class="ask-cell"></span><span class="ask-cell"></span><span class="ask-cell">' + total + '</span><span class="ask-cell"></span></div>';
   // 三顺路推荐合计：三顺推荐列颜色不一致（既有庄又有闲）→ 不推荐；单一颜色 → 推荐该色
   let seqTotal;
   if (seqR > 0 && seqB > 0) seqTotal = '<span class="ask-na">—</span>';   // 颜色不一致 → 不推荐
   else if (seqR > 0) seqTotal = '<span class="ask-rb">推荐庄</span>';
   else if (seqB > 0) seqTotal = '<span class="ask-rp">推荐闲</span>';
   else seqTotal = '<span class="ask-na">—</span>';
-  html += '<div class="ask-row ask-total"><span class="ask-road">三顺路推荐</span><span class="ask-cell"></span><span class="ask-cell"></span><span class="ask-cell"></span><span class="ask-cell">' + seqTotal + '</span></div>';
+  html += '<div class="ask-row ask-total"><span class="ask-road">三顺路推荐</span><span class="ask-cell"></span><span class="ask-cell"></span><span class="ask-cell">' + seqTotal + '</span></div>';
   el.innerHTML = html;
-  // 记录三小路推荐状态（供共同推荐使用）：red | blue | tie(颜色不一致) | none
-  state.smallRecoStatus = s.status;
-  // 顶部三小路推荐徽标同步（珠盘推荐右侧）
-  const smEl = $('totalRecoSm');
-  if (smEl){
-    if (noReco){ setBadgeClass(smEl, 'none'); smEl.querySelector('.val').textContent = '—'; }
-    else if (cntR > 0 && cntB > 0){ setBadgeClass(smEl, 'none'); smEl.querySelector('.val').textContent = '—'; }
-    else if (cntR > 0){ setBadgeClass(smEl, 'red'); smEl.querySelector('.val').textContent = '推荐庄'; }
-    else if (cntB > 0){ setBadgeClass(smEl, 'blue'); smEl.querySelector('.val').textContent = '推荐闲'; }
-    else { setBadgeClass(smEl, 'none'); smEl.querySelector('.val').textContent = '—'; }
-  }
   // 顶部三顺推荐徽标同步（共同推荐右侧）
   const seqEl = $('totalRecoSeq');
   if (seqEl){
@@ -1261,21 +1188,12 @@ function renderSessionStats(){
   const r = state.results;
   const cnt = c => r.filter(x => x === c).length;
   const b = cnt('B'), p = cnt('P'), t = cnt('T');
-  let maxRunB = 0, maxRunP = 0, run = 0, last = null;
-  for (const x of r){
-    if (x === 'T') continue;
-    if (x === last){ run++; }
-    else { run = 1; last = x; }
-    if (last === 'B' && run > maxRunB) maxRunB = run;
-    if (last === 'P' && run > maxRunP) maxRunP = run;
-  }
   $('sessionStats').innerHTML =
     '<span class="s-chip"><b>' + r.length + '</b><span class="d">局数</span></span>' +
     '<span class="s-chip b"><b>' + b + '</b><span class="d">庄</span></span>' +
     '<span class="s-chip p"><b>' + p + '</b><span class="d">闲</span></span>' +
     '<span class="s-chip t"><b>' + t + '</b><span class="d">和</span></span>' +
-    '<span class="s-chip b"><b>' + maxRunB + '</b><span class="d">最长连庄</span></span>' +
-    '<span class="s-chip p"><b>' + maxRunP + '</b><span class="d">最长连闲</span></span>';
+    '';
 }
 
 function pct(n, total){
@@ -1747,11 +1665,6 @@ function renderBoxStat(){
   dEl.style.color = diff > 0 ? 'var(--red-deep)' : diff < 0 ? 'var(--blue-deep)' : 'var(--ink)';
 }
 
-
-/* ============ 走势分析 ============ */
-// 分析最新列：按列色统计历史同色列的列高分布（1/2/3/4/5/6/6+），
-// 本次列高在历史同色列中出现的次数与占比
-// 通用：对一列列结构（每列为同色连续段，元素为 'B'/'P'）做走势分桶
 function computeTrendFromCols(cols){
   if (!cols.length) return null;
   const lastCol = cols[cols.length - 1];
@@ -1770,61 +1683,6 @@ function computeTrendFromCols(cols){
   const hitCount = buckets[hitKey];
   const pct = total > 0 ? (hitCount / total * 100) : 0;
   return { color, curH, buckets, total, hitKey, hitCount, pct };
-}
-
-function computeTrend(){
-  return computeTrendFromCols(buildStreakCols(state.results));
-}
-
-// 大眼仔路走势分析：把大眼仔路标记序列(R=红/B=蓝)当作结果序列，逻辑与大路走势一致
-function computeEyeTrend(){
-  const cols = buildStreakCols(state.results);
-  const marks = buildDerivedRoad(cols, 0);
-  const seq = marks.map(m => m === 'R' ? 'B' : 'P');
-  return computeTrendFromCols(buildStreakCols(seq));
-}
-
-// 小路走势分析：逻辑与大路走势一致
-function computeSmallTrend(){
-  const cols = buildStreakCols(state.results);
-  const marks = buildDerivedRoad(cols, 1);
-  const seq = marks.map(m => m === 'R' ? 'B' : 'P');
-  return computeTrendFromCols(buildStreakCols(seq));
-}
-
-// 曱甴路走势分析：逻辑与大路走势一致
-function computeRoachTrend(){
-  const cols = buildStreakCols(state.results);
-  const marks = buildDerivedRoad(cols, 2);
-  const seq = marks.map(m => m === 'R' ? 'B' : 'P');
-  return computeTrendFromCols(buildStreakCols(seq));
-}
-
-function renderTrendInto(el, t, colorLabel, showSameRatio){
-  if (!el) return;
-  if (!t){
-    el.innerHTML = '<div class="trend-empty">暂无数据</div>';
-    return;
-  }
-  const colorName = t.color === 'B' ? colorLabel.red : colorLabel.blue;
-  const dotCls = t.color === 'B' ? 'red' : 'blue';
-  const keys = [1,2,3,4,5,6,'6+'];
-  let cells = '', vals = '';
-  for (const k of keys){
-    const hit = String(k) === String(t.hitKey) ? ' class="hit"' : '';
-    cells += '<th>' + k + '</th>';
-    vals += '<td' + hit + '>' + t.buckets[k] + '</td>';
-  }
-  el.innerHTML =
-    '<div class="trend-cur"><span class="dot ' + dotCls + '"></span>最新列：<b>' + colorName + '</b>　本次列高 <b>' + t.curH + '</b></div>' +
-    '<table class="trend-table"><tr><th>列高</th>' + cells + '</tr>' +
-    '<tr><th>历史列数</th>' + vals + '</tr></table>' +
-    '<div class="trend-summary">本次列高 <b>' + t.curH + '</b>：历史' + colorName + '列中列高为 <b>' + t.hitKey + '</b> 的共 <b>' + t.hitCount + '</b> 列' +
-    (t.total > 0 ? '，占历史' + colorName + '列总数(' + t.total + ')的 <b>' + t.pct.toFixed(1) + '%</b>' : '（暂无历史' + colorName + '列）') +
-    '</div>' +
-    (showSameRatio && t.curH > 1 && t.total > 0 ?
-      (function(){ const ex = t.total - (t.buckets[1] || 0); if (ex <= 0) return ''; const same = t.hitCount; const diff = ex - same; return '<div class="trend-summary">本次列高 <b>' + t.curH + '</b>：历史' + colorName + '列(不计1个)中列高相同 <b>' + same + '</b> 列占 <b>' + (same / ex * 100).toFixed(1) + '%</b>，不相同 <b>' + diff + '</b> 列占 <b>' + (diff / ex * 100).toFixed(1) + '%</b></div>'; })() :
-      '');
 }
 
 
@@ -2071,137 +1929,6 @@ function drawKlineInto(cv, seq){
 
 
 
-function computeKlineSignals(){
-  const seq = state.results.filter(function(r){ return r !== 'T'; });
-  if (seq.length < 14) return null;
-  const closes = [];
-  let price = 0;
-  for (let i = 0; i < seq.length; i++){
-    price += seq[i] === 'B' ? (state.klineFlip ? -1 : 1) : (state.klineFlip ? 1 : -1);
-    closes.push(price);
-  }
-  const n = seq.length, last = n - 1;
-  const ema = function(arr, len){
-    const k = 2 / (len + 1);
-    const out = [arr[0]];
-    for (let i = 1; i < arr.length; i++) out.push(arr[i] * k + out[i - 1] * (1 - k));
-    return out;
-  };
-  const ma = function(arr, len){
-    const out = [];
-    for (let i = 0; i < arr.length; i++){
-      let s = 0; const st = Math.max(0, i - len + 1);
-      for (let j = st; j <= i; j++) s += arr[j];
-      out.push(s / (i - st + 1));
-    }
-    return out;
-  };
-  const sma = function(arr, len, m){
-    const out = [arr[0]];
-    for (let i = 1; i < arr.length; i++) out.push((m * arr[i] + (len - m) * out[i - 1]) / len);
-    return out;
-  };
-  const ref = function(arr, off){
-    const out = [];
-    for (let i = 0; i < arr.length; i++) out.push(i >= off ? arr[i - off] : 0);
-    return out;
-  };
-  const hhv = function(arr, len){
-    const out = [];
-    for (let i = 0; i < arr.length; i++){
-      let m = -Infinity; const st = Math.max(0, i - len + 1);
-      for (let j = st; j <= i; j++) m = Math.max(m, arr[j]);
-      out.push(m);
-    }
-    return out;
-  };
-  const llv = function(arr, len){
-    const out = [];
-    for (let i = 0; i < arr.length; i++){
-      let m = Infinity; const st = Math.max(0, i - len + 1);
-      for (let j = st; j <= i; j++) m = Math.min(m, arr[j]);
-      out.push(m);
-    }
-    return out;
-  };
-  // 均线 MEMA7 vs MEMA10
-  const e7 = ema(closes, 7), e10 = ema(closes, 10);
-  const sigMa = e7[last] > e10[last] ? 'red' : 'blue';
-  // MACD(12,26,9)
-  const e12 = ema(closes, 12), e26 = ema(closes, 26);
-  const difA = [];
-  for (let i = 0; i < n; i++) difA.push(e12[i] - e26[i]);
-  const deaA = ema(difA, 9);
-  const sigMacd = difA[last] > deaA[last] ? 'red' : 'blue';
-  // 六指标共振（与K线副图同公式）
-  const opens = [0];
-  for (let i = 1; i < n; i++) opens.push(closes[i - 1]);
-  const high = [], low = [];
-  for (let i = 0; i < n; i++){ high.push(Math.max(opens[i], closes[i])); low.push(Math.min(opens[i], closes[i])); }
-  const diff8 = [];
-  for (let i = 0; i < n; i++) diff8.push(ema(closes, 8)[i] - ema(closes, 13)[i]);
-  const dea5Arr = ema(diff8, 5);
-  const hh8 = hhv(high, 8), ll8 = llv(low, 8);
-  const rsv1 = [];
-  for (let i = 0; i < n; i++) rsv1.push((closes[i] - ll8[i]) / ((hh8[i] - ll8[i]) || 1) * 100);
-  const kArr = sma(rsv1, 3, 1), dArr = sma(kArr, 3, 1);
-  const lc = ref(closes, 1);
-  const upArr = [], abArr = [];
-  for (let i = 0; i < n; i++){ upArr.push(Math.max(closes[i] - lc[i], 0)); abArr.push(Math.abs(closes[i] - lc[i])); }
-  const sa5 = sma(upArr, 5, 1), sab5 = sma(abArr, 5, 1);
-  const sa13 = sma(upArr, 13, 1), sab13 = sma(abArr, 13, 1);
-  const rsi1 = [], rsi2 = [];
-  for (let i = 0; i < n; i++){
-    rsi1.push(sab5[i] > 0 ? sa5[i] / sab5[i] * 100 : 50);
-    rsi2.push(sab13[i] > 0 ? sa13[i] / sab13[i] * 100 : 50);
-  }
-  const hh13 = hhv(high, 13), ll13 = llv(low, 13);
-  const rsv2 = [];
-  for (let i = 0; i < n; i++) rsv2.push(-(hh13[i] - closes[i]) / ((hh13[i] - ll13[i]) || 1) * 100);
-  const lwr1 = sma(rsv2, 3, 1), lwr2 = sma(lwr1, 3, 1);
-  const bbi = [];
-  for (let i = 0; i < n; i++) bbi.push((ma(closes, 3)[i] + ma(closes, 5)[i] + ma(closes, 8)[i] + ma(closes, 13)[i]) / 4);
-  const mtm = [], amtm = [];
-  for (let i = 0; i < n; i++){ mtm.push(closes[i] - lc[i]); amtm.push(Math.abs(closes[i] - lc[i])); }
-  const eMt5 = ema(ema(mtm, 5), 3), eAm5 = ema(ema(amtm, 5), 3);
-  const eMt13 = ema(ema(mtm, 13), 8), eAm13 = ema(ema(amtm, 13), 8);
-  const mms = [], mmm = [];
-  for (let i = 0; i < n; i++){
-    mms.push(eAm5[i] > 0 ? 100 * eMt5[i] / eAm5[i] : 50);
-    mmm.push(eAm13[i] > 0 ? 100 * eMt13[i] / eAm13[i] : 50);
-  }
-  const t1 = diff8[last] > dea5Arr[last];
-  const t2 = kArr[last] > dArr[last];
-  const t3 = rsi1[last] > rsi2[last];
-  const t4 = lwr1[last] > lwr2[last];
-  const t5 = closes[last] > bbi[last];
-  const t6 = mms[last] > mmm[last];
-  const sigRes = (t1 && t2 && t3 && t4 && t5 && t6) ? 'red' : 'blue';
-  const sigs = { mema: sigMa, macd: sigMacd, res: sigRes };
-  let rn = 0, bn = 0;
-  for (const k in sigs){ if (sigs[k] === 'red') rn++; else bn++; }
-  const combo = rn > bn ? 'red' : rn < bn ? 'blue' : null;
-  return { sigs: sigs, combo: combo };
-}
-function renderTrendPredict(){
-  const el = $('trendPredict'); if (!el) return;
-  const s = computeKlineSignals();
-  const setDot = function(id, c){ const d = $(id); if (d) d.className = 'tp-dot ' + (c || 'na'); };
-  const comboEl = $('tpCombo');
-  if (!s){
-setDot('tpMemaDot', null); setDot('tpMacdDot', null); setDot('tpResDot', null);
-    if (comboEl){ comboEl.className = 'tp-badge na'; comboEl.textContent = '—'; }
-    return;
-  }
-  setDot('tpMemaDot', s.sigs.mema);
-  setDot('tpMacdDot', s.sigs.macd);
-  setDot('tpResDot', s.sigs.res);
-  if (comboEl){
-    if (s.combo){ comboEl.className = 'tp-badge ' + s.combo; comboEl.textContent = s.combo === 'red' ? '庄' : '闲'; }
-    else { comboEl.className = 'tp-badge na'; comboEl.textContent = '—'; }
-  }
-}
-
 function drawKline(){
   drawKlineInto(document.getElementById('klineCanvas'), state.results.filter(function(r){ return r !== 'T'; }));
 }
@@ -2214,22 +1941,6 @@ function klineSeqForRoad(kind){
 function drawEyeKline(){ drawKlineInto(document.getElementById('eyeKlineCanvas'), klineSeqForRoad('eye')); }
 function drawSmallKline(){ drawKlineInto(document.getElementById('smallKlineCanvas'), klineSeqForRoad('small')); }
 function drawRoachKline(){ drawKlineInto(document.getElementById('roachKlineCanvas'), klineSeqForRoad('roach')); }
-
-function renderTrend(){
-  renderTrendInto($('trendPanel'), computeTrend(), {red:'庄(红)', blue:'闲(蓝)'}, true);
-}
-
-function renderEyeTrend(){
-  renderTrendInto($('eyeTrendPanel'), computeEyeTrend(), {red:'红(有规律)', blue:'蓝(无规律)'}, true);
-}
-
-function renderSmallTrend(){
-  renderTrendInto($('smallTrendPanel'), computeSmallTrend(), {red:'红(有规律)', blue:'蓝(无规律)'}, true);
-}
-
-function renderRoachTrend(){
-  renderTrendInto($('roachTrendPanel'), computeRoachTrend(), {red:'红(有规律)', blue:'蓝(无规律)'}, true);
-}
 
 function render(){
   renderSessionStats();
@@ -2246,19 +1957,11 @@ function render(){
     renderBoxStat();
     $('bigroad').innerHTML = '';
     $('smEye').innerHTML = $('smSmall').innerHTML = $('smRoach').innerHTML = '';
-    renderTrend();
-  renderEyeTrend();
-    renderSmallTrend();
-    renderRoachTrend();
-    renderTrendPredict();
-    drawKline();
+      drawKline();
     drawEyeKline();
     drawSmallKline();
     drawRoachKline();
     $('askRoads').innerHTML = '';
-    setBadgeClass($('totalRecoSeqCommon'), 'none'); $('totalRecoSeqCommon').querySelector('.val').textContent = '—';
-    setBadgeClass($('totalRecoRoach'), 'none'); $('totalRecoRoach').querySelector('.val').textContent = '—';
-    renderStats();
     return;
   }
   const big = buildBigRoad(state.results);
@@ -2266,17 +1969,11 @@ function render(){
   renderAskRoads();
   renderCommonReco();
   renderBigRoad(big);
-  renderTrend();
-  renderEyeTrend();
-  renderSmallTrend();
-  renderRoachTrend();
-  renderTrendPredict();
   drawKline();
   drawEyeKline();
   drawSmallKline();
   drawRoachKline();
   renderBoxStat();
-  renderStats();
 }
 
 /* ============ 交互 ============ */
