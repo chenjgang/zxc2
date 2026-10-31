@@ -53,6 +53,8 @@
   /* ===== 工具栏 ===== */
   section.toolbar{display:flex;align-items:center;gap:14px;flex-wrap:wrap;background:var(--panel);
     border:1px solid var(--line);border-radius:14px;padding:12px 16px;margin-bottom:26px}
+  .res-alert{display:none;background:linear-gradient(90deg,#fff7cc,#ffe9a6);border:1px solid #f0c040;color:#7a5c00;border-radius:10px;padding:10px 14px;margin-bottom:26px;font-size:14px;font-weight:600;font-family:var(--sans)}
+  .res-alert-flip{background:linear-gradient(90deg,#eef3ff,#dbe6ff);border-color:#7fa8f0;color:#27497d;margin-top:-18px}
   .btn-group{display:flex;gap:8px;align-items:center}
   .btn-round{width:52px;height:52px;border-radius:50%;border:1px solid transparent;font-family:var(--sans);
     font-size:17px;font-weight:700;color:#fff;cursor:pointer;transition:transform .12s ease, box-shadow .12s ease;box-shadow:0 2px 6px rgba(35,39,46,.12)}
@@ -310,6 +312,9 @@
 
   </section>
 
+  <div class="res-alert" id="resAlert"></div>
+  <div class="res-alert res-alert-flip" id="resAlertFlip"></div>
+
   <section class="roads-main">
     <div class="panel">
       <div class="panel-head"><h3>大路</h3><span class="en">Big Road · 6行</span><span class="legend">超6个从第6行向右衍生 · 下行被占则从当前行衍生 · 换色从第1行开始</span></div>
@@ -352,7 +357,7 @@
 
   <section class="roads-main">
     <div class="panel ask-panel">
-      <div class="panel-head"><h3>庄问路 · 闲问路　/　三小路推荐</h3><span class="en">Ask & Recommend</span><span class="legend">问路＝假设下一局为庄/闲时三小路的下一标记；最新颜色与庄问路相反显示“推荐庄”、与闲问路相反显示“推荐闲”</span></div>
+      <div class="panel-head"><h3>庄问路 · 闲问路</h3><span class="en">Ask & Recommend</span><span class="legend">问路＝假设下一局为庄/闲时三小路的下一标记</span></div>
       <div class="ask-grid" id="askRoads"></div>
     </div>
   </section>
@@ -1118,7 +1123,7 @@ function renderAskRoads(){
     return '<span class="mk-slash ' + (v === 'R' ? 'red' : 'blue') + '"></span>';
   };
   // 庄问路 / 闲问路 / 三顺推荐 表（4列）
-  let html = '<div class="ask-head"><span class="ask-road"></span><span class="ask-col b">庄问路</span><span class="ask-col p">闲问路</span><span class="ask-col">三顺推荐</span></div>';
+  let html = '<div class="ask-head"><span class="ask-road"></span><span class="ask-col b">庄问路</span><span class="ask-col p">闲问路</span></div>';
   let seqR = 0, seqB = 0;
   for (let i = 0; i < 3; i++){
     const active = (s.colLen[i] || 0) >= 1;   // 最新列1个也参与比较推荐
@@ -1135,10 +1140,9 @@ function renderAskRoads(){
       else if (isBlue && !isRed){ tagEl.className = 'ask-seq-tag blue'; tagEl.textContent = '三顺：闲'; }
       else { tagEl.className = 'ask-seq-tag'; tagEl.textContent = '三顺：—'; }
     }
-    html += '<div class="ask-row"><span class="ask-road">' + names[i] + '</span>'
+    html += '<div class="ask-row"><span class="ask-road">' + (i + 1) + ' ' + names[i] + '</span>'
       + '<span class="ask-cell">' + markHtml(i, pred.B[i]) + '</span>'
-      + '<span class="ask-cell">' + markHtml(i, pred.P[i]) + '</span>'
-      + '<span class="ask-cell">' + seq + '</span></div>';
+      + '<span class="ask-cell">' + markHtml(i, pred.P[i]) + '</span></div>';
   }
   // 三顺路推荐合计：三顺推荐列颜色不一致（既有庄又有闲）→ 不推荐；单一颜色 → 推荐该色
   let seqTotal;
@@ -1146,7 +1150,6 @@ function renderAskRoads(){
   else if (seqR > 0) seqTotal = '<span class="ask-rb">推荐庄</span>';
   else if (seqB > 0) seqTotal = '<span class="ask-rp">推荐闲</span>';
   else seqTotal = '<span class="ask-na">—</span>';
-  html += '<div class="ask-row ask-total"><span class="ask-road">三顺路推荐</span><span class="ask-cell"></span><span class="ask-cell"></span><span class="ask-cell">' + seqTotal + '</span></div>';
   el.innerHTML = html;
   // 顶部三顺推荐徽标同步（共同推荐右侧）
   const seqEl = $('totalRecoSeq');
@@ -1688,6 +1691,105 @@ function computeTrendFromCols(cols){
 
 
 // K线走势：依据大路红蓝生成股票K线（红=庄+1，蓝=闲-1，实体单位1、宽度0.5，不计和局）
+function computeResonance(closes){
+  const n = closes.length;
+  const res = [], buy = [];
+  if (n < 3) return { res: res, buy: buy };
+  const ema = function(arr, len){ const k = 2 / (len + 1); const out = [arr[0]]; for (let i = 1; i < arr.length; i++) out.push(arr[i] * k + out[i - 1] * (1 - k)); return out; };
+  const ma = function(arr, len){ const out = []; for (let i = 0; i < arr.length; i++){ let s = 0; const st = Math.max(0, i - len + 1); for (let j = st; j <= i; j++) s += arr[j]; out.push(s / (i - st + 1)); } return out; };
+  const sma = function(arr, len, m){ const out = [arr[0]]; for (let i = 1; i < arr.length; i++) out.push((m * arr[i] + (len - m) * out[i - 1]) / len); return out; };
+  const ref = function(arr, off){ const out = []; for (let i = 0; i < arr.length; i++) out.push(i >= off ? arr[i - off] : 0); return out; };
+  const hhv = function(arr, len){ const out = []; for (let i = 0; i < arr.length; i++){ let m = -Infinity; const st = Math.max(0, i - len + 1); for (let j = st; j <= i; j++) m = Math.max(m, arr[j]); out.push(m); } return out; };
+  const llv = function(arr, len){ const out = []; for (let i = 0; i < arr.length; i++){ let m = Infinity; const st = Math.max(0, i - len + 1); for (let j = st; j <= i; j++) m = Math.min(m, arr[j]); out.push(m); } return out; };
+  const high = [], low = [];
+  for (let i = 0; i < n; i++){ const o = i > 0 ? closes[i - 1] : 0; high.push(Math.max(o, closes[i])); low.push(Math.min(o, closes[i])); }
+  const lc = ref(closes, 1);
+  const diff8 = [], dea5 = [];
+  for (let i = 0; i < n; i++) diff8.push(ema(closes, 8)[i] - ema(closes, 13)[i]);
+  const dea5Arr = ema(diff8, 5);
+  const hh8 = hhv(high, 8), ll8 = llv(low, 8);
+  const rsv1 = [];
+  for (let i = 0; i < n; i++) rsv1.push((closes[i] - ll8[i]) / ((hh8[i] - ll8[i]) || 1) * 100);
+  const kArr = sma(rsv1, 3, 1), dArr = sma(kArr, 3, 1);
+  const upArr = [], abArr = [];
+  for (let i = 0; i < n; i++){ upArr.push(Math.max(closes[i] - lc[i], 0)); abArr.push(Math.abs(closes[i] - lc[i])); }
+  const sa5 = sma(upArr, 5, 1), sab5 = sma(abArr, 5, 1);
+  const sa13 = sma(upArr, 13, 1), sab13 = sma(abArr, 13, 1);
+  const rsi1 = [], rsi2 = [];
+  for (let i = 0; i < n; i++){ rsi1.push(sab5[i] > 0 ? sa5[i] / sab5[i] * 100 : 50); rsi2.push(sab13[i] > 0 ? sa13[i] / sab13[i] * 100 : 50); }
+  const hh13 = hhv(high, 13), ll13 = llv(low, 13);
+  const rsv2 = [];
+  for (let i = 0; i < n; i++) rsv2.push(-(hh13[i] - closes[i]) / ((hh13[i] - ll13[i]) || 1) * 100);
+  const lwr1 = sma(rsv2, 3, 1), lwr2 = sma(lwr1, 3, 1);
+  const bbi = [];
+  for (let i = 0; i < n; i++) bbi.push((ma(closes, 3)[i] + ma(closes, 5)[i] + ma(closes, 8)[i] + ma(closes, 13)[i]) / 4);
+  const mtm = [], amtm = [];
+  for (let i = 0; i < n; i++){ mtm.push(closes[i] - lc[i]); amtm.push(Math.abs(closes[i] - lc[i])); }
+  const eMt5 = ema(ema(mtm, 5), 3), eAm5 = ema(ema(amtm, 5), 3);
+  const eMt13 = ema(ema(mtm, 13), 8), eAm13 = ema(ema(amtm, 13), 8);
+  const mms = [], mmm = [];
+  for (let i = 0; i < n; i++){ mms.push(eAm5[i] > 0 ? 100 * eMt5[i] / eAm5[i] : 50); mmm.push(eAm13[i] > 0 ? 100 * eMt13[i] / eAm13[i] : 50); }
+  for (let i = 0; i < n; i++){
+    const g = diff8[i] > dea5Arr[i] && kArr[i] > dArr[i] && rsi1[i] > rsi2[i] && lwr1[i] > lwr2[i] && closes[i] > bbi[i] && mms[i] > mmm[i];
+    res.push(g);
+    buy.push(g && !(i > 0 ? res[i - 1] : false));
+  }
+  return { res: res, buy: buy };
+}
+function refreshResAlert(){
+  const tags = { '大路': '大路', '大眼仔': '大眼仔路', '小路': '小路', '曱甴': '曱甴路' };
+  const seqs = {
+    '大路': state.results.filter(function(r){ return r !== 'T'; }),
+    '大眼仔': klineSeqForRoad('eye'),
+    '小路': klineSeqForRoad('small'),
+    '曱甴': klineSeqForRoad('roach')
+  };
+  const out = { '正常': [], '反转': [] };
+  const dirs = [['正常', false], ['反转', true]];
+  const ema = function(arr, len){ const k = 2 / (len + 1); const outA = [arr[0]]; for (let i = 1; i < arr.length; i++) outA.push(arr[i] * k + outA[i - 1] * (1 - k)); return outA; };
+  for (const key in tags){
+    const seq = seqs[key];
+    if (seq.length < 3) continue;
+    for (let d = 0; d < dirs.length; d++){
+      const label = dirs[d][0], flip = dirs[d][1];
+      const closes = [];
+      let cur = 0;
+      for (let i = 0; i < seq.length; i++){
+        cur = cur + (seq[i] === 'B' ? (flip ? -1 : 1) : (flip ? 1 : -1));
+        closes.push(cur);
+      }
+      const r = computeResonance(closes);
+      const e7 = ema(closes, 7), e10 = ema(closes, 10);
+      if (r.buy.length && r.res[r.res.length - 1] && e10[e10.length - 1] < e7[e7.length - 1]){
+        let cnt = 0;
+        for (let i = r.res.length - 1; i >= 0 && r.res[i]; i--) cnt++;
+        const buyTag = r.buy[r.buy.length - 1] ? '·共振买入' : '·共振持有';
+        let colorTag = '';
+        if (key === '大路'){
+          colorTag = flip ? '·<span style="color:#1971c2;font-weight:800">蓝买入</span>' : '·<span style="color:#e03131;font-weight:800">庄红买入</span>';
+        } else {
+          const idx = key === '大眼仔' ? 0 : (key === '小路' ? 1 : 2);
+          const sStats = smallRecoStats(state.results);
+          const pB = sStats.pred.B[idx], pP = sStats.pred.P[idx];
+          let part = '';
+          if (flip){
+            if (pB === 'B') part = '<span style="color:#e03131;font-weight:800">庄买入</span>';
+            else if (pP === 'B') part = '<span style="color:#1971c2;font-weight:800">蓝买入</span>';
+          } else {
+            if (pB === 'R') part = '<span style="color:#e03131;font-weight:800">庄买入</span>';
+            else if (pP === 'R') part = '<span style="color:#1971c2;font-weight:800">闲买入</span>';
+          }
+          if (part) colorTag = '·' + part;
+        }
+        out[label].push(tags[key] + 'K线' + buyTag + '·连续' + cnt + '根' + colorTag + '（' + label + '）');
+      }
+    }
+  }
+  const el1 = document.getElementById('resAlert');
+  if (el1){ if (out['正常'].length){ el1.style.display = 'block'; el1.innerHTML = '<b>共振信号（正常）：</b>' + out['正常'].join('、'); } else { el1.style.display = 'none'; el1.innerHTML = ''; } }
+  const el2 = document.getElementById('resAlertFlip');
+  if (el2){ if (out['反转'].length){ el2.style.display = 'block'; el2.innerHTML = '<b>共振信号（反转）：</b>' + out['反转'].join('、'); } else { el2.style.display = 'none'; el2.innerHTML = ''; } }
+}
 function drawKlineInto(cv, seq){
   if (!cv) return;
   const ctx = cv.getContext('2d');
@@ -1933,12 +2035,15 @@ function drawKlineInto(cv, seq){
       ctx.fillRect(x - 1.5, rOf(6) - 3, 3, rH + 3);
     }
   }
+  state.__lastRes = { buy: !!(buy.length && buy[n - 1]), res: !!(res.length && res[n - 1]) };
 }
 
 
 
 function drawKline(){
+  state.__alerts = state.__alerts || {};
   drawKlineInto(document.getElementById('klineCanvas'), state.results.filter(function(r){ return r !== 'T'; }));
+  state.__alerts['大路'] = state.__lastRes;
 }
 function klineSeqForRoad(kind){
   const cols = buildStreakCols(state.results);
@@ -1946,9 +2051,9 @@ function klineSeqForRoad(kind){
   const marks = buildDerivedRoad(cols, skip);
   return marks.map(function(m){ return m === 'R' ? 'B' : 'P'; });
 }
-function drawEyeKline(){ drawKlineInto(document.getElementById('eyeKlineCanvas'), klineSeqForRoad('eye')); }
-function drawSmallKline(){ drawKlineInto(document.getElementById('smallKlineCanvas'), klineSeqForRoad('small')); }
-function drawRoachKline(){ drawKlineInto(document.getElementById('roachKlineCanvas'), klineSeqForRoad('roach')); }
+function drawEyeKline(){ state.__alerts = state.__alerts || {}; drawKlineInto(document.getElementById('eyeKlineCanvas'), klineSeqForRoad('eye')); state.__alerts['大眼仔'] = state.__lastRes; }
+function drawSmallKline(){ state.__alerts = state.__alerts || {}; drawKlineInto(document.getElementById('smallKlineCanvas'), klineSeqForRoad('small')); state.__alerts['小路'] = state.__lastRes; }
+function drawRoachKline(){ state.__alerts = state.__alerts || {}; drawKlineInto(document.getElementById('roachKlineCanvas'), klineSeqForRoad('roach')); state.__alerts['曱甴'] = state.__lastRes; }
 
 function render(){
   renderSessionStats();
@@ -1970,6 +2075,7 @@ function render(){
     drawSmallKline();
     drawRoachKline();
     $('askRoads').innerHTML = '';
+    refreshResAlert();
     return;
   }
   const big = buildBigRoad(state.results);
@@ -1982,6 +2088,7 @@ function render(){
   drawSmallKline();
   drawRoachKline();
   renderBoxStat();
+  refreshResAlert();
 }
 
 /* ============ 交互 ============ */
@@ -2016,6 +2123,7 @@ $('klineFlipBtn').addEventListener('click', () => {
   drawEyeKline();
   drawSmallKline();
   drawRoachKline();
+  refreshResAlert();
 });
 $('sampleBtn').addEventListener('click', () => { state.results = parseInput(SAMPLE); render(); });
 $('loadBtn').addEventListener('click', () => {
