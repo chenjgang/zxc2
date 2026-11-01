@@ -55,6 +55,9 @@
     border:1px solid var(--line);border-radius:14px;padding:12px 16px;margin-bottom:26px}
   .res-alert{display:none;background:linear-gradient(90deg,#fff7cc,#ffe9a6);border:1px solid #f0c040;color:#7a5c00;border-radius:10px;padding:10px 14px;margin-bottom:26px;font-size:14px;font-weight:600;font-family:var(--sans)}
   .res-alert-flip{background:linear-gradient(90deg,#eef3ff,#dbe6ff);border-color:#7fa8f0;color:#27497d;margin-top:-18px}
+  .res-kline-grid{display:none;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin:-8px 0 24px}
+  .res-kline-cell{min-width:0}
+  .res-kline-mini{width:100%;background:#fff;border:1px solid #e8e8e8;border-radius:8px;box-sizing:border-box}
   .btn-group{display:flex;gap:8px;align-items:center}
   .btn-round{width:52px;height:52px;border-radius:50%;border:1px solid transparent;font-family:var(--sans);
     font-size:17px;font-weight:700;color:#fff;cursor:pointer;transition:transform .12s ease, box-shadow .12s ease;box-shadow:0 2px 6px rgba(35,39,46,.12)}
@@ -313,7 +316,9 @@
   </section>
 
   <div class="res-alert" id="resAlert"></div>
+  <div class="res-kline-grid" id="resKlineNormal"></div>
   <div class="res-alert res-alert-flip" id="resAlertFlip"></div>
+  <div class="res-kline-grid" id="resKlineFlip"></div>
 
   <section class="roads-main">
     <div class="panel">
@@ -1745,6 +1750,7 @@ function refreshResAlert(){
     '曱甴': klineSeqForRoad('roach')
   };
   const out = { '正常': [], '反转': [] };
+  const hit = { '正常': [], '反转': [] };
   const dirs = [['正常', false], ['反转', true]];
   const ema = function(arr, len){ const k = 2 / (len + 1); const outA = [arr[0]]; for (let i = 1; i < arr.length; i++) outA.push(arr[i] * k + outA[i - 1] * (1 - k)); return outA; };
   for (const key in tags){
@@ -1782,6 +1788,7 @@ function refreshResAlert(){
           if (part) colorTag = '·' + part;
         }
         out[label].push(tags[key] + 'K线' + buyTag + '·连续' + cnt + '根' + colorTag + '（' + label + '）');
+        hit[label].push(key);
       }
     }
   }
@@ -1789,6 +1796,28 @@ function refreshResAlert(){
   if (el1){ if (out['正常'].length){ el1.style.display = 'block'; el1.innerHTML = '<b>共振信号（正常）：</b>' + out['正常'].join('、'); } else { el1.style.display = 'none'; el1.innerHTML = ''; } }
   const el2 = document.getElementById('resAlertFlip');
   if (el2){ if (out['反转'].length){ el2.style.display = 'block'; el2.innerHTML = '<b>共振信号（反转）：</b>' + out['反转'].join('、'); } else { el2.style.display = 'none'; el2.innerHTML = ''; } }
+  const prevFlip = state.klineFlip;
+  const grids = [['resKlineNormal', '正常'], ['resKlineFlip', '反转']];
+  for (let g = 0; g < grids.length; g++){
+    const grid = document.getElementById(grids[g][0]);
+    if (!grid) continue;
+    grid.innerHTML = '';
+    if (out[grids[g][1]].length){
+      grid.style.display = 'grid';
+      state.klineFlip = (grids[g][1] === '反转');
+      const ks = hit[grids[g][1]];
+      for (let q = 0; q < ks.length; q++){
+        const cell = document.createElement('div');
+        cell.className = 'res-kline-cell';
+        grid.appendChild(cell);
+        const cv = document.createElement('canvas');
+        cv.className = 'res-kline-mini';
+        cell.appendChild(cv);
+        drawKlineInto(cv, seqs[ks[q]]);
+      }
+    } else { grid.style.display = 'none'; }
+  }
+  state.klineFlip = prevFlip;
 }
 function drawKlineInto(cv, seq){
   if (!cv) return;
