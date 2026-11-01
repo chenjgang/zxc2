@@ -53,11 +53,6 @@
   /* ===== 工具栏 ===== */
   section.toolbar{display:flex;align-items:center;gap:14px;flex-wrap:wrap;background:var(--panel);
     border:1px solid var(--line);border-radius:14px;padding:12px 16px;margin-bottom:26px}
-  .res-alert{display:none;background:linear-gradient(90deg,#fff7cc,#ffe9a6);border:1px solid #f0c040;color:#7a5c00;border-radius:10px;padding:10px 14px;margin-bottom:26px;font-size:14px;font-weight:600;font-family:var(--sans)}
-  .res-alert-flip{background:linear-gradient(90deg,#eef3ff,#dbe6ff);border-color:#7fa8f0;color:#27497d;margin-top:-18px}
-  .res-kline-grid{display:none;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin:-8px 0 24px}
-  .res-kline-cell{min-width:0}
-  .res-kline-mini{width:100%;background:#fff;border:1px solid #e8e8e8;border-radius:8px;box-sizing:border-box}
   .btn-group{display:flex;gap:8px;align-items:center}
   .btn-round{width:52px;height:52px;border-radius:50%;border:1px solid transparent;font-family:var(--sans);
     font-size:17px;font-weight:700;color:#fff;cursor:pointer;transition:transform .12s ease, box-shadow .12s ease;box-shadow:0 2px 6px rgba(35,39,46,.12)}
@@ -275,6 +270,9 @@
 
   .kline-wrap{overflow-x:auto;padding:6px 2px}
   .kline-wrap canvas{display:block;max-width:100%;height:auto}
+  .kline-row{display:flex;gap:10px;align-items:flex-start}
+  .kline-row .kline-wrap{flex:1 1 0;min-width:0}
+  .kline-cap{font-size:12px;color:#888;font-weight:600;margin-bottom:2px}
 
   .kline-flip{margin-left:10px;padding:2px 10px;font-size:12px;border:1px solid var(--line);border-radius:12px;background:transparent;color:var(--ink);cursor:pointer}
   .kline-flip.on{background:var(--red);color:#fff;border-color:var(--red)}
@@ -315,10 +313,6 @@
 
   </section>
 
-  <div class="res-alert" id="resAlert"></div>
-  <div class="res-kline-grid" id="resKlineNormal"></div>
-  <div class="res-alert res-alert-flip" id="resAlertFlip"></div>
-  <div class="res-kline-grid" id="resKlineFlip"></div>
 
   <section class="roads-main">
     <div class="panel">
@@ -338,7 +332,10 @@
   <section class="roads-main">
     <div class="panel">
       <div class="panel-head"><h3>K线走势</h3><span class="en">Stock Candles · 依据大路红蓝</span><button class="kline-flip" id="klineFlipBtn">反转</button><span class="legend">红=庄(+1) 蓝=闲(-1) · 实体单位1 · 宽度0.5 · 不计和局</span></div>
-      <div class="kline-wrap"><canvas id="klineCanvas" width="920" height="240"></canvas></div>
+      <div class="kline-row">
+        <div class="kline-wrap"><div class="kline-cap">大路K线</div><canvas id="klineCanvas" width="920" height="240"></canvas></div>
+        <div class="kline-wrap"><div class="kline-cap">大路K线（反转）</div><canvas id="klineFlipCanvas" width="920" height="240"></canvas></div>
+      </div>
     </div>
   </section>
 
@@ -1741,84 +1738,6 @@ function computeResonance(closes){
   }
   return { res: res, buy: buy };
 }
-function refreshResAlert(){
-  const tags = { '大路': '大路', '大眼仔': '大眼仔路', '小路': '小路', '曱甴': '曱甴路' };
-  const seqs = {
-    '大路': state.results.filter(function(r){ return r !== 'T'; }),
-    '大眼仔': klineSeqForRoad('eye'),
-    '小路': klineSeqForRoad('small'),
-    '曱甴': klineSeqForRoad('roach')
-  };
-  const out = { '正常': [], '反转': [] };
-  const hit = { '正常': [], '反转': [] };
-  const dirs = [['正常', false], ['反转', true]];
-  const ema = function(arr, len){ const k = 2 / (len + 1); const outA = [arr[0]]; for (let i = 1; i < arr.length; i++) outA.push(arr[i] * k + outA[i - 1] * (1 - k)); return outA; };
-  for (const key in tags){
-    const seq = seqs[key];
-    if (seq.length < 3) continue;
-    for (let d = 0; d < dirs.length; d++){
-      const label = dirs[d][0], flip = dirs[d][1];
-      const closes = [];
-      let cur = 0;
-      for (let i = 0; i < seq.length; i++){
-        cur = cur + (seq[i] === 'B' ? (flip ? -1 : 1) : (flip ? 1 : -1));
-        closes.push(cur);
-      }
-      const r = computeResonance(closes);
-      const e7 = ema(closes, 7), e10 = ema(closes, 10);
-      if (r.buy.length && r.res[r.res.length - 1] && e10[e10.length - 1] < e7[e7.length - 1]){
-        let cnt = 0;
-        for (let i = r.res.length - 1; i >= 0 && r.res[i]; i--) cnt++;
-        const buyTag = r.buy[r.buy.length - 1] ? '·共振买入' : '·共振持有';
-        let colorTag = '';
-        if (key === '大路'){
-          colorTag = flip ? '·<span style="color:#1971c2;font-weight:800">蓝买入</span>' : '·<span style="color:#e03131;font-weight:800">庄红买入</span>';
-        } else {
-          const idx = key === '大眼仔' ? 0 : (key === '小路' ? 1 : 2);
-          const sStats = smallRecoStats(state.results);
-          const pB = sStats.pred.B[idx], pP = sStats.pred.P[idx];
-          let part = '';
-          if (flip){
-            if (pB === 'B') part = '<span style="color:#e03131;font-weight:800">庄买入</span>';
-            else if (pP === 'B') part = '<span style="color:#1971c2;font-weight:800">蓝买入</span>';
-          } else {
-            if (pB === 'R') part = '<span style="color:#e03131;font-weight:800">庄买入</span>';
-            else if (pP === 'R') part = '<span style="color:#1971c2;font-weight:800">闲买入</span>';
-          }
-          if (part) colorTag = '·' + part;
-        }
-        out[label].push(tags[key] + 'K线' + buyTag + '·连续' + cnt + '根' + colorTag + '（' + label + '）');
-        hit[label].push(key);
-      }
-    }
-  }
-  const el1 = document.getElementById('resAlert');
-  if (el1){ if (out['正常'].length){ el1.style.display = 'block'; el1.innerHTML = '<b>共振信号（正常）：</b>' + out['正常'].join('、'); } else { el1.style.display = 'none'; el1.innerHTML = ''; } }
-  const el2 = document.getElementById('resAlertFlip');
-  if (el2){ if (out['反转'].length){ el2.style.display = 'block'; el2.innerHTML = '<b>共振信号（反转）：</b>' + out['反转'].join('、'); } else { el2.style.display = 'none'; el2.innerHTML = ''; } }
-  const prevFlip = state.klineFlip;
-  const grids = [['resKlineNormal', '正常'], ['resKlineFlip', '反转']];
-  for (let g = 0; g < grids.length; g++){
-    const grid = document.getElementById(grids[g][0]);
-    if (!grid) continue;
-    grid.innerHTML = '';
-    if (out[grids[g][1]].length){
-      grid.style.display = 'grid';
-      state.klineFlip = (grids[g][1] === '反转');
-      const ks = hit[grids[g][1]];
-      for (let q = 0; q < ks.length; q++){
-        const cell = document.createElement('div');
-        cell.className = 'res-kline-cell';
-        grid.appendChild(cell);
-        const cv = document.createElement('canvas');
-        cv.className = 'res-kline-mini';
-        cell.appendChild(cv);
-        drawKlineInto(cv, seqs[ks[q]]);
-      }
-    } else { grid.style.display = 'none'; }
-  }
-  state.klineFlip = prevFlip;
-}
 function drawKlineInto(cv, seq){
   if (!cv) return;
   const ctx = cv.getContext('2d');
@@ -2071,8 +1990,16 @@ function drawKlineInto(cv, seq){
 
 function drawKline(){
   state.__alerts = state.__alerts || {};
-  drawKlineInto(document.getElementById('klineCanvas'), state.results.filter(function(r){ return r !== 'T'; }));
+  const seq = state.results.filter(function(r){ return r !== 'T'; });
+  drawKlineInto(document.getElementById('klineCanvas'), seq);
   state.__alerts['大路'] = state.__lastRes;
+  const fcv = document.getElementById('klineFlipCanvas');
+  if (fcv){
+    const prev = state.klineFlip;
+    state.klineFlip = true;
+    drawKlineInto(fcv, seq);
+    state.klineFlip = prev;
+  }
 }
 function klineSeqForRoad(kind){
   const cols = buildStreakCols(state.results);
@@ -2104,7 +2031,6 @@ function render(){
     drawSmallKline();
     drawRoachKline();
     $('askRoads').innerHTML = '';
-    refreshResAlert();
     return;
   }
   const big = buildBigRoad(state.results);
@@ -2117,7 +2043,6 @@ function render(){
   drawSmallKline();
   drawRoachKline();
   renderBoxStat();
-  refreshResAlert();
 }
 
 /* ============ 交互 ============ */
@@ -2152,7 +2077,6 @@ $('klineFlipBtn').addEventListener('click', () => {
   drawEyeKline();
   drawSmallKline();
   drawRoachKline();
-  refreshResAlert();
 });
 $('sampleBtn').addEventListener('click', () => { state.results = parseInput(SAMPLE); render(); });
 $('loadBtn').addEventListener('click', () => {
