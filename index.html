@@ -343,17 +343,26 @@
     <div class="panel">
       <div class="panel-head"><h3>大眼仔路</h3><span class="en">Big Eye Boy</span><span class="ask-seq-tag" id="smSeqEye">三顺：—</span></div>
       <div class="road-scroll"><div class="road-grid smroad" id="smEye"></div></div>
-      <div class="kline-wrap"><canvas id="eyeKlineCanvas" width="920" height="372"></canvas></div>
+      <div class="kline-row">
+        <div class="kline-wrap"><div class="kline-cap">大眼仔路K线</div><canvas id="eyeKlineCanvas" width="920" height="372"></canvas></div>
+        <div class="kline-wrap"><div class="kline-cap">大眼仔路K线（反转）</div><canvas id="eyeKlineFlipCanvas" width="920" height="372"></canvas></div>
+      </div>
     </div>
     <div class="panel">
       <div class="panel-head"><h3>小路</h3><span class="en">Small Road</span><span class="ask-seq-tag" id="smSeqSmall">三顺：—</span></div>
       <div class="road-scroll"><div class="road-grid smroad" id="smSmall"></div></div>
-      <div class="kline-wrap"><canvas id="smallKlineCanvas" width="920" height="372"></canvas></div>
+      <div class="kline-row">
+        <div class="kline-wrap"><div class="kline-cap">小路K线</div><canvas id="smallKlineCanvas" width="920" height="372"></canvas></div>
+        <div class="kline-wrap"><div class="kline-cap">小路K线（反转）</div><canvas id="smallKlineFlipCanvas" width="920" height="372"></canvas></div>
+      </div>
     </div>
     <div class="panel">
       <div class="panel-head"><h3>曱甴路</h3><span class="en">Cockroach Pig</span><span class="ask-seq-tag" id="smSeqRoach">三顺：—</span></div>
       <div class="road-scroll"><div class="road-grid smroad" id="smRoach"></div></div>
-      <div class="kline-wrap"><canvas id="roachKlineCanvas" width="920" height="372"></canvas></div>
+      <div class="kline-row">
+        <div class="kline-wrap"><div class="kline-cap">曱甴路K线</div><canvas id="roachKlineCanvas" width="920" height="372"></canvas></div>
+        <div class="kline-wrap"><div class="kline-cap">曱甴路K线（反转）</div><canvas id="roachKlineFlipCanvas" width="920" height="372"></canvas></div>
+      </div>
     </div>
   </section>
 
@@ -2007,9 +2016,9 @@ function klineSeqForRoad(kind){
   const marks = buildDerivedRoad(cols, skip);
   return marks.map(function(m){ return m === 'R' ? 'B' : 'P'; });
 }
-function drawEyeKline(){ state.__alerts = state.__alerts || {}; drawKlineInto(document.getElementById('eyeKlineCanvas'), klineSeqForRoad('eye')); state.__alerts['大眼仔'] = state.__lastRes; }
-function drawSmallKline(){ state.__alerts = state.__alerts || {}; drawKlineInto(document.getElementById('smallKlineCanvas'), klineSeqForRoad('small')); state.__alerts['小路'] = state.__lastRes; }
-function drawRoachKline(){ state.__alerts = state.__alerts || {}; drawKlineInto(document.getElementById('roachKlineCanvas'), klineSeqForRoad('roach')); state.__alerts['曱甴'] = state.__lastRes; }
+function drawEyeKline(){ state.__alerts = state.__alerts || {}; const seq = klineSeqForRoad('eye'); drawKlineInto(document.getElementById('eyeKlineCanvas'), seq); state.__alerts['大眼仔'] = state.__lastRes; const fcv = document.getElementById('eyeKlineFlipCanvas'); if (fcv){ const prev = state.klineFlip; state.klineFlip = true; drawKlineInto(fcv, seq); state.klineFlip = prev; } }
+function drawSmallKline(){ state.__alerts = state.__alerts || {}; const seq = klineSeqForRoad('small'); drawKlineInto(document.getElementById('smallKlineCanvas'), seq); state.__alerts['小路'] = state.__lastRes; const fcv = document.getElementById('smallKlineFlipCanvas'); if (fcv){ const prev = state.klineFlip; state.klineFlip = true; drawKlineInto(fcv, seq); state.klineFlip = prev; } }
+function drawRoachKline(){ state.__alerts = state.__alerts || {}; const seq = klineSeqForRoad('roach'); drawKlineInto(document.getElementById('roachKlineCanvas'), seq); state.__alerts['曱甴'] = state.__lastRes; const fcv = document.getElementById('roachKlineFlipCanvas'); if (fcv){ const prev = state.klineFlip; state.klineFlip = true; drawKlineInto(fcv, seq); state.klineFlip = prev; } }
 
 function render(){
   renderSessionStats();
