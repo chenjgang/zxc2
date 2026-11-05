@@ -65,6 +65,8 @@
   .btn-ghost{background:transparent;border:1px solid var(--line2);color:var(--ink);border-radius:9px;padding:9px 15px;
     font-size:13px;cursor:pointer;font-family:var(--sans);transition:background .12s, border-color .12s}
   .btn-ghost:hover{background:var(--panel-deep);border-color:var(--line2)}
+  .btn-ghost.act-lg{padding:13px 26px;font-size:15px;font-weight:600;border-radius:11px}
+  .btn-group .act-lg + .act-lg{margin-left:32px}
   .bulk{display:flex;gap:8px;flex:1;min-width:220px}
   .bulk input{flex:1;background:var(--paper);border:1px solid var(--line);border-radius:9px;padding:9px 13px;
     font-size:13px;color:var(--ink);font-family:var(--sans);outline:none}
@@ -270,7 +272,25 @@
 
   .kline-wrap{overflow-x:auto;padding:6px 2px}
   .kline-wrap canvas{display:block;max-width:100%;height:auto}
-  .kline-row{display:flex;gap:10px;align-items:flex-start}
+  .kline-row{display:flex;gap:10px;align-items:flex-start;position:relative}
+  .kline-cross{display:none;position:absolute;inset:0;pointer-events:none;z-index:8;overflow:hidden}
+  .kline-cross.on{display:block}
+  .kline-cross i{position:absolute;background:#ff9f43;opacity:.9}
+  .kline-cross .kc-v{top:0;bottom:0;width:1px}
+  .kline-cross .kc-h{left:0;right:0;height:1px}
+  .trend-panel{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:12px 16px;margin-bottom:26px}
+  .trend-head{display:flex;align-items:center;gap:10px;margin-bottom:9px}
+  .trend-head h3{font-size:15px;font-weight:700;color:var(--ink);margin:0}
+  .trend-total{margin-left:auto;font-size:13px;font-weight:800;padding:3px 10px;border-radius:10px;border:1px solid var(--line);color:var(--muted)}
+  .trend-total.red{background:var(--red);color:#fff;border-color:var(--red)}
+  .trend-total.blue{background:var(--blue);color:#fff;border-color:var(--blue)}
+  .trend-grid{display:flex;gap:10px;flex-wrap:wrap}
+  .trend-card{flex:1 1 150px;min-width:146px;border:1px solid var(--line);border-radius:10px;padding:8px 10px;background:var(--paper);display:flex;flex-direction:column;gap:1px}
+  .trend-card .tk{font-size:12px;font-weight:700;color:var(--muted)}
+  .trend-card .tv{font-size:14px;font-weight:800;color:var(--ink)}
+  .trend-card.red .tv{color:#e03131}
+  .trend-card.blue .tv{color:#1971c2}
+  .trend-card .td{font-size:11px;color:var(--muted);line-height:1.4}
   .kline-row .kline-wrap{flex:1 1 0;min-width:0}
   .kline-cap{font-size:12px;color:#888;font-weight:600;margin-bottom:2px}
 
@@ -301,14 +321,19 @@
     </div>
   </header>
 
+  <section class="trend-panel">
+    <div class="trend-head"><h3>趋势分析</h3><span class="trend-total" id="trendTotal">推荐：—</span></div>
+    <div class="trend-grid" id="trendGrid"></div>
+  </section>
+
   <section class="toolbar">
     <div class="btn-group">
       <button class="btn-round p" data-add="P" title="闲 Player">闲</button>
       <button class="btn-round b" data-add="B" title="庄 Banker">庄</button>
       <button class="btn-round t" data-add="T" title="和 Tie">和</button>
-      <button class="btn-ghost" id="undoBtn">撤销</button>
-      <button class="btn-ghost" id="randomBtn">随机</button>
-      <button class="btn-ghost" id="clearBtn">清空</button>
+      <button class="btn-ghost act-lg" id="undoBtn">撤销</button>
+      <button class="btn-ghost act-lg" id="randomBtn">随机</button>
+      <button class="btn-ghost act-lg" id="clearBtn">清空</button>
     </div>
 
   </section>
@@ -331,10 +356,11 @@
 
   <section class="roads-main">
     <div class="panel">
-      <div class="panel-head"><h3>K线走势</h3><span class="en">Stock Candles · 依据大路红蓝</span><button class="kline-flip" id="klineFlipBtn">反转</button><span class="legend">红=庄(+1) 蓝=闲(-1) · 实体单位1 · 宽度0.5 · 不计和局</span></div>
-      <div class="kline-row">
+      <div class="panel-head"><h3>K线走势</h3><span class="en">Stock Candles · 依据大路红蓝</span><button class="kline-flip" id="klineFlipBtn">反转</button><button class="kline-flip" id="klineCrossBtn">十字</button><span class="legend">红=庄(+1) 蓝=闲(-1) · 实体单位1 · 宽度0.5 · 不计和局</span></div>
+      <div class="kline-row" id="klineRow">
         <div class="kline-wrap"><div class="kline-cap">大路K线</div><canvas id="klineCanvas" width="920" height="240"></canvas></div>
         <div class="kline-wrap"><div class="kline-cap">大路K线（反转）</div><canvas id="klineFlipCanvas" width="920" height="240"></canvas></div>
+        <div class="kline-cross" id="klineCross"><i class="kc-v"></i><i class="kc-h"></i></div>
       </div>
     </div>
   </section>
@@ -1137,18 +1163,19 @@ function renderAskRoads(){
   let html = '<div class="ask-head"><span class="ask-road"></span><span class="ask-col b">庄问路</span><span class="ask-col p">闲问路</span></div>';
   let seqR = 0, seqB = 0;
   for (let i = 0; i < 3; i++){
-    const active = (s.colLen[i] || 0) >= 1;   // 最新列1个也参与比较推荐
-    // 三顺推荐：实际最新颜色与庄问路一致 → 推荐庄；与闲问路一致 → 推荐闲
+    // 三顺推荐：该行庄问路/闲问路标记判断（正常看红，反转看蓝）
+    const want = state.klineFlip ? 'B' : 'R';
     const seqParts = [];
-    if (active && latest[i] && pred.B[i] && latest[i] === pred.B[i]){ seqParts.push('<span class="ask-rb">推荐庄</span>'); seqR++; }
-    if (active && latest[i] && pred.P[i] && latest[i] === pred.P[i]){ seqParts.push('<span class="ask-rp">推荐闲</span>'); seqB++; }
+    if (pred.B[i] === want){ seqParts.push('<span class="ask-rb">庄买入</span>'); seqR++; }
+    if (pred.P[i] === want){ seqParts.push('<span class="ask-rp">闲买入</span>'); seqB++; }
     const seq = seqParts.length ? seqParts.join('<span class="ask-sep">/</span>') : '<span class="ask-na">—</span>';
     const tagEl = $(['smSeqEye','smSeqSmall','smSeqRoach'][i]);
     if (tagEl){
-      const isRed = seqParts.some(function(p){ return p.indexOf('推荐庄') >= 0; });
-      const isBlue = seqParts.some(function(p){ return p.indexOf('推荐闲') >= 0; });
-      if (isRed && !isBlue){ tagEl.className = 'ask-seq-tag red'; tagEl.textContent = '三顺：庄'; }
-      else if (isBlue && !isRed){ tagEl.className = 'ask-seq-tag blue'; tagEl.textContent = '三顺：闲'; }
+      const isRed = seqParts.some(function(p){ return p.indexOf('庄买入') >= 0; });
+      const isBlue = seqParts.some(function(p){ return p.indexOf('闲买入') >= 0; });
+      if (isRed && !isBlue){ tagEl.className = 'ask-seq-tag red'; tagEl.textContent = '三顺：庄买入'; }
+      else if (isBlue && !isRed){ tagEl.className = 'ask-seq-tag blue'; tagEl.textContent = '三顺：闲买入'; }
+      else if (isRed && isBlue){ tagEl.className = 'ask-seq-tag'; tagEl.innerHTML = '三顺：<span style="color:#e03131;font-weight:800">庄买入</span>/<span style="color:#1971c2;font-weight:800">闲买入</span>'; }
       else { tagEl.className = 'ask-seq-tag'; tagEl.textContent = '三顺：—'; }
     }
     html += '<div class="ask-row"><span class="ask-road">' + (i + 1) + ' ' + names[i] + '</span>'
@@ -2020,6 +2047,101 @@ function drawEyeKline(){ state.__alerts = state.__alerts || {}; const seq = klin
 function drawSmallKline(){ state.__alerts = state.__alerts || {}; const seq = klineSeqForRoad('small'); drawKlineInto(document.getElementById('smallKlineCanvas'), seq); state.__alerts['小路'] = state.__lastRes; const fcv = document.getElementById('smallKlineFlipCanvas'); if (fcv){ const prev = state.klineFlip; state.klineFlip = true; drawKlineInto(fcv, seq); state.klineFlip = prev; } }
 function drawRoachKline(){ state.__alerts = state.__alerts || {}; const seq = klineSeqForRoad('roach'); drawKlineInto(document.getElementById('roachKlineCanvas'), seq); state.__alerts['曱甴'] = state.__lastRes; const fcv = document.getElementById('roachKlineFlipCanvas'); if (fcv){ const prev = state.klineFlip; state.klineFlip = true; drawKlineInto(fcv, seq); state.klineFlip = prev; } }
 
+// ===== 趋势分析：K线趋势 / K线形态 / 7-10日均线 / MACD / 波浪理论 =====
+function computeTrend(){
+  const seq = state.results.filter(function(r){ return r !== 'T'; });
+  if (seq.length < 3) return null;
+  const closes = [];
+  let p = 0;
+  for (let i = 0; i < seq.length; i++){ p += (seq[i] === 'B' ? 1 : -1); closes.push(p); }
+  const n = closes.length;
+  const ema = function(arr, len){ const k = 2 / (len + 1); const out = [arr[0]]; for (let i = 1; i < arr.length; i++) out.push(arr[i] * k + out[i - 1] * (1 - k)); return out; };
+  const items = [];
+  // 1) K线趋势：近5根收盘线性斜率
+  const win = Math.min(5, n);
+  let sx = 0, sy = 0, sxy = 0, sxx = 0;
+  for (let i = 0; i < win; i++){ const yy = closes[n - win + i]; sx += i; sy += yy; sxy += i * yy; sxx += i * i; }
+  const slope = (win * sxy - sx * sy) / ((win * sxx - sx * sx) || 1);
+  items.push({ k: 'K线趋势', dir: slope > 0.0001 ? 'B' : (slope < -0.0001 ? 'P' : ''),
+    t: '近' + win + '根' + (slope > 0 ? '上行' : (slope < 0 ? '下行' : '走平')),
+    d: '斜率' + (slope >= 0 ? '+' : '') + slope.toFixed(2) + '/根' });
+  // 2) K线形态：近3根阴阳组合
+  const last3 = seq.slice(Math.max(0, n - 3));
+  const up = last3.filter(function(c){ return c === 'B'; }).length;
+  const dn = last3.length - up;
+  let shapeName = '均衡';
+  if (last3.length === 3){ shapeName = up === 3 ? '三连阳' : (dn === 3 ? '三连阴' : (up === 2 ? '两阳一阴' : '两阴一阳')); }
+  else { shapeName = up > dn ? '偏阳' : (dn > up ? '偏阴' : '均衡'); }
+  items.push({ k: 'K线形态', dir: up > dn ? 'B' : (dn > up ? 'P' : ''),
+    t: shapeName, d: '阳' + up + ' / 阴' + dn });
+  // 3) 均线：MEMA7 / MEMA10
+  const e7 = ema(closes, 7), e10 = ema(closes, 10);
+  const v7 = e7[n - 1], v10 = e10[n - 1];
+  items.push({ k: '7/10日均线', dir: v10 < v7 ? 'B' : (v10 > v7 ? 'P' : ''),
+    t: v10 < v7 ? '多头排列' : (v10 > v7 ? '空头排列' : '粘合'),
+    d: 'MEMA7 ' + v7.toFixed(2) + ' / MEMA10 ' + v10.toFixed(2) });
+  // 4) MACD
+  const e12 = ema(closes, 12), e26 = ema(closes, 26);
+  const dif = [];
+  for (let i = 0; i < n; i++) dif.push(e12[i] - e26[i]);
+  const deaArr = ema(dif, 9);
+  const dLast = dif[n - 1], dDea = deaArr[n - 1];
+  const macdVal = (dLast - dDea) * 2;
+  items.push({ k: 'MACD', dir: dLast > dDea ? 'B' : (dLast < dDea ? 'P' : ''),
+    t: macdVal > 0 ? '红柱' : (macdVal < 0 ? '绿柱' : '零轴'),
+    d: 'DIFF ' + dLast.toFixed(2) + ' / DEA ' + dDea.toFixed(2) });
+  // 5) 波浪理论：摆动低点/高点比较
+  const W = Math.min(20, n);
+  const seg = closes.slice(n - W);
+  const lows = [], highs = [];
+  for (let i = 1; i < seg.length - 1; i++){
+    if (seg[i] < seg[i - 1] && seg[i] < seg[i + 1]) lows.push(seg[i]);
+    if (seg[i] > seg[i - 1] && seg[i] > seg[i + 1]) highs.push(seg[i]);
+  }
+  let wDir = '', wT = '结构不明';
+  if (lows.length >= 2){
+    const l1 = lows[lows.length - 2], l2 = lows[lows.length - 1];
+    if (l2 > l1){ wDir = 'B'; wT = '低点抬高'; } else if (l2 < l1){ wDir = 'P'; wT = '低点降低'; }
+  } else if (highs.length >= 2){
+    const h1 = highs[highs.length - 2], h2 = highs[highs.length - 1];
+    if (h2 > h1){ wDir = 'B'; wT = '高点抬高'; } else if (h2 < h1){ wDir = 'P'; wT = '高点降低'; }
+  } else if (n >= 2){
+    wDir = closes[n - 1] > closes[n - 2] ? 'B' : (closes[n - 1] < closes[n - 2] ? 'P' : '');
+    wT = wDir === 'B' ? '上升浪' : (wDir === 'P' ? '调整浪' : '走平');
+  }
+  items.push({ k: '波浪理论', dir: wDir, t: wT,
+    d: '摆动低点 ' + (lows.length ? lows.join(' → ') : '—') });
+  // 综合：票数多者胜，平票取均线
+  let vb = 0, vp = 0;
+  for (let i = 0; i < items.length; i++){ if (items[i].dir === 'B') vb++; else if (items[i].dir === 'P') vp++; }
+  let total = '';
+  if (vb > vp) total = 'B'; else if (vp > vb) total = 'P'; else total = items[2].dir || '';
+  return { items: items, vb: vb, vp: vp, total: total };
+}
+function renderTrend(){
+  const el = $('trendGrid');
+  const totalEl = $('trendTotal');
+  if (!el) return;
+  const r = computeTrend();
+  if (!r){
+    el.innerHTML = '<div class="trend-card"><span class="tk">数据不足</span><span class="tv">—</span><span class="td">至少 3 手（不含和）</span></div>';
+    if (totalEl){ totalEl.className = 'trend-total'; totalEl.textContent = '推荐：—'; }
+    return;
+  }
+  let html = '';
+  for (let i = 0; i < r.items.length; i++){
+    const it = r.items[i];
+    const cls = it.dir === 'B' ? 'red' : (it.dir === 'P' ? 'blue' : '');
+    const val = it.dir === 'B' ? '看红（庄）' : (it.dir === 'P' ? '看蓝（闲）' : '中性');
+    html += '<div class="trend-card ' + cls + '"><span class="tk">' + it.k + '</span><span class="tv">' + val + '</span><span class="td">' + it.t + ' · ' + it.d + '</span></div>';
+  }
+  el.innerHTML = html;
+  if (totalEl){
+    if (r.total === 'B'){ totalEl.className = 'trend-total red'; totalEl.textContent = '综合推荐：红（庄） ' + r.vb + ':' + r.vp; }
+    else if (r.total === 'P'){ totalEl.className = 'trend-total blue'; totalEl.textContent = '综合推荐：蓝（闲） ' + r.vb + ':' + r.vp; }
+    else { totalEl.className = 'trend-total'; totalEl.textContent = '综合推荐：— ' + r.vb + ':' + r.vp; }
+  }
+}
 function render(){
   renderSessionStats();
   renderTotalReco();
@@ -2030,6 +2152,7 @@ function render(){
   renderComboReco();
   renderThreeAllReco();
   renderRecoRates();
+  renderTrend();
   if (state.results.length === 0){
     state.boxStat = null;
     renderBoxStat();
@@ -2087,6 +2210,34 @@ $('klineFlipBtn').addEventListener('click', () => {
   drawSmallKline();
   drawRoachKline();
 });
+// 十字光标：按下后跟随手指/鼠标移动
+$('klineCrossBtn').addEventListener('click', () => {
+  state.crossOn = !state.crossOn;
+  $('klineCrossBtn').classList.toggle('on', state.crossOn);
+  const cross = $('klineCross');
+  const row = $('klineRow');
+  if (cross) cross.classList.toggle('on', state.crossOn);
+  if (row) row.style.touchAction = state.crossOn ? 'none' : '';
+});
+(function(){
+  const row = $('klineRow');
+  const cross = $('klineCross');
+  if (!row || !cross) return;
+  const v = cross.querySelector('.kc-v');
+  const h = cross.querySelector('.kc-h');
+  function moveCross(e){
+    if (!state.crossOn) return;
+    const r = row.getBoundingClientRect();
+    let x = e.clientX - r.left;
+    let y = e.clientY - r.top;
+    x = Math.max(0, Math.min(r.width, x));
+    y = Math.max(0, Math.min(r.height, y));
+    if (v) v.style.left = x + 'px';
+    if (h) h.style.top = y + 'px';
+  }
+  row.addEventListener('pointermove', moveCross);
+  row.addEventListener('pointerdown', moveCross);
+})();
 $('sampleBtn').addEventListener('click', () => { state.results = parseInput(SAMPLE); render(); });
 $('loadBtn').addEventListener('click', () => {
   const parsed = parseInput($('bulkInput').value);
