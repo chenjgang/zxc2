@@ -67,6 +67,7 @@
   .btn-ghost:hover{background:var(--panel-deep);border-color:var(--line2)}
   .btn-ghost.act-lg{padding:13px 26px;font-size:15px;font-weight:600;border-radius:11px}
   .btn-group .act-lg + .act-lg{margin-left:32px}
+  .btn-group .btn-round.t + .act-lg{margin-left:40px}
   .bulk{display:flex;gap:8px;flex:1;min-width:220px}
   .bulk input{flex:1;background:var(--paper);border:1px solid var(--line);border-radius:9px;padding:9px 13px;
     font-size:13px;color:var(--ink);font-family:var(--sans);outline:none}
@@ -341,7 +342,7 @@
 
   <section class="roads-main">
     <div class="panel">
-      <div class="panel-head"><h3>大路</h3><span class="en">Big Road · 6行</span><span class="legend">超6个从第6行向右衍生 · 下行被占则从当前行衍生 · 换色从第1行开始</span></div>
+      <div class="panel-head"><h3>大路</h3><span class="en">Big Road · 6行</span><button class="kline-flip" id="bigroadBoxBtn">方框</button><span class="legend">超6个从第6行向右衍生 · 下行被占则从当前行衍生 · 换色从第1行开始</span></div>
       <div class="reco-stat none" id="boxStat">
         <span class="lbl">方框·圆圈</span>
         <span class="m">一致 <b>0</b></span>
@@ -584,7 +585,44 @@ function renderBigRoad(big){
     // 开局连续和局：在大路左上角以绿色格标注
     if (grid[0][0] === null) grid[0][0] = { type:'T', ties:big.leadingTies };
   }
-  const boxColor = {}; // 推荐已删除：不再写入方框
+  // 趋势综合推荐 → 大路方框（历史逐手预测 + 最新空格预测）；按钮开启时才显示
+  const boxColor = {};
+  if (state.boxShow){
+    const ntSeq = state.results.filter(function(r){ return r !== 'T'; });
+    const seqIdx = {};   // results 下标 → 非和序列下标
+    let sk = 0;
+    for (let i = 0; i < state.results.length; i++){ if (state.results[i] !== 'T'){ seqIdx[i] = sk++; } }
+    // 增量缓存：前缀未变时只补算新增手
+    const prevCache = state.__trendRecom;
+    let recom, fromK = 3;
+    if (prevCache && prevCache.seq.length <= ntSeq.length){
+      let same = true;
+      for (let i = 0; i < prevCache.seq.length; i++){ if (prevCache.seq[i] !== ntSeq[i]){ same = false; break; } }
+      if (same){ recom = prevCache.recom; fromK = Math.max(3, prevCache.seq.length); }
+      else recom = {};
+    } else recom = {};
+    for (let k = fromK; k < ntSeq.length; k++){
+      const t = trendOn(ntSeq.slice(0, k));
+      if (t && t.total) recom[k] = t.total;
+    }
+    state.__trendRecom = { seq: ntSeq.slice(), recom: recom };
+    for (let c = 0; c < grid.length; c++){
+      for (let r = 0; r < 6; r++){
+        const cell = grid[c][r];
+        if (!cell || cell.type === 'T') continue;
+        const p = recom[seqIdx[cell.hand - 1]];
+        if (p === 'B') boxColor[c + ',' + r] = 'red';
+        else if (p === 'P') boxColor[c + ',' + r] = 'blue';
+      }
+    }
+    // 最新一手的预测：写入下一个空格（换列时方框跟随换列）
+    const tAll = trendOn(ntSeq);
+    if (tAll && tAll.total){
+      const gridCopy = grid.map(function(colArr){ return colArr.slice(); });
+      const pos = nextBeadPos(gridCopy, big.streak, tAll.total);
+      boxColor[pos.col + ',' + pos.row] = tAll.total === 'B' ? 'red' : 'blue';
+    }
+  }
   // 统计方框与圆圈一致 / 不一致数量
   let match = 0, mismatch = 0;
   for (let c = 0; c < grid.length; c++){
@@ -1148,7 +1186,13 @@ function predictAskRoads(results){
 
 function renderAskRoads(){
   const el = $('askRoads');
-  if (state.results.length === 0){ el.innerHTML = ''; return; }
+  if (state.results.length === 0){
+    el.innerHTML = '';
+    ['smSeqEye','smSeqSmall','smSeqRoach'].forEach(function(id){
+      const t = $(id); if (t){ t.className = 'ask-seq-tag'; t.textContent = '三顺：— · 反转：—'; }
+    });
+    return;
+  }
   const s = smallRecoStats(state.results);
   const pred = s.pred;
   const latest = s.latest;
@@ -1163,20 +1207,21 @@ function renderAskRoads(){
   let html = '<div class="ask-head"><span class="ask-road"></span><span class="ask-col b">庄问路</span><span class="ask-col p">闲问路</span></div>';
   let seqR = 0, seqB = 0;
   for (let i = 0; i < 3; i++){
-    // 三顺推荐：该行庄问路/闲问路标记判断（正常看红，反转看蓝）
-    const want = state.klineFlip ? 'B' : 'R';
-    const seqParts = [];
-    if (pred.B[i] === want){ seqParts.push('<span class="ask-rb">庄买入</span>'); seqR++; }
-    if (pred.P[i] === want){ seqParts.push('<span class="ask-rp">闲买入</span>'); seqB++; }
-    const seq = seqParts.length ? seqParts.join('<span class="ask-sep">/</span>') : '<span class="ask-na">—</span>';
+    // 三顺推荐：只看红（R）在哪一边；反转买入：只看蓝（B）在哪一边（两者并列显示）
+    const word = function(w){ return '<span style="color:' + (w === '庄买入' ? '#e03131' : '#1971c2') + ';font-weight:800">' + w + '</span>'; };
+    const redParts = [], blueParts = [];
+    if (pred.B[i] === 'R') redParts.push('庄买入');
+    if (pred.P[i] === 'R') redParts.push('闲买入');
+    if (pred.B[i] === 'B') blueParts.push('庄买入');
+    if (pred.P[i] === 'B') blueParts.push('闲买入');
+    const seqParts = redParts;
+    if (redParts.indexOf('庄买入') >= 0) seqR++;
+    if (redParts.indexOf('闲买入') >= 0) seqB++;
     const tagEl = $(['smSeqEye','smSeqSmall','smSeqRoach'][i]);
     if (tagEl){
-      const isRed = seqParts.some(function(p){ return p.indexOf('庄买入') >= 0; });
-      const isBlue = seqParts.some(function(p){ return p.indexOf('闲买入') >= 0; });
-      if (isRed && !isBlue){ tagEl.className = 'ask-seq-tag red'; tagEl.textContent = '三顺：庄买入'; }
-      else if (isBlue && !isRed){ tagEl.className = 'ask-seq-tag blue'; tagEl.textContent = '三顺：闲买入'; }
-      else if (isRed && isBlue){ tagEl.className = 'ask-seq-tag'; tagEl.innerHTML = '三顺：<span style="color:#e03131;font-weight:800">庄买入</span>/<span style="color:#1971c2;font-weight:800">闲买入</span>'; }
-      else { tagEl.className = 'ask-seq-tag'; tagEl.textContent = '三顺：—'; }
+      tagEl.className = 'ask-seq-tag';
+      tagEl.innerHTML = '三顺：' + (redParts.length ? redParts.map(word).join('/') : '—')
+        + ' <span class="ask-sep">·</span> 反转：' + (blueParts.length ? blueParts.map(word).join('/') : '—');
     }
     html += '<div class="ask-row"><span class="ask-road">' + (i + 1) + ' ' + names[i] + '</span>'
       + '<span class="ask-cell">' + markHtml(i, pred.B[i]) + '</span>'
@@ -2048,8 +2093,7 @@ function drawSmallKline(){ state.__alerts = state.__alerts || {}; const seq = kl
 function drawRoachKline(){ state.__alerts = state.__alerts || {}; const seq = klineSeqForRoad('roach'); drawKlineInto(document.getElementById('roachKlineCanvas'), seq); state.__alerts['曱甴'] = state.__lastRes; const fcv = document.getElementById('roachKlineFlipCanvas'); if (fcv){ const prev = state.klineFlip; state.klineFlip = true; drawKlineInto(fcv, seq); state.klineFlip = prev; } }
 
 // ===== 趋势分析：K线趋势 / K线形态 / 7-10日均线 / MACD / 波浪理论 =====
-function computeTrend(){
-  const seq = state.results.filter(function(r){ return r !== 'T'; });
+function trendOn(seq){
   if (seq.length < 3) return null;
   const closes = [];
   let p = 0;
@@ -2118,6 +2162,7 @@ function computeTrend(){
   if (vb > vp) total = 'B'; else if (vp > vb) total = 'P'; else total = items[2].dir || '';
   return { items: items, vb: vb, vp: vp, total: total };
 }
+function computeTrend(){ return trendOn(state.results.filter(function(r){ return r !== 'T'; })); }
 function renderTrend(){
   const el = $('trendGrid');
   const totalEl = $('trendTotal');
@@ -2158,6 +2203,9 @@ function render(){
     renderBoxStat();
     $('bigroad').innerHTML = '';
     $('smEye').innerHTML = $('smSmall').innerHTML = $('smRoach').innerHTML = '';
+    ['smSeqEye','smSeqSmall','smSeqRoach'].forEach(function(id){
+      const t = $(id); if (t){ t.className = 'ask-seq-tag'; t.textContent = '三顺：— · 反转：—'; }
+    });
       drawKline();
     drawEyeKline();
     drawSmallKline();
@@ -2202,6 +2250,11 @@ $('randomBtn').addEventListener('click', () => {
   render();
 });
 $('clearBtn').addEventListener('click', () => { state.results = []; $('bulkInput').value=''; render(); });
+$('bigroadBoxBtn').addEventListener('click', () => {
+  state.boxShow = !state.boxShow;
+  $('bigroadBoxBtn').classList.toggle('on', state.boxShow);
+  render();
+});
 $('klineFlipBtn').addEventListener('click', () => {
   state.klineFlip = !state.klineFlip;
   $('klineFlipBtn').classList.toggle('on', state.klineFlip);
