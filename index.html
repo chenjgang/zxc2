@@ -249,18 +249,6 @@
   }
 
   /* 走势分析 */
-  .trend-panel{padding:12px 16px;font-size:13px;color:var(--ink)}
-  .trend-cur{display:flex;align-items:center;gap:8px;margin-bottom:10px;font-size:13.5px}
-  .trend-cur .dot{width:12px;height:12px;border-radius:50%;display:inline-block}
-  .trend-cur .dot.red{background:var(--red)} .trend-cur .dot.blue{background:var(--blue)}
-  .trend-cur b{font-weight:600}
-  .trend-table{width:100%;border-collapse:collapse;margin:6px 0 10px;font-size:12.5px}
-  .trend-table th,.trend-table td{border:1px solid var(--line);padding:5px 4px;text-align:center}
-  .trend-table th{background:var(--bg);font-weight:500;color:var(--muted)}
-  .trend-table td.hit{background:rgba(255,180,80,.18);font-weight:700}
-  .trend-summary{margin-top:4px;line-height:1.7;color:var(--ink)}
-  .trend-summary b{font-weight:600}
-  .trend-empty{color:var(--muted);padding:18px 0;text-align:center}
 
 
   /* 大路推荐：本次==最多时红色色点闪烁 */
@@ -279,19 +267,7 @@
   .kline-cross i{position:absolute;background:#ff9f43;opacity:.9}
   .kline-cross .kc-v{top:0;bottom:0;width:1px}
   .kline-cross .kc-h{left:0;right:0;height:1px}
-  .trend-panel{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:12px 16px;margin-bottom:26px}
-  .trend-head{display:flex;align-items:center;gap:10px;margin-bottom:9px}
-  .trend-head h3{font-size:15px;font-weight:700;color:var(--ink);margin:0}
-  .trend-total{margin-left:auto;font-size:13px;font-weight:800;padding:3px 10px;border-radius:10px;border:1px solid var(--line);color:var(--muted)}
-  .trend-total.red{background:var(--red);color:#fff;border-color:var(--red)}
-  .trend-total.blue{background:var(--blue);color:#fff;border-color:var(--blue)}
-  .trend-grid{display:flex;gap:10px;flex-wrap:wrap}
-  .trend-card{flex:1 1 150px;min-width:146px;border:1px solid var(--line);border-radius:10px;padding:8px 10px;background:var(--paper);display:flex;flex-direction:column;gap:1px}
-  .trend-card .tk{font-size:12px;font-weight:700;color:var(--muted)}
-  .trend-card .tv{font-size:14px;font-weight:800;color:var(--ink)}
-  .trend-card.red .tv{color:#e03131}
-  .trend-card.blue .tv{color:#1971c2}
-  .trend-card .td{font-size:11px;color:var(--muted);line-height:1.4}
+
   .kline-row .kline-wrap{flex:1 1 0;min-width:0}
   .kline-cap{font-size:12px;color:#888;font-weight:600;margin-bottom:2px}
 
@@ -321,11 +297,6 @@
       <button class="btn-ghost" id="sampleBtn">示例</button>
     </div>
   </header>
-
-  <section class="trend-panel">
-    <div class="trend-head"><h3>趋势分析</h3><span class="trend-total" id="trendTotal">推荐：—</span></div>
-    <div class="trend-grid" id="trendGrid"></div>
-  </section>
 
   <section class="toolbar">
     <div class="btn-group">
@@ -2162,31 +2133,6 @@ function trendOn(seq){
   if (vb > vp) total = 'B'; else if (vp > vb) total = 'P'; else total = items[2].dir || '';
   return { items: items, vb: vb, vp: vp, total: total };
 }
-function computeTrend(){ return trendOn(state.results.filter(function(r){ return r !== 'T'; })); }
-function renderTrend(){
-  const el = $('trendGrid');
-  const totalEl = $('trendTotal');
-  if (!el) return;
-  const r = computeTrend();
-  if (!r){
-    el.innerHTML = '<div class="trend-card"><span class="tk">数据不足</span><span class="tv">—</span><span class="td">至少 3 手（不含和）</span></div>';
-    if (totalEl){ totalEl.className = 'trend-total'; totalEl.textContent = '推荐：—'; }
-    return;
-  }
-  let html = '';
-  for (let i = 0; i < r.items.length; i++){
-    const it = r.items[i];
-    const cls = it.dir === 'B' ? 'red' : (it.dir === 'P' ? 'blue' : '');
-    const val = it.dir === 'B' ? '看红（庄）' : (it.dir === 'P' ? '看蓝（闲）' : '中性');
-    html += '<div class="trend-card ' + cls + '"><span class="tk">' + it.k + '</span><span class="tv">' + val + '</span><span class="td">' + it.t + ' · ' + it.d + '</span></div>';
-  }
-  el.innerHTML = html;
-  if (totalEl){
-    if (r.total === 'B'){ totalEl.className = 'trend-total red'; totalEl.textContent = '综合推荐：红（庄） ' + r.vb + ':' + r.vp; }
-    else if (r.total === 'P'){ totalEl.className = 'trend-total blue'; totalEl.textContent = '综合推荐：蓝（闲） ' + r.vb + ':' + r.vp; }
-    else { totalEl.className = 'trend-total'; totalEl.textContent = '综合推荐：— ' + r.vb + ':' + r.vp; }
-  }
-}
 function render(){
   renderSessionStats();
   renderTotalReco();
@@ -2197,7 +2143,6 @@ function render(){
   renderComboReco();
   renderThreeAllReco();
   renderRecoRates();
-  renderTrend();
   if (state.results.length === 0){
     state.boxStat = null;
     renderBoxStat();
