@@ -268,6 +268,19 @@
   .kline-cross .kc-v{top:0;bottom:0;width:1px}
   .kline-cross .kc-h{left:0;right:0;height:1px}
 
+  .trend-panel{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:12px 16px;margin-bottom:26px}
+  .trend-head{display:flex;align-items:center;gap:10px;margin-bottom:9px}
+  .trend-head h3{font-size:15px;font-weight:700;color:var(--ink);margin:0}
+  .trend-total{margin-left:auto;font-size:13px;font-weight:800;padding:3px 10px;border-radius:10px;border:1px solid var(--line);color:var(--muted)}
+  .trend-total.red{background:var(--red);color:#fff;border-color:var(--red)}
+  .trend-total.blue{background:var(--blue);color:#fff;border-color:var(--blue)}
+  .trend-grid{display:flex;gap:10px;flex-wrap:wrap}
+  .trend-card{flex:1 1 150px;min-width:146px;border:1px solid var(--line);border-radius:10px;padding:8px 10px;background:var(--paper);display:flex;flex-direction:column;gap:1px}
+  .trend-card .tk{font-size:12px;font-weight:700;color:var(--muted)}
+  .trend-card .tv{font-size:14px;font-weight:800;color:var(--ink)}
+  .trend-card.red .tv{color:#e03131}
+  .trend-card.blue .tv{color:#1971c2}
+  .trend-card .td{font-size:11px;color:var(--muted);line-height:1.4}
   .kline-row .kline-wrap{flex:1 1 0;min-width:0}
   .kline-cap{font-size:12px;color:#888;font-weight:600;margin-bottom:2px}
 
@@ -297,6 +310,11 @@
       <button class="btn-ghost" id="sampleBtn">示例</button>
     </div>
   </header>
+
+  <section class="trend-panel">
+    <div class="trend-head"><h3>趋势分析</h3><span class="trend-total" id="trendTotal">推荐：—</span><button class="kline-flip" id="trendWinBtn">10根</button></div>
+    <div class="trend-grid" id="trendGrid"></div>
+  </section>
 
   <section class="toolbar">
     <div class="btn-group">
@@ -376,7 +394,7 @@
 
 <script>
 /* ============ 状态 ============ */
-const state = { results: [], recoSource: 'big', recoRateMode: 'real', randSeq: null, klineFlip: false };   // recoRateMode: 'real'|'rand'（一致率统计来源）
+const state = { results: [], recoSource: 'big', recoRateMode: 'real', randSeq: null, klineFlip: false, trendWin: 10 };   // recoRateMode: 'real'|'rand'（一致率统计来源）
 const SAMPLE = "BBBBPPBPBBPPPPBPPBTBBPPPPBBPBBPBTBP";
 const COLOR_KEY = { B:'red', P:'blue', T:'green' };
 
@@ -564,6 +582,9 @@ function renderBigRoad(big){
     let sk = 0;
     for (let i = 0; i < state.results.length; i++){ if (state.results[i] !== 'T'){ seqIdx[i] = sk++; } }
     // 增量缓存：前缀未变时只补算新增手
+    const trendOf = function(pre){
+      return trendOn(pre, { eye: roadKlineSeq('eye', pre), small: roadKlineSeq('small', pre), roach: roadKlineSeq('roach', pre) }, { results: pre });
+    };
     const prevCache = state.__trendRecom;
     let recom, fromK = 3;
     if (prevCache && prevCache.seq.length <= ntSeq.length){
@@ -573,7 +594,7 @@ function renderBigRoad(big){
       else recom = {};
     } else recom = {};
     for (let k = fromK; k < ntSeq.length; k++){
-      const t = trendOn(ntSeq.slice(0, k));
+      const t = trendOf(ntSeq.slice(0, k));
       if (t && t.total) recom[k] = t.total;
     }
     state.__trendRecom = { seq: ntSeq.slice(), recom: recom };
@@ -587,7 +608,7 @@ function renderBigRoad(big){
       }
     }
     // 最新一手的预测：写入下一个空格（换列时方框跟随换列）
-    const tAll = trendOn(ntSeq);
+    const tAll = trendOf(ntSeq);
     if (tAll && tAll.total){
       const gridCopy = grid.map(function(colArr){ return colArr.slice(); });
       const pos = nextBeadPos(gridCopy, big.streak, tAll.total);
@@ -1749,7 +1770,6 @@ function computeResonance(closes){
   const n = closes.length;
   const res = [], buy = [];
   if (n < 3) return { res: res, buy: buy };
-  const ema = function(arr, len){ const k = 2 / (len + 1); const out = [arr[0]]; for (let i = 1; i < arr.length; i++) out.push(arr[i] * k + out[i - 1] * (1 - k)); return out; };
   const ma = function(arr, len){ const out = []; for (let i = 0; i < arr.length; i++){ let s = 0; const st = Math.max(0, i - len + 1); for (let j = st; j <= i; j++) s += arr[j]; out.push(s / (i - st + 1)); } return out; };
   const sma = function(arr, len, m){ const out = [arr[0]]; for (let i = 1; i < arr.length; i++) out.push((m * arr[i] + (len - m) * out[i - 1]) / len); return out; };
   const ref = function(arr, off){ const out = []; for (let i = 0; i < arr.length; i++) out.push(i >= off ? arr[i - off] : 0); return out; };
@@ -2053,85 +2073,103 @@ function drawKline(){
     state.klineFlip = prev;
   }
 }
-function klineSeqForRoad(kind){
-  const cols = buildStreakCols(state.results);
+function roadKlineSeq(kind, results){
+  const cols = buildStreakCols(results || state.results);
   const skip = kind === 'eye' ? 0 : kind === 'small' ? 1 : 2;
   const marks = buildDerivedRoad(cols, skip);
   return marks.map(function(m){ return m === 'R' ? 'B' : 'P'; });
 }
+function klineSeqForRoad(kind){ return roadKlineSeq(kind, state.results); }
 function drawEyeKline(){ state.__alerts = state.__alerts || {}; const seq = klineSeqForRoad('eye'); drawKlineInto(document.getElementById('eyeKlineCanvas'), seq); state.__alerts['大眼仔'] = state.__lastRes; const fcv = document.getElementById('eyeKlineFlipCanvas'); if (fcv){ const prev = state.klineFlip; state.klineFlip = true; drawKlineInto(fcv, seq); state.klineFlip = prev; } }
 function drawSmallKline(){ state.__alerts = state.__alerts || {}; const seq = klineSeqForRoad('small'); drawKlineInto(document.getElementById('smallKlineCanvas'), seq); state.__alerts['小路'] = state.__lastRes; const fcv = document.getElementById('smallKlineFlipCanvas'); if (fcv){ const prev = state.klineFlip; state.klineFlip = true; drawKlineInto(fcv, seq); state.klineFlip = prev; } }
 function drawRoachKline(){ state.__alerts = state.__alerts || {}; const seq = klineSeqForRoad('roach'); drawKlineInto(document.getElementById('roachKlineCanvas'), seq); state.__alerts['曱甴'] = state.__lastRes; const fcv = document.getElementById('roachKlineFlipCanvas'); if (fcv){ const prev = state.klineFlip; state.klineFlip = true; drawKlineInto(fcv, seq); state.klineFlip = prev; } }
 
-// ===== 趋势分析：K线趋势 / K线形态 / 7-10日均线 / MACD / 波浪理论 =====
-function trendOn(seq){
-  if (seq.length < 3) return null;
+// ===== 趋势分析：K线趋势（大路 / 大眼仔 / 小路 / 曱甴） =====
+// 单条 K 线序列：近 10 根收盘线性斜率
+function kSlopeItem(seq, label){
+  if (!seq || seq.length < 3) return null;
   const closes = [];
   let p = 0;
   for (let i = 0; i < seq.length; i++){ p += (seq[i] === 'B' ? 1 : -1); closes.push(p); }
   const n = closes.length;
-  const ema = function(arr, len){ const k = 2 / (len + 1); const out = [arr[0]]; for (let i = 1; i < arr.length; i++) out.push(arr[i] * k + out[i - 1] * (1 - k)); return out; };
-  const items = [];
-  // 1) K线趋势：近5根收盘线性斜率
-  const win = Math.min(5, n);
+  const win = Math.min(state.trendWin || 10, n);
   let sx = 0, sy = 0, sxy = 0, sxx = 0;
   for (let i = 0; i < win; i++){ const yy = closes[n - win + i]; sx += i; sy += yy; sxy += i * yy; sxx += i * i; }
   const slope = (win * sxy - sx * sy) / ((win * sxx - sx * sx) || 1);
-  items.push({ k: 'K线趋势', dir: slope > 0.0001 ? 'B' : (slope < -0.0001 ? 'P' : ''),
+  const dir = slope > 0.0001 ? 'B' : (slope < -0.0001 ? 'P' : '');
+  return { k: label, slopeDir: dir, dir: dir,
     t: '近' + win + '根' + (slope > 0 ? '上行' : (slope < 0 ? '下行' : '走平')),
-    d: '斜率' + (slope >= 0 ? '+' : '') + slope.toFixed(2) + '/根' });
-  // 2) K线形态：近3根阴阳组合
-  const last3 = seq.slice(Math.max(0, n - 3));
-  const up = last3.filter(function(c){ return c === 'B'; }).length;
-  const dn = last3.length - up;
-  let shapeName = '均衡';
-  if (last3.length === 3){ shapeName = up === 3 ? '三连阳' : (dn === 3 ? '三连阴' : (up === 2 ? '两阳一阴' : '两阴一阳')); }
-  else { shapeName = up > dn ? '偏阳' : (dn > up ? '偏阴' : '均衡'); }
-  items.push({ k: 'K线形态', dir: up > dn ? 'B' : (dn > up ? 'P' : ''),
-    t: shapeName, d: '阳' + up + ' / 阴' + dn });
-  // 3) 均线：MEMA7 / MEMA10
-  const e7 = ema(closes, 7), e10 = ema(closes, 10);
-  const v7 = e7[n - 1], v10 = e10[n - 1];
-  items.push({ k: '7/10日均线', dir: v10 < v7 ? 'B' : (v10 > v7 ? 'P' : ''),
-    t: v10 < v7 ? '多头排列' : (v10 > v7 ? '空头排列' : '粘合'),
-    d: 'MEMA7 ' + v7.toFixed(2) + ' / MEMA10 ' + v10.toFixed(2) });
-  // 4) MACD
-  const e12 = ema(closes, 12), e26 = ema(closes, 26);
-  const dif = [];
-  for (let i = 0; i < n; i++) dif.push(e12[i] - e26[i]);
-  const deaArr = ema(dif, 9);
-  const dLast = dif[n - 1], dDea = deaArr[n - 1];
-  const macdVal = (dLast - dDea) * 2;
-  items.push({ k: 'MACD', dir: dLast > dDea ? 'B' : (dLast < dDea ? 'P' : ''),
-    t: macdVal > 0 ? '红柱' : (macdVal < 0 ? '绿柱' : '零轴'),
-    d: 'DIFF ' + dLast.toFixed(2) + ' / DEA ' + dDea.toFixed(2) });
-  // 5) 波浪理论：摆动低点/高点比较
-  const W = Math.min(20, n);
-  const seg = closes.slice(n - W);
-  const lows = [], highs = [];
-  for (let i = 1; i < seg.length - 1; i++){
-    if (seg[i] < seg[i - 1] && seg[i] < seg[i + 1]) lows.push(seg[i]);
-    if (seg[i] > seg[i - 1] && seg[i] > seg[i + 1]) highs.push(seg[i]);
+    d: '斜率' + (slope >= 0 ? '+' : '') + slope.toFixed(2) + '/根' };
+}
+// 趋势分析：大路 + 大眼仔 / 小路 / 曱甴路的 K 线趋势
+function trendOn(seq, extra, ctx){
+  if (seq.length < 3) return null;
+  const items = [];
+  const main = kSlopeItem(seq, 'K线趋势');
+  if (main) items.push(main);
+  if (extra){
+    const base = (ctx && ctx.results) ? ctx.results : null;
+    const pred = base ? predictAskRoads(base) : null;
+    // 三小路 K 线：上行 → 该路三顺推荐色，下行 → 反转推荐色
+    const mk = function(s, label, i){
+      const it = kSlopeItem(s, label);
+      if (!it) return null;
+      if (!it.slopeDir){ it.dir = ''; it.d = it.d + ' · 走平无推荐'; return it; }
+      const rev = it.slopeDir === 'P';
+      let buy = '';
+      if (pred){
+        const v = rev ? 'B' : 'R';
+        const inB = pred.B[i] === v, inP = pred.P[i] === v;
+        if (inB && !inP) buy = 'B';
+        else if (inP && !inB) buy = 'P';
+      }
+      it.dir = buy;
+      it.d = it.d + ' · ' + (rev ? '反转' : '三顺') + (buy ? (buy === 'B' ? ' 庄买入' : ' 闲买入') : ' 无推荐');
+      return it;
+    };
+    const e1 = mk(extra.eye, '大眼仔路K线', 0);
+    const e2 = mk(extra.small, '小路K线', 1);
+    const e3 = mk(extra.roach, '曱甴路K线', 2);
+    if (e1) items.push(e1);
+    if (e2) items.push(e2);
+    if (e3) items.push(e3);
   }
-  let wDir = '', wT = '结构不明';
-  if (lows.length >= 2){
-    const l1 = lows[lows.length - 2], l2 = lows[lows.length - 1];
-    if (l2 > l1){ wDir = 'B'; wT = '低点抬高'; } else if (l2 < l1){ wDir = 'P'; wT = '低点降低'; }
-  } else if (highs.length >= 2){
-    const h1 = highs[highs.length - 2], h2 = highs[highs.length - 1];
-    if (h2 > h1){ wDir = 'B'; wT = '高点抬高'; } else if (h2 < h1){ wDir = 'P'; wT = '高点降低'; }
-  } else if (n >= 2){
-    wDir = closes[n - 1] > closes[n - 2] ? 'B' : (closes[n - 1] < closes[n - 2] ? 'P' : '');
-    wT = wDir === 'B' ? '上升浪' : (wDir === 'P' ? '调整浪' : '走平');
-  }
-  items.push({ k: '波浪理论', dir: wDir, t: wT,
-    d: '摆动低点 ' + (lows.length ? lows.join(' → ') : '—') });
-  // 综合：票数多者胜，平票取均线
+  // 综合：票数多者胜；平票（各占一半）不推荐
   let vb = 0, vp = 0;
   for (let i = 0; i < items.length; i++){ if (items[i].dir === 'B') vb++; else if (items[i].dir === 'P') vp++; }
   let total = '';
-  if (vb > vp) total = 'B'; else if (vp > vb) total = 'P'; else total = items[2].dir || '';
+  if (vb > vp) total = 'B'; else if (vp > vb) total = 'P'; else total = '';
   return { items: items, vb: vb, vp: vp, total: total };
+}
+function computeTrend(){
+  const s = state.results.filter(function(r){ return r !== 'T'; });
+  return trendOn(s, { eye: roadKlineSeq('eye', s), small: roadKlineSeq('small', s), roach: roadKlineSeq('roach', s) }, { results: s });
+}
+function renderTrend(){
+  const el = $('trendGrid');
+  const totalEl = $('trendTotal');
+  const winBtn = $('trendWinBtn');
+  if (winBtn) winBtn.textContent = (state.trendWin || 10) + '根';
+  if (!el) return;
+  const r = computeTrend();
+  if (!r){
+    el.innerHTML = '<div class="trend-card"><span class="tk">数据不足</span><span class="tv">—</span><span class="td">至少 3 手（不含和）</span></div>';
+    if (totalEl){ totalEl.className = 'trend-total'; totalEl.textContent = '推荐：—'; }
+    return;
+  }
+  let out = '';
+  for (let i = 0; i < r.items.length; i++){
+    const it = r.items[i];
+    const cls = it.dir === 'B' ? 'red' : (it.dir === 'P' ? 'blue' : '');
+    const val = it.dir === 'B' ? '看红（庄）' : (it.dir === 'P' ? '看蓝（闲）' : '中性');
+    out += '<div class="trend-card ' + cls + '"><span class="tk">' + it.k + '</span><span class="tv">' + val + '</span><span class="td">' + it.t + ' · ' + it.d + '</span></div>';
+  }
+  el.innerHTML = out;
+  if (totalEl){
+    if (r.total === 'B'){ totalEl.className = 'trend-total red'; totalEl.textContent = '综合推荐：红（庄） ' + r.vb + ':' + r.vp; }
+    else if (r.total === 'P'){ totalEl.className = 'trend-total blue'; totalEl.textContent = '综合推荐：蓝（闲） ' + r.vb + ':' + r.vp; }
+    else { totalEl.className = 'trend-total'; totalEl.textContent = '综合推荐：— ' + r.vb + ':' + r.vp; }
+  }
 }
 function render(){
   renderSessionStats();
@@ -2143,6 +2181,7 @@ function render(){
   renderComboReco();
   renderThreeAllReco();
   renderRecoRates();
+  renderTrend();
   if (state.results.length === 0){
     state.boxStat = null;
     renderBoxStat();
@@ -2216,6 +2255,13 @@ $('klineCrossBtn').addEventListener('click', () => {
   const row = $('klineRow');
   if (cross) cross.classList.toggle('on', state.crossOn);
   if (row) row.style.touchAction = state.crossOn ? 'none' : '';
+});
+// 趋势分析：切换 5 根 / 10 根 K 线窗口
+$('trendWinBtn').addEventListener('click', () => {
+  state.trendWin = (state.trendWin || 10) === 10 ? 5 : 10;
+  state.__trendRecom = null;
+  $('trendWinBtn').classList.toggle('on', state.trendWin === 5);
+  render();
 });
 (function(){
   const row = $('klineRow');
