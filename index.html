@@ -269,8 +269,17 @@
   .kline-cross .kc-h{left:0;right:0;height:1px}
 
   .trend-panel{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:12px 16px;margin-bottom:26px}
-  .trend-head{display:flex;align-items:center;flex-wrap:wrap;gap:10px;margin-bottom:9px}
-  .trend-head h3{font-size:15px;font-weight:700;color:var(--ink);margin:0}
+  .trend-head{display:flex;align-items:flex-end;flex-wrap:wrap;gap:10px;margin-bottom:9px}
+  .kbtn-wrap{display:inline-flex;flex-direction:column;align-items:center;gap:3px}
+  .kbtn-wrap.lead{margin-left:auto}
+  .kbtn-wrap .kline-flip{margin-left:0}
+  .kbtn-rate{font-size:11px;font-weight:800;line-height:1.1;color:#212529;font-variant-numeric:tabular-nums}
+  .kbtn-rate.hot{color:var(--red)}
+  .trend-head h3,.trend-info h3{font-size:15px;font-weight:700;color:var(--ink);margin:0}
+  .trend-info{display:flex;align-items:center;flex-wrap:wrap;gap:10px;margin-bottom:9px}
+  .ti-reco{font-size:13px;font-weight:800;color:var(--muted)}
+  .ti-reco.red{color:var(--red)}
+  .ti-reco.blue{color:var(--blue)}
   .kline-flip.trend-sum{margin-left:auto;margin-right:2px;font-weight:800}
   .kline-flip.trend-k{margin-left:auto;margin-right:8px}
   .kline-flip.trend-k2{margin-left:0;margin-right:0}
@@ -319,7 +328,7 @@
   </header>
 
   <section class="trend-panel">
-    <div class="trend-head"><h3>趋势分析</h3><button class="kline-flip trend-sum trend-k" id="trendKBtn">K线趋势推荐</button><button class="kline-flip trend-k2" id="eyeKBtn">大眼仔</button><button class="kline-flip trend-k2" id="smallKBtn">小路</button><button class="kline-flip trend-k2" id="roachKBtn">曱甴</button><button class="kline-flip trend-k2 trend-bold" id="trendSumBtn">合计推荐</button><span class="trend-total" id="trendTotal">推荐：—</span><button class="kline-flip" id="trendWinBtn">10根</button><button class="kline-flip" id="trendWin5Btn">5根</button></div>
+    <div class="trend-info" id="trendInfo"><h3>趋势分析</h3><span class="ti-reco" id="tiReco"></span></div><div class="trend-head"><span class="kbtn-wrap lead"><span class="kbtn-rate" id="rateK">—</span><button class="kline-flip trend-k2 trend-bold" id="trendKBtn">K线趋势推荐</button></span><span class="kbtn-wrap"><span class="kbtn-rate" id="rateEye">—</span><button class="kline-flip trend-k2" id="eyeKBtn">大眼仔</button></span><span class="kbtn-wrap"><span class="kbtn-rate" id="rateSmall">—</span><button class="kline-flip trend-k2" id="smallKBtn">小路</button></span><span class="kbtn-wrap"><span class="kbtn-rate" id="rateRoach">—</span><button class="kline-flip trend-k2" id="roachKBtn">曱甴</button></span><span class="kbtn-wrap"><span class="kbtn-rate" id="rateSum">—</span><button class="kline-flip trend-k2 trend-bold" id="trendSumBtn">合计推荐</button></span><span class="kbtn-wrap"><span class="kbtn-rate" id="rateZW">—</span><button class="kline-flip trend-k2 trend-bold" id="zwBtn">ZW推荐</button></span><span class="trend-total" id="trendTotal">推荐：—</span><span class="kbtn-wrap"><span class="kbtn-rate" id="rate10">—</span><button class="kline-flip" id="trendWinBtn">10根</button></span><span class="kbtn-wrap"><span class="kbtn-rate" id="rate5">—</span><button class="kline-flip" id="trendWin5Btn">5根</button></span></div>
     <div class="trend-grid" id="trendGrid"></div>
   </section>
 
@@ -598,6 +607,10 @@ function renderBigRoad(big){
     };
     const trendOf = function(pre){
       const src = state.trendSrc || '10';
+      if (src === 'zw'){
+        const s = zwSign(pre);
+        return s ? { total: s } : null;
+      }
       if (src === '5') return tAt(pre, 5);
       if (src === '10') return tAt(pre, 10);
       const a = tAt(pre, 5), b = tAt(pre, 10);
@@ -2128,6 +2141,14 @@ function kSlopeItem(seq, label){
     t: '近' + win + '根' + (slope > 0 ? '上行' : (slope < 0 ? '下行' : '走平')),
     d: '斜率' + (slope >= 0 ? '+' : '') + slope.toFixed(2) + '/根' };
 }
+// ZW 推荐：出蓝打蓝、出红打红；若上一手跟着打错了（上一手与它前一手异色），则这手反打（与最新一手相反）
+function zwSign(seq){
+  const n = seq ? seq.length : 0;
+  if (!n) return '';
+  const last = seq[n - 1];
+  if (n < 2) return last;
+  return (seq[n - 2] === last) ? last : seq[n - 2];
+}
 // 趋势分析：大路 + 大眼仔 / 小路 / 曱甴路的 K 线趋势
 function trendOn(seq, extra, ctx){
   if (seq.length < 3) return null;
@@ -2202,7 +2223,7 @@ function renderTrend(){
   const txtCn = function(d){ return d ? (d === 'B' ? '红' : '蓝') : '无'; };
   let kColor = '', ekColor = '', skColor = '', rkColor = '';
   const kSpecs = [
-    { key: 'k',     title: 'K线趋势', item: 'K线趋势',     btn: kBtn,     base: 'kline-flip trend-sum trend-k' },
+    { key: 'k',     title: 'K线趋势', item: 'K线趋势',     btn: kBtn,     base: 'kline-flip trend-k2 trend-bold' },
     { key: 'eye',   title: '大眼仔',   item: '大眼仔路K线', btn: eyeBtn,   base: 'kline-flip trend-k2' },
     { key: 'small', title: '小路',     item: '小路K线',     btn: smallBtn, base: 'kline-flip trend-k2' },
     { key: 'roach', title: '曱甴',     item: '曱甴路K线',   btn: roachBtn, base: 'kline-flip trend-k2' },
@@ -2232,12 +2253,27 @@ function renderTrend(){
     sumText = same ? ('合计推荐 ' + (a5.total === 'B' ? '红（庄）' : '蓝（闲）')) : ('合计推荐 — 5' + s5 + '·10' + s10);
   }
   if (sumBtn){ sumBtn.className = sumCls; sumBtn.textContent = sumText; }
+  // ZW推荐：最新一手的颜色即推荐（跟随最新列最后一个）
+  const zwBtn = $('zwBtn');
+  let zwColor = '';
+  {
+    const ntSeq = state.results.filter(function(x){ return x !== 'T'; });
+    zwColor = zwSign(ntSeq);
+  }
+  if (zwBtn){
+    if (src !== 'zw'){ zwBtn.className = 'kline-flip trend-k2 trend-bold'; zwBtn.textContent = 'ZW推荐'; }
+    else {
+      zwBtn.className = 'kline-flip trend-k2 trend-bold on ' + (zwColor ? (zwColor === 'B' ? 'red' : 'blue') : 'none');
+      zwBtn.textContent = 'ZW推荐' + (zwColor ? (' ' + (zwColor === 'B' ? '红（庄）' : '蓝（闲）')) : ' —');
+    }
+  }
   if (!el) return;
   const r = computeTrend();
   if (!r){
     el.innerHTML = '<div class="trend-card"><span class="tk">数据不足</span><span class="tv">—</span><span class="td">至少 3 手（不含和）</span></div>';
-    if (totalEl){ totalEl.className = 'trend-total'; const nm = { k: 'K线趋势', eye: '大眼仔', small: '小路', roach: '曱甴', sum: '合计推荐' }[src];
-      totalEl.textContent = (nm ? nm : '推荐') + '：—'; }
+    const nm = { k: 'K线趋势', eye: '大眼仔', small: '小路', roach: '曱甴', sum: '合计推荐', zw: 'ZW推荐' }[src];
+    if (totalEl){ totalEl.className = 'trend-total'; totalEl.textContent = (nm ? nm : '推荐') + '：—'; }
+    state.__trendNow = { color: '', title: (nm ? nm : '推荐'), votes: '' };
     return;
   }
   let out = '';
@@ -2248,20 +2284,94 @@ function renderTrend(){
     out += '<div class="trend-card ' + cls + '"><span class="tk">' + it.k + '</span><span class="tv">' + val + '</span><span class="td">' + it.t + ' · ' + it.d + '</span></div>';
   }
   el.innerHTML = out;
+  const kindMap = { k: ['K线趋势', kColor], eye: ['大眼仔', ekColor], small: ['小路', skColor], roach: ['曱甴', rkColor], zw: ['ZW推荐', zwColor] };
+  const km = kindMap[src];
+  let nTitle = '推荐', nColor = '', nVotes = '';
+  if (km){ nTitle = km[0]; nColor = km[1]; }
+  else if (src === 'sum'){ nTitle = '合计推荐'; nColor = sumColor; }
+  else { nTitle = '综合推荐'; nColor = r.total; nVotes = r.vb + ':' + r.vp; }
+  state.__trendNow = { color: nColor, title: nTitle, votes: nVotes };
   if (totalEl){
-    const kindMap = { k: ['K线趋势', kColor], eye: ['大眼仔', ekColor], small: ['小路', skColor], roach: ['曱甴', rkColor] };
-    const km = kindMap[src];
-    if (km){
-      if (km[1] === 'B'){ totalEl.className = 'trend-total red'; totalEl.textContent = km[0] + '：红（庄）'; }
-      else if (km[1] === 'P'){ totalEl.className = 'trend-total blue'; totalEl.textContent = km[0] + '：蓝（闲）'; }
-      else { totalEl.className = 'trend-total'; totalEl.textContent = km[0] + '：—'; }
-    } else if (src === 'sum'){
-      if (sumColor === 'B'){ totalEl.className = 'trend-total red'; totalEl.textContent = '合计推荐：红（庄）'; }
-      else if (sumColor === 'P'){ totalEl.className = 'trend-total blue'; totalEl.textContent = '合计推荐：蓝（闲）'; }
-      else { totalEl.className = 'trend-total'; totalEl.textContent = '合计推荐：—'; }
-    } else if (r.total === 'B'){ totalEl.className = 'trend-total red'; totalEl.textContent = '综合推荐：红（庄） ' + r.vb + ':' + r.vp; }
-    else if (r.total === 'P'){ totalEl.className = 'trend-total blue'; totalEl.textContent = '综合推荐：蓝（闲） ' + r.vb + ':' + r.vp; }
-    else { totalEl.className = 'trend-total'; totalEl.textContent = '综合推荐：— ' + r.vb + ':' + r.vp; }
+    const cn = function(d){ return d === 'B' ? '红（庄）' : (d === 'P' ? '蓝（闲）' : '—'); };
+    totalEl.className = 'trend-total' + (nColor === 'B' ? ' red' : (nColor === 'P' ? ' blue' : ''));
+    totalEl.textContent = nTitle + '：' + cn(nColor) + (nVotes ? ' ' + nVotes : '');
+  }
+}
+// 顶部信息行：方框一致率 + 当前来源推荐
+function renderTrendInfo(){
+  const recoEl = $('tiReco');
+  const now = state.__trendNow || { color: '', title: '推荐', votes: '' };
+  if (recoEl){
+    const cn = function(d){ return d === 'B' ? '红（庄）' : (d === 'P' ? '蓝（闲）' : '—'); };
+    recoEl.className = 'ti-reco' + (now.color === 'B' ? ' red' : (now.color === 'P' ? ' blue' : ''));
+    recoEl.textContent = now.title + '：' + cn(now.color) + (now.votes ? ' ' + now.votes : '');
+  }
+}
+// 各推荐来源的历史一致率（该来源方框颜色与真实红蓝的吻合比例；不受方框开关影响）
+function computeRecoRates(){
+  const KEYS = ['k', 'eye', 'small', 'roach', 'sum', 'w10', 'w5', 'zw'];
+  const seq = state.results.filter(function(r){ return r !== 'T'; });
+  const fresh = function(){
+    const r = {};
+    KEYS.forEach(function(x){ r[x] = { m: 0, t: 0 }; });
+    return { seq: [], k: 3, rates: r };
+  };
+  let c = state.__rateCache;
+  if (!c) c = fresh();
+  else {
+    let samePrefix = c.seq.length <= seq.length;
+    for (let i = 0; samePrefix && i < c.seq.length; i++){ if (c.seq[i] !== seq[i]) samePrefix = false; }
+    if (!samePrefix) c = fresh();
+  }
+  const pv = state.trendWin;
+  for (let k = c.k; k < seq.length; k++){
+    const pre = seq.slice(0, k);
+    const ext = { eye: roadKlineSeq('eye', pre), small: roadKlineSeq('small', pre), roach: roadKlineSeq('roach', pre) };
+    state.trendWin = 5;
+    const r5 = trendOn(pre, ext, { results: pre });
+    state.trendWin = 10;
+    const r10 = trendOn(pre, ext, { results: pre });
+    state.trendWin = pv;
+    if (!r5 || !r10) continue;
+    const sameDir = function(label){
+      const d5 = trendItemDir(r5, label), d10 = trendItemDir(r10, label);
+      return (d5 && d10 && d5 === d10) ? d5 : '';
+    };
+    const kSame = sameDir('K线趋势');
+    const sumSame = (r5.total && r10.total && r5.total === r10.total) ? r5.total : '';
+    const preds = {
+      k: kSame,
+      eye: sameDir('大眼仔路K线'),
+      small: sameDir('小路K线'),
+      roach: sameDir('曱甴路K线'),
+      sum: sumSame,
+      w10: r10.total || '',
+      w5: r5.total || '',
+      zw: zwSign(pre)
+    };
+    const actual = seq[k];
+    for (let i = 0; i < KEYS.length; i++){
+      const key = KEYS[i], p = preds[key];
+      if (!p) continue;
+      c.rates[key].t++;
+      if (p === actual) c.rates[key].m++;
+    }
+  }
+  c.seq = seq.slice();
+  c.k = seq.length;
+  state.__rateCache = c;
+  state.__rates = c.rates;
+}
+function renderKbtnRates(){
+  const map = { k: 'rateK', eye: 'rateEye', small: 'rateSmall', roach: 'rateRoach', sum: 'rateSum', w10: 'rate10', w5: 'rate5', zw: 'rateZW' };
+  const rr = state.__rates || {};
+  for (const key in map){
+    const el = $(map[key]);
+    if (!el) continue;
+    const st = rr[key];
+    if (!st || !st.t) el.textContent = '—';
+    else el.textContent = (st.m / st.t * 100).toFixed(1) + '%';
+    el.className = 'kbtn-rate' + (state.boxShow ? ' hot' : '');
   }
 }
 function render(){
@@ -2278,6 +2388,9 @@ function render(){
   if (state.results.length === 0){
     state.boxStat = null;
     renderBoxStat();
+    computeRecoRates();
+    renderKbtnRates();
+    renderTrendInfo();
     $('bigroad').innerHTML = '';
     $('smEye').innerHTML = $('smSmall').innerHTML = $('smRoach').innerHTML = '';
     ['smSeqEye','smSeqSmall','smSeqRoach'].forEach(function(id){
@@ -2300,6 +2413,9 @@ function render(){
   drawSmallKline();
   drawRoachKline();
   renderBoxStat();
+  computeRecoRates();
+  renderKbtnRates();
+  renderTrendInfo();
 }
 
 /* ============ 交互 ============ */
@@ -2363,6 +2479,7 @@ $('eyeKBtn').addEventListener('click', () => setTrendSrc('eye'));
 $('smallKBtn').addEventListener('click', () => setTrendSrc('small'));
 $('roachKBtn').addEventListener('click', () => setTrendSrc('roach'));
 $('trendSumBtn').addEventListener('click', () => setTrendSrc('sum'));
+$('zwBtn').addEventListener('click', () => setTrendSrc('zw'));
 (function(){
   const row = $('klineRow');
   const cross = $('klineCross');
